@@ -2,7 +2,7 @@ services:
   nginx:
     environment:
       WEB_HOST: ${WEB_HOST}
-    build: .
+    image: uka17/envault-nginx:latest
     container_name: envault-nginx
     ports:
       - "80:80"
