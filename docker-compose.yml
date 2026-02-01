@@ -2,6 +2,7 @@ services:
   nginx:
     environment:
       WEB_HOST: ${WEB_HOST}
+      API: ${API}
     image: uka17/envault-nginx:latest
     container_name: envault-nginx
     ports:

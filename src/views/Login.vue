@@ -1,35 +1,37 @@
 <template>
   <div class="login-container">
-    <h2>Вход</h2>
+    <h2>Login</h2>
     <form @submit.prevent="onSubmit">
       <div class="form-group">
-        <label for="login">Логин</label>
+        <label for="login">Login</label>
         <input id="login" v-model="login" type="text" required />
       </div>
       <div class="form-group">
-        <label for="password">Пароль</label>
+        <label for="password">Password</label>
         <input id="password" v-model="password" type="password" required />
       </div>
       <div class="form-group checkbox">
         <input id="remember" v-model="remember" type="checkbox" />
-        <label for="remember">Запомни меня</label>
+        <label for="remember">Remember me</label>
       </div>
-      <button type="submit">Войти</button>
+      <button type="submit">Login</button>
     </form>
-    <RouterLink to="/register" class="register-link">Создать новый аккаунт</RouterLink>
+    <RouterLink to="/register" class="register-link">Create new</RouterLink>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { useAuthStore } from "@/stores/auth";
 
 const login = ref("");
 const password = ref("");
 const remember = ref(false);
 
-function onSubmit() {
-  // Здесь обработка авторизации
-  alert(`Логин: ${login.value}, Пароль: ${password.value}, Запомнить: ${remember.value}`);
+const auth = useAuthStore();
+
+async function onSubmit() {
+  await auth.login(login.value, password.value);
 }
 </script>
 

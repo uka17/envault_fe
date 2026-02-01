@@ -7,6 +7,14 @@ import nightwatchPlugin from "vite-plugin-nightwatch";
 
 // https://vite.dev/config/
 export default defineConfig({
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://localhost/api",
+        changeOrigin: true,
+      },
+    },
+  },
   optimizeDeps: {
     exclude: ["@emotion/is-prop-valid"],
   },
