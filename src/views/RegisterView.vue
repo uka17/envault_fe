@@ -57,12 +57,17 @@ const submit = async () => {
 };
 
 const goToLogin = () => router.push("/login");
+const goHome = () => router.push("/");
 </script>
 
 <template>
   <n-layout class="register-page envault-page-shell">
     <n-layout-content class="register-content">
       <div class="register-shell">
+        <div class="top-link-row">
+          <n-button text class="back-home-link" @click="goHome">&lt;- На главную</n-button>
+        </div>
+
         <n-space vertical align="center" :size="14" class="brand-block">
           <div class="brand-badge">
             <n-icon :size="28">
@@ -160,6 +165,10 @@ const goToLogin = () => router.push("/login");
 
 .register-shell {
   width: min(560px, 100%);
+}
+
+.top-link-row {
+  margin-bottom: 0.9rem;
 }
 
 .brand-block {
@@ -262,6 +271,16 @@ const goToLogin = () => router.push("/login");
 :deep(.login-link.n-button) {
   color: var(--env-accent-soft);
   font-weight: 600;
+}
+
+:deep(.back-home-link.n-button) {
+  color: #b7bdcb;
+  font-weight: 600;
+  padding-left: 0;
+}
+
+:deep(.back-home-link.n-button:hover) {
+  color: var(--env-accent-soft);
 }
 
 @media (max-width: 640px) {
