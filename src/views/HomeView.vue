@@ -89,9 +89,12 @@ import {
 
 <style scoped>
 .homepage {
+  --accent: hsl(260 30% 58%);
+  --accent-soft: hsl(260 30% 68%);
+  --accent-deep: hsl(260 30% 48%);
   min-height: 100vh;
-  background: radial-gradient(circle at 20% 10%, rgba(24, 160, 88, 0.22), transparent 30%),
-    radial-gradient(circle at 90% 80%, rgba(24, 160, 88, 0.12), transparent 35%), #080a0d;
+  background: radial-gradient(circle at 20% 10%, hsl(260 30% 58% / 0.22), transparent 30%),
+    radial-gradient(circle at 90% 80%, hsl(260 30% 58% / 0.12), transparent 35%), #080a0d;
   color: #eef1f5;
   display: flex;
   flex-direction: column;
@@ -130,7 +133,7 @@ import {
   border-radius: 10px;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #1fb364 0%, #147d47 100%);
+  background: linear-gradient(135deg, var(--accent-soft) 0%, var(--accent-deep) 100%);
 }
 
 .brand-icon :deep(svg) {
@@ -171,14 +174,14 @@ import {
 
 .btn-primary {
   color: #ffffff;
-  background: linear-gradient(135deg, #1fb364 0%, #147d47 100%);
-  border-color: rgba(31, 179, 100, 0.6);
-  box-shadow: 0 8px 22px rgba(24, 160, 88, 0.25);
+  background: linear-gradient(135deg, var(--accent-soft) 0%, var(--accent-deep) 100%);
+  border-color: hsl(260 30% 58% / 0.6);
+  box-shadow: 0 8px 22px hsl(260 30% 58% / 0.25);
 }
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 28px rgba(24, 160, 88, 0.35);
+  box-shadow: 0 12px 28px hsl(260 30% 58% / 0.35);
 }
 
 .btn-outline {
@@ -189,7 +192,7 @@ import {
 
 .btn-outline:hover {
   color: #ffffff;
-  border-color: rgba(31, 179, 100, 0.8);
+  border-color: hsl(260 30% 58% / 0.8);
 }
 
 .btn-lg {
@@ -215,8 +218,8 @@ import {
   border-radius: 28px;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #1fb364 0%, #147d47 100%);
-  box-shadow: 0 0 38px rgba(24, 160, 88, 0.45);
+  background: linear-gradient(135deg, var(--accent-soft) 0%, var(--accent-deep) 100%);
+  box-shadow: 0 0 38px hsl(260 30% 58% / 0.45);
   animation: float 2.8s ease-in-out infinite;
 }
 
@@ -235,7 +238,7 @@ import {
 
 .hero-title span {
   display: block;
-  background: linear-gradient(135deg, #7ff4ba 0%, #1fb364 100%);
+  background: linear-gradient(135deg, hsl(260 30% 72%) 0%, var(--accent) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -276,8 +279,8 @@ import {
   width: 46px;
   height: 46px;
   border-radius: 12px;
-  background: rgba(31, 179, 100, 0.14);
-  color: #5ce09a;
+  background: hsl(260 30% 58% / 0.18);
+  color: hsl(260 40% 76%);
   display: grid;
   place-items: center;
   margin-bottom: 0.95rem;
