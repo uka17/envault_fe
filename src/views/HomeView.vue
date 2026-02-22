@@ -31,7 +31,7 @@ const toSignup = () => router.push("/register");
 <template>
   <n-layout class="homepage envault-page-shell">
     <n-layout-header bordered class="home-header">
-      <div class="envault-container header-content">
+      <div class="header-content header-content-wide">
         <n-space align="center" :size="10">
           <div class="envault-brand-mark">
             <n-icon :size="16">
@@ -148,6 +148,11 @@ const toSignup = () => router.push("/register");
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.header-content-wide {
+  width: 100%;
+  padding: 0 2rem;
 }
 
 .brand-name {
@@ -295,6 +300,10 @@ const toSignup = () => router.push("/register");
 }
 
 @media (max-width: 640px) {
+  .header-content-wide {
+    padding: 0 1rem;
+  }
+
   .hero {
     padding-top: 4rem;
   }
