@@ -1,90 +1,146 @@
 <script setup lang="ts">
-import { RouterLink } from "vue-router";
+import { useRouter } from "vue-router";
+import {
+  darkTheme,
+  NButton,
+  NCard,
+  NConfigProvider,
+  NGrid,
+  NGridItem,
+  NH1,
+  NIcon,
+  NLayout,
+  NLayoutContent,
+  NLayoutFooter,
+  NLayoutHeader,
+  NP,
+  NSpace,
+  NText,
+} from "naive-ui";
 import {
   LockClosedOutline,
+  SettingsOutline,
   ShieldCheckmarkOutline,
   TimeOutline,
-  SettingsOutline,
 } from "@vicons/ionicons5";
+
+const router = useRouter();
+
+const themeOverrides = {
+  common: {
+    primaryColor: "hsl(260 30% 58%)",
+    primaryColorHover: "hsl(260 30% 62%)",
+    primaryColorPressed: "hsl(260 30% 50%)",
+    primaryColorSuppl: "hsl(260 30% 58%)",
+    borderRadius: "5px",
+  },
+};
+
+const toLogin = () => router.push("/login");
+const toSignup = () => router.push("/login?mode=signup");
 </script>
 
 <template>
-  <div class="homepage">
-    <header class="home-header">
-      <div class="container header-content">
-        <div class="brand">
-          <div class="brand-icon">
-            <LockClosedOutline />
+  <n-config-provider :theme="darkTheme" :theme-overrides="themeOverrides">
+    <n-layout class="homepage">
+      <n-layout-header bordered class="home-header">
+        <div class="container header-content">
+          <n-space align="center" :size="10">
+            <div class="brand-icon">
+              <n-icon :size="16">
+                <LockClosedOutline />
+              </n-icon>
+            </div>
+            <n-text class="brand-name">Envault</n-text>
+          </n-space>
+
+          <n-space align="center" :size="12" class="header-actions">
+            <n-button @click="toLogin" dashed>Войти</n-button>
+            <n-button type="primary" @click="toSignup">Начать</n-button>
+          </n-space>
+        </div>
+      </n-layout-header>
+
+      <n-layout-content class="hero">
+        <div class="container hero-content">
+          <div class="hero-lock">
+            <n-icon :size="46">
+              <LockClosedOutline />
+            </n-icon>
           </div>
-          <span class="brand-name">Envault</span>
+
+          <n-h1 class="hero-title">
+            Защити свои слова
+            <span>временем</span>
+          </n-h1>
+
+          <n-p class="hero-subtitle">
+            Отправляй зашифрованные сообщения в будущее. Письма близким, важные данные или
+            послания самому себе, доставка точно в назначенное время.
+          </n-p>
+
+          <n-space justify="center" align="center" :size="14" class="hero-actions" wrap>
+            <n-button type="primary" size="large" class="btn btn-primary btn-lg" @click="toSignup">
+              Создать первый stash
+            </n-button>
+            <n-button ghost size="large" class="btn btn-outline btn-lg" @click="toLogin">
+              У меня есть ключ
+            </n-button>
+          </n-space>
+
+          <n-grid cols="1 s:1 m:3" responsive="screen" :x-gap="16" :y-gap="16" class="features">
+            <n-grid-item>
+              <n-card class="feature-card" :bordered="false">
+                <div class="feature-icon">
+                  <n-icon :size="22">
+                    <ShieldCheckmarkOutline />
+                  </n-icon>
+                </div>
+                <n-text class="feature-title">End-to-end шифрование</n-text>
+                <n-text depth="2" class="feature-description">
+                  Только получатель с ключом может прочитать сообщение. Даже мы не имеем доступа.
+                </n-text>
+              </n-card>
+            </n-grid-item>
+
+            <n-grid-item>
+              <n-card class="feature-card" :bordered="false">
+                <div class="feature-icon">
+                  <n-icon :size="22">
+                    <TimeOutline />
+                  </n-icon>
+                </div>
+                <n-text class="feature-title">Точная доставка</n-text>
+                <n-text depth="2" class="feature-description">
+                  Запланируй отправку на любую дату - через день, год или десятилетие.
+                </n-text>
+              </n-card>
+            </n-grid-item>
+
+            <n-grid-item>
+              <n-card class="feature-card" :bordered="false">
+                <div class="feature-icon">
+                  <n-icon :size="22">
+                    <SettingsOutline />
+                  </n-icon>
+                </div>
+                <n-text class="feature-title">Гибкий контроль</n-text>
+                <n-text depth="2" class="feature-description">
+                  Откладывай отправку или получай напоминания перед доставкой сообщения.
+                </n-text>
+              </n-card>
+            </n-grid-item>
+          </n-grid>
         </div>
+      </n-layout-content>
 
-        <div class="header-actions">
-          <RouterLink to="/login" class="btn btn-ghost">Войти</RouterLink>
-          <RouterLink to="/login?mode=signup" class="btn btn-primary">Начать</RouterLink>
+      <n-layout-footer bordered class="home-footer">
+        <div class="container">
+          <n-text depth="3">© 2026 Envault. Защищай важное.</n-text>
         </div>
-      </div>
-    </header>
-
-    <main class="hero">
-      <div class="container hero-content">
-        <div class="hero-lock">
-          <LockClosedOutline />
-        </div>
-
-        <h1 class="hero-title">
-          Защити свои слова
-          <span>временем</span>
-        </h1>
-
-        <p class="hero-subtitle">
-          Отправляй зашифрованные сообщения в будущее. Письма близким, важные данные или
-          послания самому себе, доставка точно в назначенное время.
-        </p>
-
-        <div class="hero-actions">
-          <RouterLink to="/login?mode=signup" class="btn btn-primary btn-lg">Создать первый stash</RouterLink>
-          <RouterLink to="/login" class="btn btn-outline btn-lg">У меня есть ключ</RouterLink>
-        </div>
-
-        <section class="features">
-          <article class="feature-card">
-            <div class="feature-icon">
-              <ShieldCheckmarkOutline />
-            </div>
-            <h3>End-to-end шифрование</h3>
-            <p>
-              Только получатель с ключом может прочитать сообщение. Даже мы не имеем доступа.
-            </p>
-          </article>
-
-          <article class="feature-card">
-            <div class="feature-icon">
-              <TimeOutline />
-            </div>
-            <h3>Точная доставка</h3>
-            <p>
-              Запланируй отправку на любую дату - через день, год или десятилетие.
-            </p>
-          </article>
-
-          <article class="feature-card">
-            <div class="feature-icon">
-              <SettingsOutline />
-            </div>
-            <h3>Гибкий контроль</h3>
-            <p>
-              Откладывай отправку или получай напоминания перед доставкой сообщения.
-            </p>
-          </article>
-        </section>
-      </div>
-    </main>
-
-    <footer class="home-footer">
-      <div class="container">© 2026 Envault. Защищай важное.</div>
-    </footer>
-  </div>
+      </n-layout-footer>
+    </n-layout>
+  </n-config-provider>
 </template>
 
 <style scoped>
@@ -96,8 +152,6 @@ import {
   background: radial-gradient(circle at 20% 10%, hsl(260 30% 58% / 0.22), transparent 30%),
     radial-gradient(circle at 90% 80%, hsl(260 30% 58% / 0.12), transparent 35%), #080a0d;
   color: #eef1f5;
-  display: flex;
-  flex-direction: column;
 }
 
 .container {
@@ -121,12 +175,6 @@ import {
   justify-content: space-between;
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
 .brand-icon {
   width: 32px;
   height: 32px;
@@ -134,74 +182,60 @@ import {
   display: grid;
   place-items: center;
   background: linear-gradient(135deg, var(--accent-soft) 0%, var(--accent-deep) 100%);
-}
-
-.brand-icon :deep(svg) {
-  width: 16px;
-  height: 16px;
+  color: #ffffff;
 }
 
 .brand-name {
+  color: #eef1f5;
   font-size: 1.2rem;
   font-weight: 700;
 }
 
-.header-actions {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.btn {
-  border: 1px solid transparent;
+:deep(.btn.n-button) {
   border-radius: 12px;
-  padding: 0.5rem 1rem;
   font-weight: 600;
   transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
-.btn-ghost {
+:deep(.btn-ghost.n-button) {
   color: #d4d8dd;
-  background: transparent;
 }
 
-.btn-ghost:hover {
+:deep(.btn-ghost.n-button:hover) {
   color: #ffffff;
   background: rgba(255, 255, 255, 0.08);
 }
 
-.btn-primary {
-  color: #ffffff;
+:deep(.btn-primary.n-button) {
   background: linear-gradient(135deg, var(--accent-soft) 0%, var(--accent-deep) 100%);
   border-color: hsl(260 30% 58% / 0.6);
   box-shadow: 0 8px 22px hsl(260 30% 58% / 0.25);
 }
 
-.btn-primary:hover {
+:deep(.btn-primary.n-button:hover) {
   transform: translateY(-1px);
   box-shadow: 0 12px 28px hsl(260 30% 58% / 0.35);
 }
 
-.btn-outline {
+:deep(.btn-outline.n-button) {
   color: #d4d8dd;
   border-color: rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.02);
 }
 
-.btn-outline:hover {
+:deep(.btn-outline.n-button:hover) {
   color: #ffffff;
   border-color: hsl(260 30% 58% / 0.8);
+  background: rgba(255, 255, 255, 0.06);
 }
 
-.btn-lg {
-  padding: 0.85rem 1.3rem;
+:deep(.btn-lg.n-button) {
   min-width: 220px;
+  padding: 0.85rem 1.3rem;
 }
 
 .hero {
-  flex: 1;
+  min-height: calc(100vh - 128px);
   display: grid;
   place-items: center;
   padding: 4rem 0 3rem;
@@ -220,20 +254,17 @@ import {
   place-items: center;
   background: linear-gradient(135deg, var(--accent-soft) 0%, var(--accent-deep) 100%);
   box-shadow: 0 0 38px hsl(260 30% 58% / 0.45);
+  color: #ffffff;
   animation: float 2.8s ease-in-out infinite;
 }
 
-.hero-lock :deep(svg) {
-  width: 46px;
-  height: 46px;
-}
-
-.hero-title {
+:deep(.hero-title.n-h1) {
+  margin-bottom: 1.2rem;
+  color: #eef1f5;
   font-size: clamp(2.3rem, 5.6vw, 4.6rem);
   line-height: 1.05;
   font-weight: 800;
   letter-spacing: -0.02em;
-  margin-bottom: 1.2rem;
 }
 
 .hero-title span {
@@ -244,7 +275,7 @@ import {
   color: transparent;
 }
 
-.hero-subtitle {
+:deep(.hero-subtitle.n-p) {
   width: min(700px, 100%);
   margin: 0 auto;
   color: #c0c7d1;
@@ -254,25 +285,21 @@ import {
 
 .hero-actions {
   margin-top: 2.2rem;
-  display: flex;
-  gap: 0.9rem;
-  justify-content: center;
-  flex-wrap: wrap;
 }
 
 .features {
   margin-top: 4.2rem;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
 }
 
-.feature-card {
+:deep(.feature-card.n-card) {
+  border-radius: 18px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
   border: 1px solid rgba(255, 255, 255, 0.11);
-  border-radius: 18px;
-  padding: 1.25rem;
   text-align: left;
+}
+
+:deep(.feature-card .n-card__content) {
+  padding: 1.25rem;
 }
 
 .feature-icon {
@@ -286,18 +313,16 @@ import {
   margin-bottom: 0.95rem;
 }
 
-.feature-icon :deep(svg) {
-  width: 22px;
-  height: 22px;
-}
-
-.feature-card h3 {
+:deep(.feature-title.n-text) {
+  display: block;
+  color: #eef1f5;
   font-size: 1.05rem;
   font-weight: 650;
   margin-bottom: 0.5rem;
 }
 
-.feature-card p {
+:deep(.feature-description.n-text) {
+  display: block;
   color: #bac2ce;
   font-size: 0.93rem;
   line-height: 1.45;
@@ -305,10 +330,8 @@ import {
 
 .home-footer {
   border-top: 1px solid rgba(255, 255, 255, 0.12);
-  color: #96a0af;
   text-align: center;
   padding: 1.2rem 0;
-  font-size: 0.9rem;
 }
 
 @keyframes float {
@@ -322,29 +345,18 @@ import {
   }
 }
 
-@media (max-width: 960px) {
-  .features {
-    grid-template-columns: 1fr;
-  }
-}
-
 @media (max-width: 640px) {
   .hero {
     padding-top: 3rem;
-  }
-
-  .btn-lg {
-    width: 100%;
-    max-width: 320px;
   }
 
   .header-actions {
     gap: 0.5rem;
   }
 
-  .btn {
-    padding: 0.45rem 0.85rem;
+  :deep(.btn-lg.n-button) {
+    width: 100%;
+    max-width: 320px;
   }
 }
 </style>
-
