@@ -187,11 +187,12 @@ const toSignup = () => router.push("/register");
   min-height: calc(100vh - 128px);
   display: grid;
   place-items: center;
-  padding: 4rem 0 3rem;
+  padding: 1rem 0 3rem;
 }
 
 .hero-content {
   text-align: center;
+  padding-top: 2.5rem;
 }
 
 .hero-lock {
@@ -295,7 +296,7 @@ const toSignup = () => router.push("/register");
 
 @media (max-width: 640px) {
   .hero {
-    padding-top: 3rem;
+    padding-top: 4rem;
   }
 
   :deep(.btn-lg.n-button) {
