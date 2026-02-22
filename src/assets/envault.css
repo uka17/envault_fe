@@ -1,0 +1,35 @@
+:root {
+  --env-accent: #8974b4;
+  --env-accent-soft: #9481bb;
+  --env-accent-deep: #6e569f;
+  --env-text: #eef1f5;
+  --env-muted: #c0c7d1;
+  --env-surface: #10121c;
+  --env-surface-border: rgba(255, 255, 255, 0.1);
+}
+
+.envault-page-shell {
+  min-height: 100vh;
+  color: var(--env-text);
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px) 0 0 / 56px 56px,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px) 0 0 / 56px 56px,
+    radial-gradient(circle at 20% 10%, rgba(137, 116, 180, 0.22), transparent 30%),
+    radial-gradient(circle at 90% 80%, rgba(137, 116, 180, 0.12), transparent 35%),
+    #080a0d;
+}
+
+.envault-container {
+  width: min(1120px, calc(100% - 2rem));
+  margin: 0 auto;
+}
+
+.envault-brand-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--env-accent-soft) 0%, var(--env-accent-deep) 100%);
+  color: #ffffff;
+}

@@ -1,4 +1,5 @@
 @import "./base.css";
+@import "./envault.css";
 
 #app {
   min-height: 100vh;
