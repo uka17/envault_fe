@@ -48,9 +48,6 @@ const submit = async () => {
     isSubmitting.value = false;
   }
 };
-
-const goHome = () => router.push("/");
-const goToRegister = () => router.push("/register");
 </script>
 
 <template>
@@ -58,7 +55,7 @@ const goToRegister = () => router.push("/register");
     <n-layout-content class="login-content">
       <div class="login-shell">
         <div class="top-link-row">
-          <n-button text class="back-home-link" @click="goHome">&lt;- На главную</n-button>
+          <RouterLink to="/" class="text-link back-home-link">&lt;- На главную</RouterLink>
         </div>
 
         <n-space vertical align="center" :size="14" class="brand-block">
@@ -115,7 +112,7 @@ const goToRegister = () => router.push("/register");
 
             <footer class="card-footer">
               <n-text depth="3">Нет аккаунта?</n-text>
-              <n-button text class="switch-link" @click="goToRegister">Создать</n-button>
+              <RouterLink to="/register" class="text-link switch-link">Создать</RouterLink>
             </footer>
           </n-space>
         </n-card>
@@ -237,19 +234,13 @@ const goToRegister = () => router.push("/register");
   gap: 0.35rem;
 }
 
-:deep(.switch-link.n-button) {
-  color: var(--env-accent-soft);
+.text-link {
+  display: inline-block;
   font-weight: 600;
 }
 
-:deep(.back-home-link.n-button) {
-  color: #b7bdcb;
-  font-weight: 600;
+.back-home-link {
   padding-left: 0;
-}
-
-:deep(.back-home-link.n-button:hover) {
-  color: var(--env-accent-soft);
 }
 
 @media (max-width: 640px) {

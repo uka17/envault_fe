@@ -15,13 +15,7 @@ import {
   type FormInst,
   type FormRules,
 } from "naive-ui";
-import {
-  EyeOffOutline,
-  EyeOutline,
-  KeyOutline,
-  LockClosedOutline,
-  MailOutline,
-} from "@vicons/ionicons5";
+import { EyeOffOutline, EyeOutline, KeyOutline, LockClosedOutline, MailOutline } from "@vicons/ionicons5";
 
 const router = useRouter();
 const formRef = ref<FormInst | null>(null);
@@ -55,9 +49,6 @@ const submit = async () => {
   await formRef.value?.validate();
   router.push("/login");
 };
-
-const goToLogin = () => router.push("/login");
-const goHome = () => router.push("/");
 </script>
 
 <template>
@@ -65,7 +56,7 @@ const goHome = () => router.push("/");
     <n-layout-content class="register-content">
       <div class="register-shell">
         <div class="top-link-row">
-          <n-button text class="back-home-link" @click="goHome">&lt;- На главную</n-button>
+          <RouterLink to="/" class="text-link back-home-link">&lt;- На главную</RouterLink>
         </div>
 
         <n-space vertical align="center" :size="14" class="brand-block">
@@ -146,7 +137,7 @@ const goHome = () => router.push("/");
 
             <footer class="card-footer">
               <n-text depth="3">Уже есть аккаунт?</n-text>
-              <n-button text class="login-link" @click="goToLogin">Войти</n-button>
+              <RouterLink to="/login" class="text-link login-link">Войти</RouterLink>
             </footer>
           </n-space>
         </n-card>
@@ -268,19 +259,13 @@ const goHome = () => router.push("/");
   gap: 0.35rem;
 }
 
-:deep(.login-link.n-button) {
-  color: var(--env-accent-soft);
+.text-link {
+  display: inline-block;
   font-weight: 600;
 }
 
-:deep(.back-home-link.n-button) {
-  color: #b7bdcb;
-  font-weight: 600;
+.back-home-link {
   padding-left: 0;
-}
-
-:deep(.back-home-link.n-button:hover) {
-  color: var(--env-accent-soft);
 }
 
 @media (max-width: 640px) {

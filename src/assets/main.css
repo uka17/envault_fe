@@ -6,6 +6,11 @@
 }
 
 a {
-  color: inherit;
+  color: var(--env-accent);
   text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: #ffffff;
 }
