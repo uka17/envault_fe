@@ -42,7 +42,7 @@ const toSignup = () => router.push("/register");
         </n-space>
 
         <n-space align="center" :size="12" class="header-actions">
-          <n-button @click="toLogin" dashed>Войти</n-button>
+          <RouterLink to="/login" class="header-login-link">Войти</RouterLink>
           <n-button type="primary" @click="toSignup">Начать</n-button>
         </n-space>
       </div>
@@ -159,6 +159,16 @@ const toSignup = () => router.push("/register");
   color: var(--env-text);
   font-size: 1.2rem;
   font-weight: 700;
+}
+
+.header-login-link {
+  color: rgba(212, 216, 221, 0.9);
+  font-weight: 600;
+  line-height: 1;
+}
+
+.header-login-link:hover {
+  color: #ffffff;
 }
 
 :deep(.btn-primary.n-button) {

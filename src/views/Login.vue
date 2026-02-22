@@ -15,7 +15,7 @@ import {
   type FormInst,
   type FormRules,
 } from "naive-ui";
-import { EyeOffOutline, EyeOutline, KeyOutline, LockClosedOutline, MailOutline } from "@vicons/ionicons5";
+import { ArrowBackSharp, EyeOffOutline, EyeOutline, KeyOutline, LockClosedOutline, MailOutline } from "@vicons/ionicons5";
 import { useAuthStore } from "@/stores/auth";
 
 const router = useRouter();
@@ -55,7 +55,12 @@ const submit = async () => {
     <n-layout-content class="login-content">
       <div class="login-shell">
         <div class="top-link-row">
-          <RouterLink to="/" class="text-link back-home-link">&lt;- На главную</RouterLink>
+          <RouterLink to="/" class="text-link back-home-link">
+            <n-icon :size="19" class="back-home-link__icon" aria-hidden="true">
+              <ArrowBackSharp />
+            </n-icon>
+            <span>На главную</span>
+          </RouterLink>
         </div>
 
         <n-space vertical align="center" :size="14" class="brand-block">
@@ -127,6 +132,7 @@ const submit = async () => {
   display: grid;
   place-items: center;
   padding: 2rem 1rem;
+  position: relative;
 }
 
 .login-shell {
@@ -134,7 +140,10 @@ const submit = async () => {
 }
 
 .top-link-row {
-  margin-bottom: 0.9rem;
+  position: absolute;
+  top: 1rem;
+  left: 2rem;
+  z-index: 1;
 }
 
 .brand-block {
@@ -240,10 +249,32 @@ const submit = async () => {
 }
 
 .back-home-link {
-  padding-left: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  color: rgba(209, 216, 229, 0.72);
+  font-weight: 500;
+  padding: 0.4rem 0.75rem 0.42rem 0.56rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(7, 9, 15, 0.72);
+}
+
+.back-home-link:hover {
+  color: rgba(231, 236, 245, 0.9);
+  background: rgba(10, 12, 19, 0.9);
+}
+
+.back-home-link__icon {
+  display: grid;
+  place-items: center;
 }
 
 @media (max-width: 640px) {
+  .top-link-row {
+    left: 1rem;
+  }
+
   .brand-title {
     font-size: 1.9rem;
   }
