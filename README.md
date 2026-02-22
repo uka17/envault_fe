@@ -53,6 +53,22 @@ npm run test:e2e -- tests/e2e/example.ts
 # Runs the tests in debug mode
 npm run test:e2e -- --debug
 ```
+
+### Run Integration Tests with [Playwright](https://playwright.dev/)
+
+```sh
+# Install dependencies (if not installed yet)
+npm install
+
+# Install browser binaries for Playwright
+npx playwright install
+
+# Run Playwright tests
+npm run test:e2e:playwright
+
+# Run headed mode
+npm run test:e2e:playwright:headed
+```
     
 ### Lint with [ESLint](https://eslint.org/)
 
