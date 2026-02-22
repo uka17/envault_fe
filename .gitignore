@@ -30,6 +30,5 @@ coverage
 *.tsbuildinfo
 
 logs/
-tests_output/
 playwright-report/
 test-results/
