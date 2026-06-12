@@ -1,10 +1,9 @@
-// stores/auth.ts
 import { defineStore } from "pinia";
-import { loginApi } from "@/api/authApi";
+import { loginApi, checkAuthApi, type UserResponse } from "@/api/authApi";
 
 interface AuthState {
   accessToken: string | null;
-  user: { id: string; email: string } | null;
+  user: UserResponse | null;
 }
 
 export const useAuthStore = defineStore("auth", {
@@ -13,35 +12,29 @@ export const useAuthStore = defineStore("auth", {
     user: null,
   }),
 
+  getters: {
+    isAuthenticated: (state) => state.accessToken !== null,
+  },
+
   actions: {
     async login(email: string, password: string) {
-      const resp = await loginApi({ email, password });
-      this.accessToken = resp.token;
-      alert("token: " + resp.token);
-      this.persist();
+      const token = await loginApi({ email, password });
+      this.accessToken = token;
+      await this.fetchUser();
     },
 
     logout() {
       this.accessToken = null;
       this.user = null;
-      this.clearPersist();
     },
 
-    initFromStorage() {
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        this.accessToken = token;
+    async fetchUser() {
+      try {
+        this.user = await checkAuthApi();
+      } catch {
+        this.accessToken = null;
+        this.user = null;
       }
-    },
-
-    persist() {
-      if (this.accessToken) {
-        localStorage.setItem("accessToken", this.accessToken);
-      }
-    },
-
-    clearPersist() {
-      localStorage.removeItem("accessToken");
     },
   },
 });

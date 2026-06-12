@@ -43,7 +43,8 @@ const submit = async () => {
   isSubmitting.value = true;
   try {
     await auth.login(formValue.email, formValue.password);
-    router.push("/");
+    //router.push("/");
+    alert(auth.user?.name);
   } finally {
     isSubmitting.value = false;
   }
