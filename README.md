@@ -1,5 +1,9 @@
 # envault_fe
 
+f5a623 - золотой/янтарный
+f97316 - оранжевый
+e11d48 - малиновый
+
 This template should help get you started developing with Vue 3 in Vite.
 
 ## Recommended IDE Setup
