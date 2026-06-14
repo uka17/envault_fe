@@ -1,7 +1,11 @@
 import { defineStore } from "pinia";
-import { loginApi, checkAuthApi, type UserResponse } from "@/api/authApi";
-
-const TOKEN_KEY = "envault_token";
+import {
+  loginApi,
+  logoutApi,
+  refreshTokenApi,
+  checkAuthApi,
+  type UserResponse,
+} from "@/api/authApi";
 
 interface AuthState {
   accessToken: string | null;
@@ -10,7 +14,7 @@ interface AuthState {
 
 export const useAuthStore = defineStore("auth", {
   state: (): AuthState => ({
-    accessToken: localStorage.getItem(TOKEN_KEY),
+    accessToken: null,
     user: null,
   }),
 
@@ -20,29 +24,52 @@ export const useAuthStore = defineStore("auth", {
 
   actions: {
     /**
-     * Authenticates the user and persists the token to localStorage.
-     * @param email - User email address.
-     * @param password - User password.
+     * Authenticate with email and password.
+     * Stores the access token in memory and sets an HttpOnly refresh token cookie via the server.
+     * @param email User email address.
+     * @param password User password.
      */
     async login(email: string, password: string) {
       const token = await loginApi({ email, password });
       this.accessToken = token;
-      localStorage.setItem(TOKEN_KEY, token);
       await this.fetchUser();
     },
 
     /**
-     * Clears auth state and removes the token from localStorage.
+     * Exchange the HttpOnly refresh token cookie for a new access token.
+     * Called automatically by the axios interceptor on 401 responses.
+     * @returns New access token string.
      */
-    logout() {
-      this.accessToken = null;
-      this.user = null;
-      localStorage.removeItem(TOKEN_KEY);
+    async refresh(): Promise<string> {
+      const token = await refreshTokenApi();
+      this.accessToken = token;
+      return token;
     },
 
     /**
-     * Fetches the current user profile using the stored token.
-     * Clears auth state if the token is invalid or the request fails.
+     * Clear in-memory auth state without calling the server.
+     * Used by the axios interceptor when a refresh attempt fails.
+     */
+    clearAuth() {
+      this.accessToken = null;
+      this.user = null;
+    },
+
+    /**
+     * Revoke the refresh token on the server and clear local auth state.
+     */
+    async logout() {
+      try {
+        await logoutApi();
+      } finally {
+        this.accessToken = null;
+        this.user = null;
+      }
+    },
+
+    /**
+     * Fetch the current user profile using the stored access token.
+     * Clears auth state if the token is invalid or missing.
      */
     async fetchUser() {
       if (!this.accessToken) return;
@@ -51,16 +78,20 @@ export const useAuthStore = defineStore("auth", {
       } catch {
         this.accessToken = null;
         this.user = null;
-        localStorage.removeItem(TOKEN_KEY);
       }
     },
 
     /**
-     * Restores auth state on app startup by fetching user info if a token exists.
+     * Restore auth state on app startup by attempting a silent token refresh.
+     * If the refresh token cookie is present the server returns a new access token.
      */
     async init() {
-      if (this.accessToken) {
+      try {
+        await this.refresh();
         await this.fetchUser();
+      } catch {
+        this.accessToken = null;
+        this.user = null;
       }
     },
   },
