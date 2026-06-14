@@ -79,7 +79,7 @@ const handleLogout = () => {
 <template>
   <n-layout-header bordered class="app-header">
     <div class="app-header-inner">
-      <n-space align="center" :size="10">
+      <n-space align="center" :size="10" class="brand-link" role="link" aria-label="На главную" @click="router.push({ name: 'home' })">
         <div class="envault-brand-mark" role="img" aria-label="Envault">
           <n-icon :size="16">
             <LockClosedOutline />
@@ -174,6 +174,10 @@ const handleLogout = () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.brand-link {
+  cursor: pointer;
 }
 
 .brand-name {
