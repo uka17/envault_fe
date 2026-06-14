@@ -43,8 +43,7 @@ const submit = async () => {
   isSubmitting.value = true;
   try {
     await auth.login(formValue.email, formValue.password);
-    //router.push("/");
-    alert(auth.user?.name);
+    router.push({ name: "dashboard" });
   } finally {
     isSubmitting.value = false;
   }
@@ -212,6 +211,22 @@ const submit = async () => {
   --n-text-color: #e6e8ee;
   --n-placeholder-color: #757c91;
   --n-border-radius: 12px;
+}
+
+:deep(.auth-form .n-input input:-webkit-autofill),
+:deep(.auth-form .n-input input:-webkit-autofill:hover),
+:deep(.auth-form .n-input input:-webkit-autofill:focus) {
+  -webkit-box-shadow: 0 0 0 1000px rgba(17, 19, 30, 0.98) inset !important;
+  -webkit-text-fill-color: #e6e8ee !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+:deep(.auth-form .n-input input::-webkit-contacts-auto-fill-button),
+:deep(.auth-form .n-input input::-webkit-credentials-auto-fill-button) {
+  visibility: hidden;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
 }
 
 :deep(.submit-btn.n-button) {

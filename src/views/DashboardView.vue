@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { NButton, NIcon, NLayout, NLayoutContent, NLayoutHeader, NSpace, NText } from "naive-ui";
+import { NButton, NIcon, NLayout, NLayoutContent } from "naive-ui";
+import AppHeader from "@/components/AppHeader.vue";
 import {
-  AddOutline,
   CheckmarkCircleOutline,
   LockClosedOutline,
   MailOutline,
   PaperPlaneOutline,
   PersonOutline,
   TimeOutline,
+  AddOutline,
 } from "@vicons/ionicons5";
 
 type StashStatus = "planned" | "sent";
@@ -97,20 +98,7 @@ const formatDate = (isoDate: string) => {
 
 <template>
   <n-layout class="dashboard-page">
-    <n-layout-header bordered class="dashboard-header">
-      <div class="dashboard-container header-content">
-        <n-space align="center" :size="10">
-          <div class="envault-brand-mark">
-            <n-icon :size="16">
-              <LockClosedOutline />
-            </n-icon>
-          </div>
-          <n-text class="brand-name">Envault</n-text>
-        </n-space>
-
-        <button class="avatar-badge" type="button" aria-label="Текущий пользователь">US</button>
-      </div>
-    </n-layout-header>
+    <AppHeader />
 
     <n-layout-content class="dashboard-content">
       <div class="dashboard-container">
@@ -255,40 +243,9 @@ const formatDate = (isoDate: string) => {
     radial-gradient(circle at 90% 80%, rgba(137, 116, 180, 0.12), transparent 35%), #080a0d;
 }
 
-.dashboard-header {
-  backdrop-filter: blur(10px);
-  background: rgba(7, 8, 15, 0.84);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
 .dashboard-container {
   width: min(1400px, calc(100% - 1rem));
   margin: 0 auto;
-}
-
-.header-content {
-  min-height: 58px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.brand-name {
-  color: var(--env-text);
-  font-size: 2rem;
-  font-weight: 680;
-  letter-spacing: -0.01em;
-}
-
-.avatar-badge {
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 50%;
-  color: #bca9d6;
-  font-size: 0.9rem;
-  font-weight: 600;
-  background: rgba(137, 116, 180, 0.18);
 }
 
 .dashboard-content {
@@ -574,4 +531,5 @@ const formatDate = (isoDate: string) => {
     padding-left: 0;
   }
 }
+
 </style>

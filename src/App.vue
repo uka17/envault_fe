@@ -2,6 +2,9 @@
 import { RouterView } from "vue-router";
 import { darkTheme, NConfigProvider } from "naive-ui";
 import { envaultThemeOverrides } from "@/theme/naiveTheme";
+import { useAuthStore } from "@/stores/auth";
+
+useAuthStore().init();
 </script>
 
 <template>

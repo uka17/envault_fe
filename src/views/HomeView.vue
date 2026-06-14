@@ -10,11 +10,11 @@ import {
   NLayout,
   NLayoutContent,
   NLayoutFooter,
-  NLayoutHeader,
   NP,
   NSpace,
   NText,
 } from "naive-ui";
+import AppHeader from "@/components/AppHeader.vue";
 import {
   LockClosedOutline,
   SettingsOutline,
@@ -24,29 +24,20 @@ import {
 
 const router = useRouter();
 
+/**
+ * Navigates to the login page.
+ */
 const toLogin = () => router.push("/login");
+
+/**
+ * Navigates to the register page.
+ */
 const toSignup = () => router.push("/register");
 </script>
 
 <template>
   <n-layout class="homepage envault-page-shell">
-    <n-layout-header bordered class="home-header">
-      <div class="header-content header-content-wide">
-        <n-space align="center" :size="10">
-          <div class="envault-brand-mark">
-            <n-icon :size="16">
-              <LockClosedOutline />
-            </n-icon>
-          </div>
-          <n-text class="brand-name">Envault</n-text>
-        </n-space>
-
-        <n-space align="center" :size="12" class="header-actions">
-          <RouterLink to="/login" class="header-login-link">Войти</RouterLink>
-          <n-button type="primary" @click="toSignup">Начать</n-button>
-        </n-space>
-      </div>
-    </n-layout-header>
+    <AppHeader />
 
     <n-layout-content class="hero">
       <div class="envault-container hero-content">
@@ -134,42 +125,6 @@ const toSignup = () => router.push("/register");
   min-height: 100vh;
 }
 
-.home-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  backdrop-filter: blur(8px);
-  background: rgba(8, 10, 13, 0.7);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.header-content {
-  min-height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.header-content-wide {
-  width: 100%;
-  padding: 0 2rem;
-}
-
-.brand-name {
-  color: var(--env-text);
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-
-.header-login-link {
-  color: rgba(212, 216, 221, 0.9);
-  font-weight: 600;
-  line-height: 1;
-}
-
-.header-login-link:hover {
-  color: #ffffff;
-}
 
 :deep(.btn-primary.n-button) {
   background: linear-gradient(135deg, var(--env-accent-soft) 0%, var(--env-accent-deep) 100%);
