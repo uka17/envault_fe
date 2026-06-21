@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { NButton, NIcon, NLayout, NLayoutContent } from "naive-ui";
 import AppHeader from "@/components/AppHeader.vue";
 import { useStashStore } from "@/stores/stash";
@@ -14,6 +15,7 @@ import {
 
 type DashboardFilter = "all" | "planned" | "sent";
 
+const router = useRouter();
 const stashStore = useStashStore();
 const activeFilter = ref<DashboardFilter>("all");
 const snoozeLoadingId = ref<number | null>(null);
@@ -161,7 +163,7 @@ const handleSnooze = async (id: number): Promise<void> => {
             </button>
           </div>
 
-          <n-button type="primary" class="new-stash-btn">
+          <n-button type="primary" class="new-stash-btn" @click="router.push({ name: 'create-stash' })">
             <template #icon>
               <n-icon :size="18">
                 <AddOutline />

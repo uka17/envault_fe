@@ -4,6 +4,7 @@ import Login from "@/views/Login.vue";
 import RegisterView from "@/views/RegisterView.vue";
 import DashboardView from "@/views/DashboardView.vue";
 import ProfileView from "@/views/ProfileView.vue";
+import CreateStashView from "@/views/CreateStashView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -32,6 +33,11 @@ const router = createRouter({
       path: "/profile",
       name: "profile",
       component: ProfileView,
+    },
+    {
+      path: "/stash/new",
+      name: "create-stash",
+      component: CreateStashView,
     },
   ],
 });

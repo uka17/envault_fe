@@ -1,9 +1,11 @@
 import { defineStore } from "pinia";
 import {
   getStashesApi,
+  createStashApi,
   deleteStashApi,
   snoozeStashApi,
   type StashResponse,
+  type StashCreatePayload,
 } from "@/api/stashApi";
 
 interface StashState {
@@ -42,6 +44,17 @@ export const useStashStore = defineStore("stash", {
       } finally {
         this.loading = false;
       }
+    },
+
+    /**
+     * Create a new stash and prepend it to the local list.
+     * @param payload Stash body, recipient email, and scheduled send time.
+     * @returns Created stash object.
+     */
+    async createStash(payload: StashCreatePayload): Promise<StashResponse> {
+      const created = await createStashApi(payload);
+      this.stashes.unshift(created);
+      return created;
     },
 
     /**

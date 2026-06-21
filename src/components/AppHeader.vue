@@ -132,7 +132,7 @@ const handleLogout = () => {
                 <n-icon :size="16"><LockClosedOutline /></n-icon>
                 My stashes
               </button>
-              <button type="button" class="dropdown-item" role="menuitem" @click="closeMenu">
+              <button type="button" class="dropdown-item" role="menuitem" @click="() => { closeMenu(); router.push({ name: 'create-stash' }); }">
                 <n-icon :size="16"><AddOutline /></n-icon>
                 Create stash
               </button>
