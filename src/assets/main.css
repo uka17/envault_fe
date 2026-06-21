@@ -15,6 +15,14 @@ a:hover {
   color: #ffffff;
 }
 
+.n-button,
+.n-input,
+.n-date-picker,
+.n-select,
+.n-base-selection {
+  --n-border-radius: 4px !important;
+}
+
 .n-input__input-el:-webkit-autofill,
 .n-input__input-el:-webkit-autofill:hover,
 .n-input__input-el:-webkit-autofill:focus,
