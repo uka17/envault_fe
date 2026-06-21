@@ -8,6 +8,7 @@ import {
   NButton,
   NInput,
   NFormItem,
+  NModal,
   useMessage,
 } from "naive-ui";
 import AppHeader from "@/components/AppHeader.vue";
@@ -18,10 +19,8 @@ import {
   ShieldOutline,
   PersonOutline,
   LogOutOutline,
-  ArrowForwardOutline,
   TrashOutline,
   KeyOutline,
-  CloseOutline,
 } from "@vicons/ionicons5";
 import { useAuthStore } from "@/stores/auth";
 
@@ -73,12 +72,14 @@ async function submitEmailForm() {
 const showNameForm = ref(false);
 const newName = ref("");
 const nameLoading = ref(false);
+const nameError = ref("");
 
 /**
  * Open the name change form, pre-filling the current name.
  */
 function openNameForm() {
   newName.value = user.value?.name ?? "";
+  nameError.value = "";
   showNameForm.value = true;
 }
 
@@ -87,13 +88,16 @@ function openNameForm() {
  */
 async function submitNameForm() {
   if (!newName.value) return;
+  nameError.value = "";
   nameLoading.value = true;
   try {
     await auth.updateProfile({ name: newName.value });
     message.success("Имя обновлено");
     showNameForm.value = false;
-  } catch {
-    message.error("Не удалось обновить имя");
+  } catch (err: unknown) {
+    const translation = (err as { response?: { data?: { errors?: { msg?: { translation?: string } }[] } } })
+      ?.response?.data?.errors?.[0]?.msg?.translation;
+    nameError.value = translation ?? "Не удалось обновить имя. Попробуйте ещё раз.";
   } finally {
     nameLoading.value = false;
   }
@@ -104,6 +108,7 @@ const showPasswordForm = ref(false);
 const currentPassword = ref("");
 const newPassword = ref("");
 const passwordLoading = ref(false);
+const passwordError = ref("");
 
 /**
  * Open the password change form and reset fields.
@@ -111,6 +116,7 @@ const passwordLoading = ref(false);
 function openPasswordForm() {
   currentPassword.value = "";
   newPassword.value = "";
+  passwordError.value = "";
   showPasswordForm.value = true;
 }
 
@@ -119,6 +125,7 @@ function openPasswordForm() {
  */
 async function submitPasswordForm() {
   if (!currentPassword.value || !newPassword.value) return;
+  passwordError.value = "";
   passwordLoading.value = true;
   try {
     await auth.updatePassword({ currentPassword: currentPassword.value, newPassword: newPassword.value });
@@ -126,8 +133,10 @@ async function submitPasswordForm() {
     showPasswordForm.value = false;
     currentPassword.value = "";
     newPassword.value = "";
-  } catch {
-    message.error("Не удалось изменить пароль. Проверьте текущий пароль.");
+  } catch (err: unknown) {
+    const translation = (err as { response?: { data?: { errors?: { msg?: { translation?: string } }[] } } })
+      ?.response?.data?.errors?.[0]?.msg?.translation;
+    passwordError.value = translation ?? "Не удалось изменить пароль. Проверьте текущий пароль.";
   } finally {
     passwordLoading.value = false;
   }
@@ -209,7 +218,10 @@ const sessions: Session[] = [
                 </n-icon>
                 <dt class="info-label">Имя</dt>
               </div>
-              <dd class="info-value">{{ user?.name ?? "—" }}</dd>
+              <dd class="info-value info-value--editable">
+                {{ user?.name ?? "—" }}
+                <button type="button" class="edit-link" @click="openNameForm">Изменить</button>
+              </dd>
             </div>
 
             <div class="info-row">
@@ -219,8 +231,9 @@ const sessions: Session[] = [
                 </n-icon>
                 <dt class="info-label">Email</dt>
               </div>
-              <dd class="info-value">
-                <span>{{ user?.email ?? "—" }}</span>
+              <dd class="info-value info-value--editable">
+                {{ user?.email ?? "—" }}
+                <button type="button" class="edit-link" @click="openEmailForm">Изменить</button>
               </dd>
             </div>
 
@@ -249,160 +262,15 @@ const sessions: Session[] = [
 
           <div class="divider" />
 
-          <div class="action-list">
-            <!-- Change name -->
-            <button type="button" class="action-row" @click="openNameForm">
-              <div class="action-row-left">
-                <n-icon :size="17" class="action-icon">
-                  <PersonOutline />
-                </n-icon>
-                <span>Изменить имя</span>
-              </div>
-              <n-icon :size="17" class="action-chevron">
-                <ArrowForwardOutline />
-              </n-icon>
-            </button>
-
-            <div v-if="showNameForm" class="inline-form">
-              <n-form-item label="Новое имя" class="form-item">
-                <n-input
-                  v-model:value="newName"
-                  placeholder="Введите новое имя"
-                  @keyup.enter="submitNameForm"
-                />
-              </n-form-item>
-              <div class="form-actions">
-                <n-button
-                  type="primary"
-                  size="small"
-                  :loading="nameLoading"
-                  @click="submitNameForm"
-                >
-                  Сохранить
-                </n-button>
-                <n-button
-                  ghost
-                  size="small"
-                  @click="showNameForm = false"
-                >
-                  <template #icon>
-                    <n-icon><CloseOutline /></n-icon>
-                  </template>
-                  Отмена
-                </n-button>
-              </div>
-            </div>
-
-            <!-- Change email -->
-            <button type="button" class="action-row" @click="openEmailForm">
-              <div class="action-row-left">
-                <n-icon :size="17" class="action-icon">
-                  <MailOutline />
-                </n-icon>
-                <span>Изменить email</span>
-              </div>
-              <n-icon :size="17" class="action-chevron">
-                <ArrowForwardOutline />
-              </n-icon>
-            </button>
-
-            <div v-if="showEmailForm" class="inline-form">
-              <n-form-item label="Новый email" class="form-item">
-                <n-input
-                  v-model:value="newEmail"
-                  placeholder="Введите новый email"
-                  type="text"
-                  @keyup.enter="submitEmailForm"
-                />
-              </n-form-item>
-              <div class="form-actions">
-                <n-button
-                  type="primary"
-                  size="small"
-                  :loading="emailLoading"
-                  @click="submitEmailForm"
-                >
-                  Сохранить
-                </n-button>
-                <n-button
-                  ghost
-                  size="small"
-                  @click="showEmailForm = false"
-                >
-                  <template #icon>
-                    <n-icon><CloseOutline /></n-icon>
-                  </template>
-                  Отмена
-                </n-button>
-              </div>
-            </div>
-
-            <!-- Change password -->
-            <button type="button" class="action-row" @click="openPasswordForm">
-              <div class="action-row-left">
-                <n-icon :size="17" class="action-icon">
-                  <KeyOutline />
-                </n-icon>
-                <span>Сменить пароль</span>
-              </div>
-              <n-icon :size="17" class="action-chevron">
-                <ArrowForwardOutline />
-              </n-icon>
-            </button>
-
-            <div v-if="showPasswordForm" class="inline-form">
-              <n-form-item label="Текущий пароль" class="form-item">
-                <n-input
-                  v-model:value="currentPassword"
-                  type="password"
-                  show-password-on="click"
-                  placeholder="Текущий пароль"
-                />
-              </n-form-item>
-              <n-form-item label="Новый пароль" class="form-item">
-                <n-input
-                  v-model:value="newPassword"
-                  type="password"
-                  show-password-on="click"
-                  placeholder="Новый пароль"
-                  @keyup.enter="submitPasswordForm"
-                />
-              </n-form-item>
-              <div class="form-actions">
-                <n-button
-                  type="primary"
-                  size="small"
-                  :loading="passwordLoading"
-                  @click="submitPasswordForm"
-                >
-                  Сменить
-                </n-button>
-                <n-button
-                  ghost
-                  size="small"
-                  @click="showPasswordForm = false"
-                >
-                  <template #icon>
-                    <n-icon><CloseOutline /></n-icon>
-                  </template>
-                  Отмена
-                </n-button>
-              </div>
-            </div>
-
-            <!-- Delete account (stub) -->
-            <button type="button" class="action-row action-row--danger">
-              <div class="action-row-left">
-                <n-icon :size="17" class="action-icon">
-                  <TrashOutline />
-                </n-icon>
-                <span>Удалить аккаунт</span>
-              </div>
-              <n-icon :size="17" class="action-chevron">
-                <ArrowForwardOutline />
-              </n-icon>
-            </button>
+          <div class="account-actions">
+            <n-button ghost @click="openPasswordForm">
+              <template #icon>
+                <n-icon><KeyOutline /></n-icon>
+              </template>
+              Сменить пароль
+            </n-button>
           </div>
+
         </section>
 
         <!-- Security section -->
@@ -467,8 +335,112 @@ const sessions: Session[] = [
             </li>
           </ul>
         </section>
+
+        <!-- Danger zone -->
+        <section class="profile-card danger-card">
+          <h2 class="danger-card-title">Опасная зона</h2>
+          <div class="danger-row">
+            <div>
+              <p class="danger-row-label">Удалить аккаунт</p>
+              <p class="danger-row-hint">Все данные будут удалены без возможности восстановления.</p>
+            </div>
+            <n-button class="danger-btn">
+              <template #icon>
+                <n-icon><TrashOutline /></n-icon>
+              </template>
+              Удалить аккаунт
+            </n-button>
+          </div>
+        </section>
       </div>
     </n-layout-content>
+
+    <!-- Name modal -->
+    <n-modal
+      v-model:show="showNameForm"
+      preset="card"
+      title="Изменить имя"
+      class="edit-modal"
+      :style="{ maxWidth: '420px' }"
+    >
+      <n-form-item label="Новое имя" class="form-item" :feedback="nameError" :validation-status="nameError ? 'error' : undefined">
+        <n-input
+          v-model:value="newName"
+          placeholder="Введите новое имя"
+          :status="nameError ? 'error' : undefined"
+          @keyup.enter="submitNameForm"
+        />
+      </n-form-item>
+      <template #footer>
+        <div class="modal-footer">
+          <n-button ghost @click="showNameForm = false">Отмена</n-button>
+          <n-button type="primary" :loading="nameLoading" @click="submitNameForm">
+            Сохранить
+          </n-button>
+        </div>
+      </template>
+    </n-modal>
+
+    <!-- Email modal -->
+    <n-modal
+      v-model:show="showEmailForm"
+      preset="card"
+      title="Изменить email"
+      class="edit-modal"
+      :style="{ maxWidth: '420px' }"
+    >
+      <n-form-item label="Новый email" class="form-item">
+        <n-input
+          v-model:value="newEmail"
+          placeholder="Введите новый email"
+          @keyup.enter="submitEmailForm"
+        />
+      </n-form-item>
+      <template #footer>
+        <div class="modal-footer">
+          <n-button ghost @click="showEmailForm = false">Отмена</n-button>
+          <n-button type="primary" :loading="emailLoading" @click="submitEmailForm">
+            Сохранить
+          </n-button>
+        </div>
+      </template>
+    </n-modal>
+
+    <!-- Password modal -->
+    <n-modal
+      v-model:show="showPasswordForm"
+      preset="card"
+      title="Сменить пароль"
+      class="edit-modal"
+      :style="{ maxWidth: '420px' }"
+    >
+      <n-form-item label="Текущий пароль" class="form-item">
+        <n-input
+          v-model:value="currentPassword"
+          type="password"
+          show-password-on="click"
+          placeholder="Текущий пароль"
+        />
+      </n-form-item>
+      <n-form-item label="Новый пароль" class="form-item">
+        <n-input
+          v-model:value="newPassword"
+          type="password"
+          show-password-on="click"
+          placeholder="Новый пароль"
+          @keyup.enter="submitPasswordForm"
+        />
+      </n-form-item>
+      <p v-if="passwordError" class="modal-error">{{ passwordError }}</p>
+      <template #footer>
+        <div class="modal-footer">
+          <n-button ghost @click="showPasswordForm = false">Отмена</n-button>
+          <n-button type="primary" :loading="passwordLoading" @click="submitPasswordForm">
+            Сменить
+          </n-button>
+        </div>
+      </template>
+    </n-modal>
   </n-layout>
 </template>
 
@@ -607,72 +579,97 @@ const sessions: Session[] = [
   font-size: 0.76rem;
 }
 
-.action-list {
-  display: grid;
-  gap: 0.5rem;
+.account-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
 }
 
-.action-row {
-  width: 100%;
+.danger-card {
+  border-color: rgba(224, 92, 92, 0.35);
+  background: linear-gradient(180deg, rgba(224, 92, 92, 0.04), rgba(224, 92, 92, 0.02));
+}
+
+.danger-card-title {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  font-weight: 650;
+  color: #e05c5c;
+}
+
+.danger-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.9rem 1rem;
+  gap: 1rem;
+  padding: 1rem;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(224, 92, 92, 0.25);
+  background: rgba(224, 92, 92, 0.04);
+}
+
+.danger-row-label {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: #dadce4;
-  font-size: 0.97rem;
-  cursor: pointer;
-  text-align: left;
 }
 
-.action-row:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.14);
+.danger-row-hint {
+  margin: 0.2rem 0 0;
+  font-size: 0.85rem;
+  color: #7f8497;
 }
 
-.action-row--danger {
+:deep(.danger-btn.n-button) {
+  border-color: rgba(224, 92, 92, 0.4);
   color: #e05c5c;
-  border-color: rgba(224, 92, 92, 0.2);
-}
-
-.action-row--danger:hover {
-  background: rgba(224, 92, 92, 0.06);
-  border-color: rgba(224, 92, 92, 0.36);
-}
-
-.action-row-left {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.action-icon {
   flex-shrink: 0;
 }
 
-.action-chevron {
-  color: #5a5e70;
+:deep(.danger-btn.n-button:hover) {
+  border-color: rgba(224, 92, 92, 0.7);
+  background: rgba(224, 92, 92, 0.08);
 }
 
-.inline-form {
-  padding: 1rem 1rem 0.5rem;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
-  display: grid;
-  gap: 0.5rem;
+.info-value--editable {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+}
+
+.edit-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 0.83rem;
+  color: #9d82d4;
+}
+
+.edit-link:hover {
+  color: #c0b0e8;
+  text-decoration: underline;
 }
 
 .form-item {
   margin-bottom: 0;
 }
 
-.form-actions {
+:deep(.form-item .n-form-item-feedback-wrapper) {
+  margin-top: 6px;
+}
+
+.modal-footer {
   display: flex;
+  justify-content: flex-end;
   gap: 0.5rem;
-  padding-bottom: 0.5rem;
+}
+
+.modal-error {
+  margin: 0.75rem 0 0;
+  font-size: 0.88rem;
+  color: #e05c5c;
 }
 
 .tfa-row {
