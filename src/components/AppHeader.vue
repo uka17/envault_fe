@@ -138,7 +138,7 @@ const handleLogout = () => {
               </button>
               <button type="button" class="dropdown-item" role="menuitem" @click="goToSettings">
                 <n-icon :size="16"><SettingsOutline /></n-icon>
-                Settings
+                Profile
               </button>
 
               <div class="dropdown-divider" />
@@ -168,8 +168,9 @@ const handleLogout = () => {
 }
 
 .app-header-inner {
-  width: min(1400px, calc(100% - 1rem));
-  margin: 0 auto;
+  width: 100%;
+  padding: 0 2rem;
+  box-sizing: border-box;
   min-height: 58px;
   display: flex;
   align-items: center;
@@ -317,6 +318,10 @@ const handleLogout = () => {
 @media (max-width: 760px) {
   .brand-name {
     font-size: 1.75rem;
+  }
+
+  .app-header-inner {
+    padding: 0 1rem;
   }
 }
 </style>
