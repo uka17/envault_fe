@@ -2,6 +2,7 @@
 import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import {
+  NAlert,
   NButton,
   NCard,
   NDatePicker,
@@ -23,12 +24,14 @@ import {
   DocumentTextOutline,
   TimeOutline,
 } from "@vicons/ionicons5";
+import { isAxiosError } from "axios";
 import { useStashStore } from "@/stores/stash";
 
 const router = useRouter();
 const stashStore = useStashStore();
 const formRef = ref<FormInst | null>(null);
 const isSubmitting = ref(false);
+const submitError = ref<string | null>(null);
 
 const formValue = reactive({
   to: "",
@@ -69,6 +72,7 @@ const rules: FormRules = {
 const submit = async (): Promise<void> => {
   await formRef.value?.validate();
   isSubmitting.value = true;
+  submitError.value = null;
   try {
     await stashStore.createStash({
       to: formValue.to,
@@ -76,6 +80,10 @@ const submit = async (): Promise<void> => {
       sendAt: new Date(formValue.sendAt!).toISOString(),
     });
     router.push({ name: "dashboard" });
+  } catch (e) {
+    submitError.value =
+      (isAxiosError(e) && e.response?.data?.message?.translation) ||
+      "Не удалось создать stash. Попробуйте ещё раз.";
   } finally {
     isSubmitting.value = false;
   }
@@ -172,6 +180,10 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
               >
                 Создать stash
               </n-button>
+
+              <n-alert v-if="submitError" type="error" :bordered="false" class="submit-error" style="margin-top: 12px;">
+                {{ submitError }}
+              </n-alert>
             </n-form>
           </n-space>
         </n-card>
