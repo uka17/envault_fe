@@ -14,3 +14,13 @@ a {
 a:hover {
   color: #ffffff;
 }
+
+.n-input__input-el:-webkit-autofill,
+.n-input__input-el:-webkit-autofill:hover,
+.n-input__input-el:-webkit-autofill:focus,
+.n-input__input-el:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #161722 inset !important;
+  -webkit-text-fill-color: #e6e8ee !important;
+  transition: background-color 5000s ease-in-out 0s;
+  caret-color: #e6e8ee;
+}
