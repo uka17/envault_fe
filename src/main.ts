@@ -13,13 +13,15 @@ const pinia = createPinia();
 app.use(pinia);
 app.use(router);
 
-const auth = useAuthStore();
-await auth.init();
+(async () => {
+  const auth = useAuthStore();
+  await auth.init();
 
-app.mount("#app");
+  app.mount("#app");
 
-const loader = document.getElementById("app-loader");
-if (loader) {
-  loader.classList.add("fade-out");
-  loader.addEventListener("transitionend", () => loader.remove(), { once: true });
-}
+  const loader = document.getElementById("app-loader");
+  if (loader) {
+    loader.classList.add("fade-out");
+    loader.addEventListener("transitionend", () => loader.remove(), { once: true });
+  }
+})();
