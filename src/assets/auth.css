@@ -30,7 +30,7 @@
   place-items: center;
   color: #0f0d17;
   background: linear-gradient(135deg, var(--env-accent-soft) 0%, var(--env-accent) 100%);
-  box-shadow: 0 12px 36px rgba(137, 116, 180, 0.38);
+  box-shadow: none;
 }
 
 .brand-title {

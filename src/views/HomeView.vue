@@ -129,12 +129,12 @@ const toSignup = () => router.push("/register");
 :deep(.btn-primary.n-button) {
   background: linear-gradient(135deg, var(--env-accent-soft) 0%, var(--env-accent-deep) 100%);
   border-color: rgba(137, 116, 180, 0.6);
-  box-shadow: 0 8px 22px rgba(137, 116, 180, 0.25);
+  box-shadow: none;
 }
 
 :deep(.btn-primary.n-button:hover) {
   transform: translateY(-1px);
-  box-shadow: 0 12px 28px rgba(137, 116, 180, 0.35);
+  box-shadow: none;
 }
 
 :deep(.btn-outline.n-button) {
@@ -173,7 +173,7 @@ const toSignup = () => router.push("/register");
   display: grid;
   place-items: center;
   background: linear-gradient(135deg, var(--env-accent-soft) 0%, var(--env-accent-deep) 100%);
-  box-shadow: 0 0 38px rgba(137, 116, 180, 0.45);
+  box-shadow: none;
   color: #ffffff;
   animation: float 2.8s ease-in-out infinite;
 }

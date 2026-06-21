@@ -21,8 +21,6 @@ import {
   ArrowBackSharp,
   LockClosedOutline,
   MailOutline,
-  DocumentTextOutline,
-  TimeOutline,
 } from "@vicons/ionicons5";
 import { isAxiosError } from "axios";
 import { useStashStore } from "@/stores/stash";
@@ -150,13 +148,7 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
                   placeholder="Введите текст сообщения, которое будет зашифровано и отправлено..."
                   :autosize="{ minRows: 5, maxRows: 14 }"
                   class="body-textarea"
-                >
-                  <template #prefix>
-                    <n-icon :size="18">
-                      <DocumentTextOutline />
-                    </n-icon>
-                  </template>
-                </n-input>
+                />
               </n-form-item>
 
               <n-form-item path="sendAt" label="Дата и время отправки">
@@ -170,16 +162,17 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
                 />
               </n-form-item>
 
-              <n-button
-                type="primary"
-                size="large"
-                class="submit-btn"
-                block
-                :loading="isSubmitting"
-                @click="submit"
-              >
-                Создать stash
-              </n-button>
+              <div class="submit-row">
+                <n-button
+                  type="primary"
+                  size="large"
+                  class="submit-btn"
+                  :loading="isSubmitting"
+                  @click="submit"
+                >
+                  Создать stash
+                </n-button>
+              </div>
 
               <n-alert v-if="submitError" type="error" :bordered="false" class="submit-error" style="margin-top: 12px;">
                 {{ submitError }}
@@ -203,5 +196,11 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
 
 .date-picker {
   width: 100%;
+}
+
+.submit-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.25rem;
 }
 </style>
