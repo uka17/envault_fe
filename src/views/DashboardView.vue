@@ -1,98 +1,89 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, onMounted } from "vue";
 import { NButton, NIcon, NLayout, NLayoutContent } from "naive-ui";
 import AppHeader from "@/components/AppHeader.vue";
+import { useStashStore } from "@/stores/stash";
 import {
   CheckmarkCircleOutline,
   LockClosedOutline,
   MailOutline,
   PaperPlaneOutline,
-  PersonOutline,
   TimeOutline,
   AddOutline,
 } from "@vicons/ionicons5";
 
-type StashStatus = "planned" | "sent";
-type DashboardFilter = "all" | StashStatus;
+type DashboardFilter = "all" | "planned" | "sent";
 
-interface StashItem {
-  id: string;
-  recipientName: string;
-  recipientEmail: string;
-  scheduledAt: string;
-  status: StashStatus;
-  subtitle: string;
-  postponeLabel?: string;
-}
-
-const stashes: StashItem[] = [
-  {
-    id: "1",
-    recipientName: "Анна Иванова",
-    recipientEmail: "anna@example.com",
-    scheduledAt: "2025-06-15T12:00:00",
-    status: "planned",
-    subtitle: "Ожидает отправки",
-    postponeLabel: "Отложить на 7 дней",
-  },
-  {
-    id: "2",
-    recipientName: "Дочь",
-    recipientEmail: "daughter@example.com",
-    scheduledAt: "2030-01-01T00:00:00",
-    status: "planned",
-    subtitle: "Через почти 4 года",
-    postponeLabel: "Отложить на 1 месяц",
-  },
-  {
-    id: "3",
-    recipientName: "Сергей Петров",
-    recipientEmail: "sergey@example.com",
-    scheduledAt: "2024-12-25T10:00:00",
-    status: "sent",
-    subtitle: "Отправлен",
-  },
-];
-
+const stashStore = useStashStore();
 const activeFilter = ref<DashboardFilter>("all");
+const snoozeLoadingId = ref<number | null>(null);
+
+onMounted(() => {
+  stashStore.fetchStashes();
+});
 
 const summary = computed(() => ({
-  total: stashes.length,
-  planned: stashes.filter((stash) => stash.status === "planned").length,
-  sent: stashes.filter((stash) => stash.status === "sent").length,
+  total: stashStore.total,
+  planned: stashStore.plannedCount,
+  sent: stashStore.sentCount,
 }));
 
 const filteredStashes = computed(() => {
-  if (activeFilter.value === "all") {
-    return stashes;
-  }
-  return stashes.filter((stash) => stash.status === activeFilter.value);
+  if (activeFilter.value === "all") return stashStore.stashes;
+  if (activeFilter.value === "sent") return stashStore.stashes.filter((s) => s.isSent);
+  return stashStore.stashes.filter((s) => !s.isSent);
 });
 
-const formatDate = (isoDate: string) => {
+/**
+ * Format an ISO date string to a human-readable Russian locale string.
+ * @param isoDate ISO 8601 date string.
+ * @returns Formatted date string, e.g. "15 июня 2025, 12:00".
+ */
+const formatDate = (isoDate: string): string => {
   const date = new Date(isoDate);
   const months = [
-    "января",
-    "февраля",
-    "марта",
-    "апреля",
-    "мая",
-    "июня",
-    "июля",
-    "августа",
-    "сентября",
-    "октября",
-    "ноября",
-    "декабря",
+    "января", "февраля", "марта", "апреля", "мая", "июня",
+    "июля", "августа", "сентября", "октября", "ноября", "декабря",
   ];
-
   const day = date.getDate();
   const month = months[date.getMonth()];
   const year = date.getFullYear();
   const hours = String(date.getHours()).padStart(2, "0");
   const minutes = String(date.getMinutes()).padStart(2, "0");
-
   return `${day} ${month} ${year}, ${hours}:${minutes}`;
+};
+
+/**
+ * Compute a human-readable subtitle for a stash based on its status and send time.
+ * @param isSent Whether the stash has already been sent.
+ * @param sendAt ISO 8601 date string of the scheduled send time.
+ * @returns Subtitle string.
+ */
+const getSubtitle = (isSent: boolean, sendAt: string): string => {
+  if (isSent) return "Отправлено";
+  const diff = new Date(sendAt).getTime() - Date.now();
+  if (diff <= 0) return "Ожидает отправки";
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  if (days === 0) return "Сегодня";
+  if (days === 1) return "Завтра";
+  if (days < 30) return `Через ${days} дн.`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `Через ${months} мес.`;
+  const years = Math.floor(months / 12);
+  return `Через ${years} ${years === 1 ? "год" : years < 5 ? "года" : "лет"}`;
+};
+
+/**
+ * Snooze a stash by 24 hours.
+ * @param id Stash ID to snooze.
+ */
+const handleSnooze = async (id: number): Promise<void> => {
+  snoozeLoadingId.value = id;
+  try {
+    await stashStore.snoozeStash(id, 24);
+  } finally {
+    snoozeLoadingId.value = null;
+  }
 };
 </script>
 
@@ -182,26 +173,18 @@ const formatDate = (isoDate: string) => {
 
         <section class="stash-list">
           <article v-for="stash in filteredStashes" :key="stash.id" class="stash-row">
-            <div class="status-badge" :class="stash.status">
+            <div class="status-badge" :class="stash.isSent ? 'sent' : 'planned'">
               <n-icon :size="24">
-                <component
-                  :is="stash.status === 'planned' ? TimeOutline : CheckmarkCircleOutline"
-                />
+                <component :is="stash.isSent ? CheckmarkCircleOutline : TimeOutline" />
               </n-icon>
             </div>
 
             <div class="recipient-block">
               <div class="recipient-name-row">
                 <n-icon :size="16">
-                  <PersonOutline />
-                </n-icon>
-                <strong class="recipient-name">{{ stash.recipientName }}</strong>
-              </div>
-              <div class="recipient-mail-row">
-                <n-icon :size="15">
                   <MailOutline />
                 </n-icon>
-                <span>{{ stash.recipientEmail }}</span>
+                <strong class="recipient-name">{{ stash.to }}</strong>
               </div>
             </div>
 
@@ -210,21 +193,27 @@ const formatDate = (isoDate: string) => {
                 <n-icon :size="16">
                   <PaperPlaneOutline />
                 </n-icon>
-                <span>{{ formatDate(stash.scheduledAt) }}</span>
+                <span>{{ formatDate(stash.sendAt) }}</span>
               </p>
-              <p class="scheduled-subtitle" :class="stash.status">
-                {{ stash.subtitle }}
+              <p class="scheduled-subtitle" :class="stash.isSent ? 'sent' : 'planned'">
+                {{ getSubtitle(stash.isSent, stash.sendAt) }}
               </p>
             </div>
 
             <div class="row-action">
-              <n-button v-if="stash.status === 'planned'" ghost class="postpone-btn">
+              <n-button
+                v-if="!stash.isSent"
+                ghost
+                class="postpone-btn"
+                :loading="snoozeLoadingId === stash.id"
+                @click="handleSnooze(stash.id)"
+              >
                 <template #icon>
                   <n-icon :size="16">
                     <TimeOutline />
                   </n-icon>
                 </template>
-                {{ stash.postponeLabel }}
+                Отложить на 24 ч
               </n-button>
             </div>
           </article>
