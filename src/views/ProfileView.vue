@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import {
   NLayout,
   NLayoutContent,
   NIcon,
   NSwitch,
   NButton,
+  NInput,
+  NFormItem,
+  useMessage,
 } from "naive-ui";
 import AppHeader from "@/components/AppHeader.vue";
 import {
@@ -18,7 +21,119 @@ import {
   ArrowForwardOutline,
   TrashOutline,
   KeyOutline,
+  CloseOutline,
 } from "@vicons/ionicons5";
+import { useAuthStore } from "@/stores/auth";
+
+const auth = useAuthStore();
+const message = useMessage();
+
+const user = computed(() => auth.user);
+
+const registeredAt = computed(() => {
+  if (!user.value?.createdOn) return "—";
+  return new Date(user.value.createdOn).toLocaleDateString("ru-RU", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+});
+
+// Email form
+const showEmailForm = ref(false);
+const newEmail = ref("");
+const emailLoading = ref(false);
+
+/**
+ * Open the email change form, pre-filling the current email.
+ */
+function openEmailForm() {
+  newEmail.value = user.value?.email ?? "";
+  showEmailForm.value = true;
+}
+
+/**
+ * Submit the email change form.
+ */
+async function submitEmailForm() {
+  if (!newEmail.value) return;
+  emailLoading.value = true;
+  try {
+    await auth.updateProfile({ email: newEmail.value });
+    message.success("Email обновлён");
+    showEmailForm.value = false;
+  } catch {
+    message.error("Не удалось обновить email");
+  } finally {
+    emailLoading.value = false;
+  }
+}
+
+// Name form
+const showNameForm = ref(false);
+const newName = ref("");
+const nameLoading = ref(false);
+
+/**
+ * Open the name change form, pre-filling the current name.
+ */
+function openNameForm() {
+  newName.value = user.value?.name ?? "";
+  showNameForm.value = true;
+}
+
+/**
+ * Submit the name change form.
+ */
+async function submitNameForm() {
+  if (!newName.value) return;
+  nameLoading.value = true;
+  try {
+    await auth.updateProfile({ name: newName.value });
+    message.success("Имя обновлено");
+    showNameForm.value = false;
+  } catch {
+    message.error("Не удалось обновить имя");
+  } finally {
+    nameLoading.value = false;
+  }
+}
+
+// Password form
+const showPasswordForm = ref(false);
+const currentPassword = ref("");
+const newPassword = ref("");
+const passwordLoading = ref(false);
+
+/**
+ * Open the password change form and reset fields.
+ */
+function openPasswordForm() {
+  currentPassword.value = "";
+  newPassword.value = "";
+  showPasswordForm.value = true;
+}
+
+/**
+ * Submit the password change form.
+ */
+async function submitPasswordForm() {
+  if (!currentPassword.value || !newPassword.value) return;
+  passwordLoading.value = true;
+  try {
+    await auth.updatePassword({ currentPassword: currentPassword.value, newPassword: newPassword.value });
+    message.success("Пароль изменён");
+    showPasswordForm.value = false;
+    currentPassword.value = "";
+    newPassword.value = "";
+  } catch {
+    message.error("Не удалось изменить пароль. Проверьте текущий пароль.");
+  } finally {
+    passwordLoading.value = false;
+  }
+}
+
+const twoFactorEnabled = ref(false);
 
 interface Session {
   id: string;
@@ -29,16 +144,6 @@ interface Session {
   time: string;
   isCurrent: boolean;
 }
-
-/** Mock user data – будет заменено реальными данными из store */
-const user = {
-  email: "user@example.com",
-  registeredAt: "15 августа 2024 г.",
-  status: "Активен" as const,
-  emailVerified: true,
-};
-
-const twoFactorEnabled = ref(false);
 
 const sessions: Session[] = [
   {
@@ -100,18 +205,22 @@ const sessions: Session[] = [
             <div class="info-row">
               <div class="info-label-row">
                 <n-icon :size="16" class="info-icon">
+                  <PersonOutline />
+                </n-icon>
+                <dt class="info-label">Имя</dt>
+              </div>
+              <dd class="info-value">{{ user?.name ?? "—" }}</dd>
+            </div>
+
+            <div class="info-row">
+              <div class="info-label-row">
+                <n-icon :size="16" class="info-icon">
                   <MailOutline />
                 </n-icon>
                 <dt class="info-label">Email</dt>
               </div>
               <dd class="info-value">
-                <span>{{ user.email }}</span>
-                <span v-if="user.emailVerified" class="badge badge-verified">
-                  <n-icon :size="13">
-                    <CheckmarkCircleOutline />
-                  </n-icon>
-                  Подтверждён
-                </span>
+                <span>{{ user?.email ?? "—" }}</span>
               </dd>
             </div>
 
@@ -122,7 +231,7 @@ const sessions: Session[] = [
                 </n-icon>
                 <dt class="info-label">Дата регистрации</dt>
               </div>
-              <dd class="info-value">{{ user.registeredAt }}</dd>
+              <dd class="info-value">{{ registeredAt }}</dd>
             </div>
 
             <div class="info-row">
@@ -133,7 +242,7 @@ const sessions: Session[] = [
                 <dt class="info-label">Статус аккаунта</dt>
               </div>
               <dd class="info-value">
-                <span class="badge badge-active">{{ user.status }}</span>
+                <span class="badge badge-active">Активен</span>
               </dd>
             </div>
           </dl>
@@ -141,7 +250,51 @@ const sessions: Session[] = [
           <div class="divider" />
 
           <div class="action-list">
-            <button type="button" class="action-row">
+            <!-- Change name -->
+            <button type="button" class="action-row" @click="openNameForm">
+              <div class="action-row-left">
+                <n-icon :size="17" class="action-icon">
+                  <PersonOutline />
+                </n-icon>
+                <span>Изменить имя</span>
+              </div>
+              <n-icon :size="17" class="action-chevron">
+                <ArrowForwardOutline />
+              </n-icon>
+            </button>
+
+            <div v-if="showNameForm" class="inline-form">
+              <n-form-item label="Новое имя" class="form-item">
+                <n-input
+                  v-model:value="newName"
+                  placeholder="Введите новое имя"
+                  @keyup.enter="submitNameForm"
+                />
+              </n-form-item>
+              <div class="form-actions">
+                <n-button
+                  type="primary"
+                  size="small"
+                  :loading="nameLoading"
+                  @click="submitNameForm"
+                >
+                  Сохранить
+                </n-button>
+                <n-button
+                  ghost
+                  size="small"
+                  @click="showNameForm = false"
+                >
+                  <template #icon>
+                    <n-icon><CloseOutline /></n-icon>
+                  </template>
+                  Отмена
+                </n-button>
+              </div>
+            </div>
+
+            <!-- Change email -->
+            <button type="button" class="action-row" @click="openEmailForm">
               <div class="action-row-left">
                 <n-icon :size="17" class="action-icon">
                   <MailOutline />
@@ -153,7 +306,39 @@ const sessions: Session[] = [
               </n-icon>
             </button>
 
-            <button type="button" class="action-row">
+            <div v-if="showEmailForm" class="inline-form">
+              <n-form-item label="Новый email" class="form-item">
+                <n-input
+                  v-model:value="newEmail"
+                  placeholder="Введите новый email"
+                  type="text"
+                  @keyup.enter="submitEmailForm"
+                />
+              </n-form-item>
+              <div class="form-actions">
+                <n-button
+                  type="primary"
+                  size="small"
+                  :loading="emailLoading"
+                  @click="submitEmailForm"
+                >
+                  Сохранить
+                </n-button>
+                <n-button
+                  ghost
+                  size="small"
+                  @click="showEmailForm = false"
+                >
+                  <template #icon>
+                    <n-icon><CloseOutline /></n-icon>
+                  </template>
+                  Отмена
+                </n-button>
+              </div>
+            </div>
+
+            <!-- Change password -->
+            <button type="button" class="action-row" @click="openPasswordForm">
               <div class="action-row-left">
                 <n-icon :size="17" class="action-icon">
                   <KeyOutline />
@@ -165,6 +350,47 @@ const sessions: Session[] = [
               </n-icon>
             </button>
 
+            <div v-if="showPasswordForm" class="inline-form">
+              <n-form-item label="Текущий пароль" class="form-item">
+                <n-input
+                  v-model:value="currentPassword"
+                  type="password"
+                  show-password-on="click"
+                  placeholder="Текущий пароль"
+                />
+              </n-form-item>
+              <n-form-item label="Новый пароль" class="form-item">
+                <n-input
+                  v-model:value="newPassword"
+                  type="password"
+                  show-password-on="click"
+                  placeholder="Новый пароль"
+                  @keyup.enter="submitPasswordForm"
+                />
+              </n-form-item>
+              <div class="form-actions">
+                <n-button
+                  type="primary"
+                  size="small"
+                  :loading="passwordLoading"
+                  @click="submitPasswordForm"
+                >
+                  Сменить
+                </n-button>
+                <n-button
+                  ghost
+                  size="small"
+                  @click="showPasswordForm = false"
+                >
+                  <template #icon>
+                    <n-icon><CloseOutline /></n-icon>
+                  </template>
+                  Отмена
+                </n-button>
+              </div>
+            </div>
+
+            <!-- Delete account (stub) -->
             <button type="button" class="action-row action-row--danger">
               <div class="action-row-left">
                 <n-icon :size="17" class="action-icon">
@@ -368,12 +594,6 @@ const sessions: Session[] = [
   font-weight: 600;
 }
 
-.badge-verified {
-  color: #48bf84;
-  background: rgba(67, 176, 129, 0.14);
-  border: 1px solid rgba(67, 176, 129, 0.3);
-}
-
 .badge-active {
   color: #48bf84;
   background: rgba(67, 176, 129, 0.14);
@@ -434,6 +654,25 @@ const sessions: Session[] = [
 
 .action-chevron {
   color: #5a5e70;
+}
+
+.inline-form {
+  padding: 1rem 1rem 0.5rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  display: grid;
+  gap: 0.5rem;
+}
+
+.form-item {
+  margin-bottom: 0;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.5rem;
+  padding-bottom: 0.5rem;
 }
 
 .tfa-row {

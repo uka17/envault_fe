@@ -4,7 +4,11 @@ import {
   logoutApi,
   refreshTokenApi,
   checkAuthApi,
+  updateProfileApi,
+  updatePasswordApi,
   type UserResponse,
+  type UpdateProfilePayload,
+  type UpdatePasswordPayload,
 } from "@/api/authApi";
 
 interface AuthState {
@@ -79,6 +83,22 @@ export const useAuthStore = defineStore("auth", {
         this.accessToken = null;
         this.user = null;
       }
+    },
+
+    /**
+     * Update the current user's profile fields (name and/or email) and sync local state.
+     * @param data Fields to update.
+     */
+    async updateProfile(data: UpdateProfilePayload) {
+      this.user = await updateProfileApi(data);
+    },
+
+    /**
+     * Change the current user's password.
+     * @param data Current and new password.
+     */
+    async updatePassword(data: UpdatePasswordPayload) {
+      await updatePasswordApi(data);
     },
 
     /**
