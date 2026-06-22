@@ -36,6 +36,7 @@ export const useAuthStore = defineStore("auth", {
     async login(email: string, password: string) {
       const token = await loginApi({ email, password });
       this.accessToken = token;
+      localStorage.setItem("hasSession", "1");
       await this.fetchUser();
     },
 
@@ -68,6 +69,7 @@ export const useAuthStore = defineStore("auth", {
       } finally {
         this.accessToken = null;
         this.user = null;
+        localStorage.removeItem("hasSession");
       }
     },
 
@@ -103,15 +105,18 @@ export const useAuthStore = defineStore("auth", {
 
     /**
      * Restore auth state on app startup by attempting a silent token refresh.
-     * If the refresh token cookie is present the server returns a new access token.
+     * Only runs if a session flag is present in localStorage to avoid unnecessary
+     * refresh requests on public pages (login, register).
      */
     async init() {
+      if (!localStorage.getItem("hasSession")) return;
       try {
         await this.refresh();
         await this.fetchUser();
       } catch {
         this.accessToken = null;
         this.user = null;
+        localStorage.removeItem("hasSession");
       }
     },
   },
