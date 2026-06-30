@@ -12,15 +12,30 @@ import {
   NLayoutContent,
   NSpace,
   NText,
+  useMessage,
   type FormInst,
   type FormRules,
 } from "naive-ui";
-import { ArrowBackSharp, EyeOffOutline, EyeOutline, KeyOutline, LockClosedOutline, MailOutline } from "@vicons/ionicons5";
+import {
+  ArrowBackSharp,
+  EyeOffOutline,
+  EyeOutline,
+  KeyOutline,
+  LockClosedOutline,
+  MailOutline,
+  PersonOutline,
+} from "@vicons/ionicons5";
+import { useAuthStore } from "@/stores/auth";
+import { extractApiFieldErrors } from "@/api/apiError";
 
 const router = useRouter();
+const auth = useAuthStore();
+const message = useMessage();
 const formRef = ref<FormInst | null>(null);
+const isSubmitting = ref(false);
 
 const formValue = reactive({
+  name: "",
   email: "",
   password: "",
   confirmPassword: "",
@@ -29,12 +44,35 @@ const formValue = reactive({
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 
+const REGISTER_FIELDS = ["name", "email", "password"] as const;
+type RegisterField = (typeof REGISTER_FIELDS)[number];
+
+const serverErrors = reactive<Record<RegisterField, string>>({
+  name: "",
+  email: "",
+  password: "",
+});
+
+const NAME_REGEXP = /^\p{L}+(?:[ '-]\p{L}+)*$/u;
+const PASSWORD_REGEXP = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
+
 const rules: FormRules = {
+  name: [
+    { required: true, message: "Введите имя", trigger: ["input", "blur"] },
+    { pattern: NAME_REGEXP, message: "Имя может содержать только буквы", trigger: ["input", "blur"] },
+  ],
   email: [
     { required: true, message: "Введите email", trigger: ["input", "blur"] },
     { type: "email", message: "Неверный формат email", trigger: ["input", "blur"] },
   ],
-  password: [{ required: true, message: "Введите пароль", trigger: ["input", "blur"] }],
+  password: [
+    { required: true, message: "Введите пароль", trigger: ["input", "blur"] },
+    {
+      pattern: PASSWORD_REGEXP,
+      message: "Пароль должен содержать минимум 8 символов, заглавную, строчную букву и цифру",
+      trigger: ["input", "blur"],
+    },
+  ],
   confirmPassword: [
     { required: true, message: "Подтвердите пароль", trigger: ["input", "blur"] },
     {
@@ -47,8 +85,40 @@ const rules: FormRules = {
 
 const submit = async () => {
   await formRef.value?.validate();
-  router.push("/login");
+  serverErrors.name = "";
+  serverErrors.email = "";
+  serverErrors.password = "";
+  isSubmitting.value = true;
+  try {
+    await auth.register({
+      name: formValue.name,
+      email: formValue.email,
+      password: formValue.password,
+    });
+    router.push("/login");
+  } catch (err) {
+    handleRegisterError(err);
+  } finally {
+    isSubmitting.value = false;
+  }
 };
+
+/**
+ * Map a registration API error onto the form, showing field-specific messages
+ * for known fields (name, email, password) and a toast for anything else.
+ * @param err Error thrown by the register API call.
+ */
+function handleRegisterError(err: unknown) {
+  const { fieldErrors, genericErrors } = extractApiFieldErrors(err, REGISTER_FIELDS);
+
+  if (!Object.keys(fieldErrors).length && !genericErrors.length) {
+    message.error("Не удалось зарегистрироваться. Проверьте данные и попробуйте снова.");
+    return;
+  }
+
+  Object.assign(serverErrors, fieldErrors);
+  genericErrors.forEach((text) => message.error(text));
+}
 </script>
 
 <template>
@@ -81,8 +151,38 @@ const submit = async () => {
             </header>
 
             <n-form ref="formRef" :model="formValue" :rules="rules" label-placement="top" class="env-auth-form">
-              <n-form-item path="email" label="Email">
-                <n-input v-model:value="formValue.email" placeholder="your@email.com" size="large">
+              <n-form-item
+                path="name"
+                label="Имя"
+                :feedback="serverErrors.name"
+                :validation-status="serverErrors.name ? 'error' : undefined"
+              >
+                <n-input
+                  v-model:value="formValue.name"
+                  placeholder="Иван Иванов"
+                  size="large"
+                  @update:value="serverErrors.name = ''"
+                >
+                  <template #prefix>
+                    <n-icon :size="18">
+                      <PersonOutline />
+                    </n-icon>
+                  </template>
+                </n-input>
+              </n-form-item>
+
+              <n-form-item
+                path="email"
+                label="Email"
+                :feedback="serverErrors.email"
+                :validation-status="serverErrors.email ? 'error' : undefined"
+              >
+                <n-input
+                  v-model:value="formValue.email"
+                  placeholder="your@email.com"
+                  size="large"
+                  @update:value="serverErrors.email = ''"
+                >
                   <template #prefix>
                     <n-icon :size="18">
                       <MailOutline />
@@ -91,12 +191,18 @@ const submit = async () => {
                 </n-input>
               </n-form-item>
 
-              <n-form-item path="password" label="Пароль">
+              <n-form-item
+                path="password"
+                label="Пароль"
+                :feedback="serverErrors.password"
+                :validation-status="serverErrors.password ? 'error' : undefined"
+              >
                 <n-input
                   v-model:value="formValue.password"
                   :type="showPassword ? 'text' : 'password'"
                   placeholder="••••••••"
                   size="large"
+                  @update:value="serverErrors.password = ''"
                 >
                   <template #prefix>
                     <n-icon :size="18">
@@ -135,7 +241,14 @@ const submit = async () => {
                 </n-input>
               </n-form-item>
 
-              <n-button type="primary" size="large" class="submit-btn" block @click="submit">
+              <n-button
+                type="primary"
+                size="large"
+                class="submit-btn"
+                block
+                :loading="isSubmitting"
+                @click="submit"
+              >
                 Создать аккаунт
               </n-button>
             </n-form>

@@ -23,6 +23,7 @@ import {
   KeyOutline,
 } from "@vicons/ionicons5";
 import { useAuthStore } from "@/stores/auth";
+import { getApiErrorMessage } from "@/api/apiError";
 
 const auth = useAuthStore();
 const message = useMessage();
@@ -95,9 +96,7 @@ async function submitNameForm() {
     message.success("Имя обновлено");
     showNameForm.value = false;
   } catch (err: unknown) {
-    const translation = (err as { response?: { data?: { errors?: { msg?: { translation?: string } }[] } } })
-      ?.response?.data?.errors?.[0]?.msg?.translation;
-    nameError.value = translation ?? "Не удалось обновить имя. Попробуйте ещё раз.";
+    nameError.value = getApiErrorMessage(err) ?? "Не удалось обновить имя. Попробуйте ещё раз.";
   } finally {
     nameLoading.value = false;
   }
@@ -134,9 +133,7 @@ async function submitPasswordForm() {
     currentPassword.value = "";
     newPassword.value = "";
   } catch (err: unknown) {
-    const translation = (err as { response?: { data?: { errors?: { msg?: { translation?: string } }[] } } })
-      ?.response?.data?.errors?.[0]?.msg?.translation;
-    passwordError.value = translation ?? "Не удалось изменить пароль. Проверьте текущий пароль.";
+    passwordError.value = getApiErrorMessage(err) ?? "Не удалось изменить пароль. Проверьте текущий пароль.";
   } finally {
     passwordLoading.value = false;
   }

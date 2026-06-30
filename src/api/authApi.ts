@@ -1,5 +1,6 @@
 import { http } from "./http";
 
+const USERS_URL = "/users";
 const USERS_LOGIN_URL = "/users/login";
 const USERS_LOGOUT_URL = "/users/logout";
 const USERS_WHOAMI_URL = "/users/whoami";
@@ -10,6 +11,12 @@ const USERS_ME_PASSWORD_URL = "/users/me/password";
 export interface LoginPayload {
   email: string;
   password: string;
+}
+
+export interface RegisterPayload {
+  email: string;
+  password: string;
+  name: string;
 }
 
 export interface UserResponse {
@@ -28,6 +35,16 @@ export interface UpdateProfilePayload {
 export interface UpdatePasswordPayload {
   currentPassword: string;
   newPassword: string;
+}
+
+/**
+ * Register a new user account.
+ * @param payload Registration data (email, password, name).
+ * @returns Created user profile object.
+ */
+export async function registerApi(payload: RegisterPayload): Promise<UserResponse> {
+  const { data } = await http.post<UserResponse>(USERS_URL, payload);
+  return data;
 }
 
 /**
