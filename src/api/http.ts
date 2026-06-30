@@ -31,10 +31,11 @@ http.interceptors.response.use(
   async (error) => {
     const original: AxiosRequestConfig & { _retry?: boolean } = error.config;
 
+    const skipRefreshUrls = ["/token/refresh", "/users/login"];
     if (
       error.response?.status !== 401 ||
       original._retry ||
-      original.url?.includes("/token/refresh")
+      skipRefreshUrls.some((url) => original.url?.includes(url))
     ) {
       return Promise.reject(error);
     }
