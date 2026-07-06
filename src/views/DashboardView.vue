@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { NButton, NIcon, NLayout, NLayoutContent } from "naive-ui";
 import AppHeader from "@/components/AppHeader.vue";
 import { useStashStore } from "@/stores/stash";
@@ -17,6 +18,7 @@ type DashboardFilter = "all" | "planned" | "sent";
 
 const router = useRouter();
 const stashStore = useStashStore();
+const { t, locale } = useI18n();
 const activeFilter = ref<DashboardFilter>("all");
 const snoozeLoadingId = ref<number | null>(null);
 
@@ -37,22 +39,19 @@ const filteredStashes = computed(() => {
 });
 
 /**
- * Format an ISO date string to a human-readable Russian locale string.
+ * Format an ISO date string to a human-readable string in the active locale.
  * @param isoDate ISO 8601 date string.
- * @returns Formatted date string, e.g. "15 июня 2025, 12:00".
+ * @returns Formatted date string, e.g. "June 15, 2025, 12:00".
  */
 const formatDate = (isoDate: string): string => {
   const date = new Date(isoDate);
-  const months = [
-    "января", "февраля", "марта", "апреля", "мая", "июня",
-    "июля", "августа", "сентября", "октября", "ноября", "декабря",
-  ];
-  const day = date.getDate();
-  const month = months[date.getMonth()];
-  const year = date.getFullYear();
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  return `${day} ${month} ${year}, ${hours}:${minutes}`;
+  return new Intl.DateTimeFormat(locale.value, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
 };
 
 /**
@@ -62,17 +61,17 @@ const formatDate = (isoDate: string): string => {
  * @returns Subtitle string.
  */
 const getSubtitle = (isSent: boolean, sendAt: string): string => {
-  if (isSent) return "Отправлено";
+  if (isSent) return t("stash.dashboard.statusSent");
   const diff = new Date(sendAt).getTime() - Date.now();
-  if (diff <= 0) return "Ожидает отправки";
+  if (diff <= 0) return t("stash.dashboard.statusPending");
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  if (days === 0) return "Сегодня";
-  if (days === 1) return "Завтра";
-  if (days < 30) return `Через ${days} дн.`;
+  if (days === 0) return t("stash.dashboard.today");
+  if (days === 1) return t("stash.dashboard.tomorrow");
+  if (days < 30) return t("stash.dashboard.inDays", { n: days }, days);
   const months = Math.floor(days / 30);
-  if (months < 12) return `Через ${months} мес.`;
+  if (months < 12) return t("stash.dashboard.inMonths", { n: months }, months);
   const years = Math.floor(months / 12);
-  return `Через ${years} ${years === 1 ? "год" : years < 5 ? "года" : "лет"}`;
+  return t("stash.dashboard.inYears", { n: years }, years);
 };
 
 /**
@@ -97,7 +96,7 @@ const handleSnooze = async (id: number): Promise<void> => {
       <div class="dashboard-container">
         <section class="summary-grid">
           <article class="summary-card">
-            <p class="summary-label">Всего stash'ей</p>
+            <p class="summary-label">{{ t("stash.dashboard.totalStashes") }}</p>
             <div class="summary-value-row">
               <n-icon class="summary-icon lock" :size="22">
                 <LockClosedOutline />
@@ -107,7 +106,7 @@ const handleSnooze = async (id: number): Promise<void> => {
           </article>
 
           <article class="summary-card">
-            <p class="summary-label">Запланировано</p>
+            <p class="summary-label">{{ t("stash.dashboard.planned") }}</p>
             <div class="summary-value-row">
               <n-icon class="summary-icon planned" :size="22">
                 <TimeOutline />
@@ -117,7 +116,7 @@ const handleSnooze = async (id: number): Promise<void> => {
           </article>
 
           <article class="summary-card">
-            <p class="summary-label">Отправлено</p>
+            <p class="summary-label">{{ t("stash.dashboard.sent") }}</p>
             <div class="summary-value-row">
               <n-icon class="summary-icon sent" :size="22">
                 <PaperPlaneOutline />
@@ -135,7 +134,7 @@ const handleSnooze = async (id: number): Promise<void> => {
               :class="{ active: activeFilter === 'all' }"
               @click="activeFilter = 'all'"
             >
-              Все
+              {{ t("stash.dashboard.filterAll") }}
             </button>
 
             <button
@@ -147,7 +146,7 @@ const handleSnooze = async (id: number): Promise<void> => {
               <n-icon :size="15">
                 <TimeOutline />
               </n-icon>
-              Запланированные
+              {{ t("stash.dashboard.filterPlanned") }}
             </button>
 
             <button
@@ -159,7 +158,7 @@ const handleSnooze = async (id: number): Promise<void> => {
               <n-icon :size="15">
                 <PaperPlaneOutline />
               </n-icon>
-              Отправленные
+              {{ t("stash.dashboard.filterSent") }}
             </button>
           </div>
 
@@ -169,7 +168,7 @@ const handleSnooze = async (id: number): Promise<void> => {
                 <AddOutline />
               </n-icon>
             </template>
-            Новый stash
+            {{ t("stash.dashboard.newStash") }}
           </n-button>
         </section>
 
@@ -215,7 +214,7 @@ const handleSnooze = async (id: number): Promise<void> => {
                     <TimeOutline />
                   </n-icon>
                 </template>
-                Отложить на 24 ч
+                {{ t("stash.dashboard.snooze") }}
               </n-button>
             </div>
           </article>

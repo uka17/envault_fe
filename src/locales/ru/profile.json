@@ -1,0 +1,50 @@
+{
+  "title": "Профиль",
+  "subtitle": "Управление аккаунтом и настройками",
+  "edit": "Изменить",
+  "account": {
+    "title": "Аккаунт",
+    "subtitle": "Основная информация о вашем аккаунте",
+    "name": "Имя",
+    "email": "Email",
+    "registeredAt": "Дата регистрации",
+    "status": "Статус аккаунта",
+    "active": "Активен",
+    "changePassword": "Сменить пароль"
+  },
+  "security": {
+    "title": "Безопасность",
+    "subtitle": "Двухфакторная аутентификация и активные сессии",
+    "twoFactor": "Двухфакторная аутентификация",
+    "twoFactorHint": "Рекомендуем включить для безопасности",
+    "activeSessions": "Активные сессии",
+    "endAll": "Завершить все",
+    "current": "текущая"
+  },
+  "danger": {
+    "title": "Опасная зона",
+    "deleteAccount": "Удалить аккаунт",
+    "deleteHint": "Все данные будут удалены без возможности восстановления.",
+    "deleteButton": "Удалить аккаунт"
+  },
+  "modals": {
+    "editName": "Изменить имя",
+    "newNameLabel": "Новое имя",
+    "newNamePlaceholder": "Введите новое имя",
+    "editEmail": "Изменить email",
+    "newEmailLabel": "Новый email",
+    "newEmailPlaceholder": "Введите новый email",
+    "changePasswordTitle": "Сменить пароль",
+    "currentPassword": "Текущий пароль",
+    "newPassword": "Новый пароль",
+    "submitChange": "Сменить"
+  },
+  "messages": {
+    "emailUpdated": "Email обновлён",
+    "emailUpdateFailed": "Не удалось обновить email",
+    "nameUpdated": "Имя обновлено",
+    "nameUpdateFailed": "Не удалось обновить имя. Попробуйте ещё раз.",
+    "passwordUpdated": "Пароль изменён",
+    "passwordUpdateFailed": "Не удалось изменить пароль. Проверьте текущий пароль."
+  }
+}

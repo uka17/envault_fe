@@ -1,0 +1,26 @@
+{
+  "email": {
+    "required": "Enter your email",
+    "invalid": "Invalid email format"
+  },
+  "name": {
+    "required": "Enter your name",
+    "invalid": "Name can only contain letters"
+  },
+  "password": {
+    "required": "Enter your password",
+    "complexity": "Password must be at least 8 characters and include an uppercase letter, a lowercase letter, and a digit"
+  },
+  "confirmPassword": {
+    "required": "Confirm your password",
+    "mismatch": "Passwords do not match"
+  },
+  "stash": {
+    "recipientRequired": "Enter recipient email",
+    "emailInvalid": "Invalid email format",
+    "bodyRequired": "Enter message text",
+    "bodyEmpty": "Message cannot be empty",
+    "sendAtRequired": "Specify send date and time",
+    "sendAtFuture": "Date must be in the future"
+  }
+}

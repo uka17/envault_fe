@@ -1,0 +1,21 @@
+{
+  "appName": "Envault",
+  "backHome": "На главную",
+  "aria": {
+    "userMenu": "Меню пользователя",
+    "goHome": "На главную"
+  },
+  "nav": {
+    "login": "Войти",
+    "start": "Начать",
+    "myStashes": "Мои stash'и",
+    "createStash": "Создать stash",
+    "profile": "Профиль",
+    "logout": "Выйти"
+  },
+  "actions": {
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "change": "Изменить"
+  }
+}

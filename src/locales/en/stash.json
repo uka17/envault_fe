@@ -1,0 +1,34 @@
+{
+  "dashboard": {
+    "totalStashes": "Total stashes",
+    "planned": "Planned",
+    "sent": "Sent",
+    "filterAll": "All",
+    "filterPlanned": "Planned",
+    "filterSent": "Sent",
+    "newStash": "New stash",
+    "snooze": "Snooze 24h",
+    "statusSent": "Sent",
+    "statusPending": "Awaiting delivery",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "inDays": "in {n} day | in {n} days",
+    "inMonths": "in {n} month | in {n} months",
+    "inYears": "in {n} year | in {n} years",
+    "loadFailed": "Failed to load stashes"
+  },
+  "create": {
+    "backToStashes": "Back to my stashes",
+    "brandTitle": "New stash",
+    "title": "Create stash",
+    "subtitle": "An encrypted message that will be delivered to the recipient at the right moment",
+    "recipientLabel": "Recipient email",
+    "recipientPlaceholder": "recipient\\@example.com",
+    "messageLabel": "Message",
+    "messagePlaceholder": "Enter the message text that will be encrypted and sent...",
+    "sendAtLabel": "Send date and time",
+    "sendAtPlaceholder": "Select date and time",
+    "submit": "Create stash",
+    "error": "Failed to create stash. Please try again."
+  }
+}

@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { reactive, ref } from "vue";
+import { computed, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import {
   NAlert,
   NButton,
@@ -23,6 +24,7 @@ import { emailRules, requiredPasswordRules } from "@/utils/formRules";
 
 const router = useRouter();
 const auth = useAuthStore();
+const { t } = useI18n();
 const formRef = ref<FormInst | null>(null);
 const isSubmitting = ref(false);
 const submitError = ref<string | null>(null);
@@ -34,10 +36,10 @@ const formValue = reactive({
 
 const showPassword = ref(false);
 
-const rules: FormRules = {
-  email: emailRules,
-  password: requiredPasswordRules,
-};
+const rules = computed<FormRules>(() => ({
+  email: emailRules(),
+  password: requiredPasswordRules(),
+}));
 
 /**
  * Validates the login form and authenticates the user.
@@ -52,7 +54,7 @@ const submit = async () => {
     await auth.login(formValue.email, formValue.password);
     router.push({ name: "dashboard" });
   } catch (err) {
-    submitError.value = getApiErrorMessage(err) ?? "Не удалось войти. Проверьте email и пароль.";
+    submitError.value = getApiErrorMessage(err) ?? t("auth.login.error");
   } finally {
     isSubmitting.value = false;
   }
@@ -68,7 +70,7 @@ const submit = async () => {
             <n-icon :size="19" class="env-back-link__icon" aria-hidden="true">
               <ArrowBackSharp />
             </n-icon>
-            <span>На главную</span>
+            <span>{{ t("common.backHome") }}</span>
           </RouterLink>
         </div>
 
@@ -78,19 +80,19 @@ const submit = async () => {
               <LockClosedOutline />
             </n-icon>
           </div>
-          <n-text class="brand-title">Envault</n-text>
+          <n-text class="brand-title">{{ t("common.appName") }}</n-text>
         </n-space>
 
         <n-card :bordered="false" class="env-auth-card">
           <n-space vertical :size="22">
             <header class="card-header">
-              <h1>Вход в аккаунт</h1>
-              <p>Войдите, чтобы управлять stash'ами и отправками</p>
+              <h1>{{ t("auth.login.title") }}</h1>
+              <p>{{ t("auth.login.subtitle") }}</p>
             </header>
 
             <n-form ref="formRef" :model="formValue" :rules="rules" label-placement="top" class="env-auth-form">
-              <n-form-item path="email" label="Email">
-                <n-input v-model:value="formValue.email" placeholder="your@email.com" size="large">
+              <n-form-item path="email" :label="t('auth.login.emailLabel')">
+                <n-input v-model:value="formValue.email" :placeholder="t('auth.login.emailPlaceholder')" size="large">
                   <template #prefix>
                     <n-icon :size="18">
                       <MailOutline />
@@ -99,7 +101,7 @@ const submit = async () => {
                 </n-input>
               </n-form-item>
 
-              <n-form-item path="password" label="Пароль">
+              <n-form-item path="password" :label="t('auth.login.passwordLabel')">
                 <n-input
                   v-model:value="formValue.password"
                   :type="showPassword ? 'text' : 'password'"
@@ -130,13 +132,13 @@ const submit = async () => {
               </n-alert>
 
               <n-button type="primary" size="large" class="submit-btn" block :loading="isSubmitting" @click="submit">
-                Войти
+                {{ t("auth.login.submit") }}
               </n-button>
             </n-form>
 
             <footer class="card-footer">
-              <n-text depth="3">Нет аккаунта?</n-text>
-              <RouterLink to="/register" class="text-link switch-link">Создать</RouterLink>
+              <n-text depth="3">{{ t("auth.login.noAccount") }}</n-text>
+              <RouterLink to="/register" class="text-link switch-link">{{ t("auth.login.createLink") }}</RouterLink>
             </footer>
           </n-space>
         </n-card>

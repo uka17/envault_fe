@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import {
   NButton,
   NCard,
@@ -23,6 +24,7 @@ import {
 } from "@vicons/ionicons5";
 
 const router = useRouter();
+const { t } = useI18n();
 
 /**
  * Navigates to the login page.
@@ -48,21 +50,20 @@ const toSignup = () => router.push("/register");
         </div>
 
         <n-h1 class="hero-title">
-          Защити свои слова
-          <span>временем</span>
+          {{ t("home.hero.titleLine1") }}
+          <span>{{ t("home.hero.titleLine2") }}</span>
         </n-h1>
 
         <n-p class="hero-subtitle">
-          Отправляй зашифрованные сообщения в будущее. Письма близким, важные данные или послания
-          самому себе, доставка точно в назначенное время.
+          {{ t("home.hero.subtitle") }}
         </n-p>
 
         <n-space justify="center" align="center" :size="14" class="hero-actions" wrap>
           <n-button type="primary" size="large" class="btn-primary btn-lg" @click="toSignup">
-            Создать первый stash
+            {{ t("home.hero.primaryCta") }}
           </n-button>
           <n-button ghost size="large" class="btn-outline btn-lg" @click="toLogin">
-            У меня есть ключ
+            {{ t("home.hero.secondaryCta") }}
           </n-button>
         </n-space>
 
@@ -74,9 +75,9 @@ const toSignup = () => router.push("/register");
                   <ShieldCheckmarkOutline />
                 </n-icon>
               </div>
-              <n-text class="feature-title">End-to-end шифрование</n-text>
+              <n-text class="feature-title">{{ t("home.features.encryptionTitle") }}</n-text>
               <n-text depth="2" class="feature-description">
-                Только получатель с ключом может прочитать сообщение. Даже мы не имеем доступа.
+                {{ t("home.features.encryptionDescription") }}
               </n-text>
             </n-card>
           </n-grid-item>
@@ -88,9 +89,9 @@ const toSignup = () => router.push("/register");
                   <TimeOutline />
                 </n-icon>
               </div>
-              <n-text class="feature-title">Точная доставка</n-text>
+              <n-text class="feature-title">{{ t("home.features.deliveryTitle") }}</n-text>
               <n-text depth="2" class="feature-description">
-                Запланируй отправку на любую дату - через день, год или десятилетие.
+                {{ t("home.features.deliveryDescription") }}
               </n-text>
             </n-card>
           </n-grid-item>
@@ -102,9 +103,9 @@ const toSignup = () => router.push("/register");
                   <SettingsOutline />
                 </n-icon>
               </div>
-              <n-text class="feature-title">Гибкий контроль</n-text>
+              <n-text class="feature-title">{{ t("home.features.controlTitle") }}</n-text>
               <n-text depth="2" class="feature-description">
-                Откладывай отправку или получай напоминания перед доставкой сообщения.
+                {{ t("home.features.controlDescription") }}
               </n-text>
             </n-card>
           </n-grid-item>
@@ -114,7 +115,7 @@ const toSignup = () => router.push("/register");
 
     <n-layout-footer bordered class="home-footer">
       <div class="envault-container">
-        <n-text depth="3">© 2026 Envault. Защищай важное.</n-text>
+        <n-text depth="3">{{ t("home.footer") }}</n-text>
       </div>
     </n-layout-footer>
   </n-layout>

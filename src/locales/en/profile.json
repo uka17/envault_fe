@@ -1,0 +1,50 @@
+{
+  "title": "Profile",
+  "subtitle": "Manage your account and settings",
+  "edit": "Edit",
+  "account": {
+    "title": "Account",
+    "subtitle": "Basic information about your account",
+    "name": "Name",
+    "email": "Email",
+    "registeredAt": "Registration date",
+    "status": "Account status",
+    "active": "Active",
+    "changePassword": "Change password"
+  },
+  "security": {
+    "title": "Security",
+    "subtitle": "Two-factor authentication and active sessions",
+    "twoFactor": "Two-factor authentication",
+    "twoFactorHint": "We recommend enabling this for extra security",
+    "activeSessions": "Active sessions",
+    "endAll": "End all",
+    "current": "current"
+  },
+  "danger": {
+    "title": "Danger zone",
+    "deleteAccount": "Delete account",
+    "deleteHint": "All data will be permanently deleted and cannot be recovered.",
+    "deleteButton": "Delete account"
+  },
+  "modals": {
+    "editName": "Edit name",
+    "newNameLabel": "New name",
+    "newNamePlaceholder": "Enter new name",
+    "editEmail": "Edit email",
+    "newEmailLabel": "New email",
+    "newEmailPlaceholder": "Enter new email",
+    "changePasswordTitle": "Change password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "submitChange": "Change"
+  },
+  "messages": {
+    "emailUpdated": "Email updated",
+    "emailUpdateFailed": "Failed to update email",
+    "nameUpdated": "Name updated",
+    "nameUpdateFailed": "Failed to update name. Please try again.",
+    "passwordUpdated": "Password changed",
+    "passwordUpdateFailed": "Failed to change password. Check your current password."
+  }
+}

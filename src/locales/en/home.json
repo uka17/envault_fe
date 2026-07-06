@@ -1,0 +1,18 @@
+{
+  "hero": {
+    "titleLine1": "Protect your words",
+    "titleLine2": "with time",
+    "subtitle": "Send encrypted messages into the future. Letters to loved ones, important data, or a message to yourself, delivered exactly on time.",
+    "primaryCta": "Create your first stash",
+    "secondaryCta": "I have a key"
+  },
+  "features": {
+    "encryptionTitle": "End-to-end encryption",
+    "encryptionDescription": "Only the recipient with the key can read the message. Not even we have access.",
+    "deliveryTitle": "Precise delivery",
+    "deliveryDescription": "Schedule delivery for any date - a day, a year, or a decade from now.",
+    "controlTitle": "Flexible control",
+    "controlDescription": "Postpone delivery or get reminders before the message is sent."
+  },
+  "footer": "© 2026 Envault. Protect what matters."
+}

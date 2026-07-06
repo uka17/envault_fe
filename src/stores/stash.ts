@@ -7,6 +7,7 @@ import {
   type StashResponse,
   type StashCreatePayload,
 } from "@/api/stashApi";
+import { i18n } from "@/i18n";
 
 interface StashState {
   stashes: StashResponse[];
@@ -40,7 +41,7 @@ export const useStashStore = defineStore("stash", {
       try {
         this.stashes = await getStashesApi();
       } catch {
-        this.error = "Не удалось загрузить stash'и";
+        this.error = i18n.global.t("stash.dashboard.loadFailed");
       } finally {
         this.loading = false;
       }

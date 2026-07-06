@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { NButton, NIcon, NLayoutHeader, NSpace, NText } from "naive-ui";
 import { useAuthStore } from "@/stores/auth";
+import { setLocale, SUPPORTED_LOCALES, type SupportedLocale } from "@/i18n";
 import {
   AddOutline,
   LockClosedOutline,
@@ -12,6 +14,15 @@ import {
 
 const router = useRouter();
 const authStore = useAuthStore();
+const { t, locale } = useI18n();
+
+/**
+ * Switches the active UI locale to the other supported language.
+ */
+const toggleLocale = () => {
+  const next = SUPPORTED_LOCALES.find((l) => l !== locale.value) as SupportedLocale;
+  setLocale(next);
+};
 
 /** Whether the user dropdown menu is open. */
 const menuOpen = ref(false);
@@ -79,39 +90,45 @@ const handleLogout = () => {
 <template>
   <n-layout-header bordered class="app-header">
     <div class="app-header-inner">
-      <n-space align="center" :size="10" class="brand-link" role="link" aria-label="На главную" @click="router.push({ name: 'home' })">
+      <n-space align="center" :size="10" class="brand-link" role="link" :aria-label="t('common.aria.goHome')" @click="router.push({ name: 'home' })">
         <div class="envault-brand-mark" role="img" aria-label="Envault">
           <n-icon :size="16">
             <LockClosedOutline />
           </n-icon>
         </div>
-        <n-text class="brand-name">Envault</n-text>
+        <n-text class="brand-name">{{ t("common.appName") }}</n-text>
       </n-space>
 
       <div class="user-menu-wrap">
-        <template v-if="authStore.isAuthenticated">
-          <button
-            ref="avatarBtn"
-            class="avatar-badge"
-            type="button"
-            :aria-expanded="menuOpen"
-            aria-haspopup="true"
-            aria-label="Меню пользователя"
-            @click="toggleMenu"
-          >
-            {{ currentUser.initials }}
+        <n-space align="center" :size="10">
+          <button type="button" class="locale-switch" @click="toggleLocale">
+            {{ locale.toUpperCase() }}
           </button>
-        </template>
-        <template v-else>
-          <n-space :size="10">
-            <n-button ghost class="header-btn-login" @click="router.push({ name: 'login' })">
-              Войти
-            </n-button>
-            <n-button type="primary" class="header-btn-start" @click="router.push({ name: 'register' })">
-              Начать
-            </n-button>
-          </n-space>
-        </template>
+
+          <template v-if="authStore.isAuthenticated">
+            <button
+              ref="avatarBtn"
+              class="avatar-badge"
+              type="button"
+              :aria-expanded="menuOpen"
+              aria-haspopup="true"
+              :aria-label="t('common.aria.userMenu')"
+              @click="toggleMenu"
+            >
+              {{ currentUser.initials }}
+            </button>
+          </template>
+          <template v-else>
+            <n-space :size="10">
+              <n-button ghost class="header-btn-login" @click="router.push({ name: 'login' })">
+                {{ t("common.nav.login") }}
+              </n-button>
+              <n-button type="primary" class="header-btn-start" @click="router.push({ name: 'register' })">
+                {{ t("common.nav.start") }}
+              </n-button>
+            </n-space>
+          </template>
+        </n-space>
 
         <Teleport to="body">
           <template v-if="menuOpen">
@@ -130,15 +147,15 @@ const handleLogout = () => {
 
               <button type="button" class="dropdown-item" role="menuitem" @click="goToDashboard">
                 <n-icon :size="16"><LockClosedOutline /></n-icon>
-                My stashes
+                {{ t("common.nav.myStashes") }}
               </button>
               <button type="button" class="dropdown-item" role="menuitem" @click="() => { closeMenu(); router.push({ name: 'create-stash' }); }">
                 <n-icon :size="16"><AddOutline /></n-icon>
-                Create stash
+                {{ t("common.nav.createStash") }}
               </button>
               <button type="button" class="dropdown-item" role="menuitem" @click="goToSettings">
                 <n-icon :size="16"><SettingsOutline /></n-icon>
-                Profile
+                {{ t("common.nav.profile") }}
               </button>
 
               <div class="dropdown-divider" />
@@ -150,7 +167,7 @@ const handleLogout = () => {
                 @click="handleLogout"
               >
                 <n-icon :size="16"><LogOutOutline /></n-icon>
-                Logout
+                {{ t("common.nav.logout") }}
               </button>
             </div>
           </template>
@@ -212,6 +229,24 @@ const handleLogout = () => {
 
 .user-menu-wrap {
   position: relative;
+}
+
+.locale-switch {
+  height: 32px;
+  padding: 0 0.65rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.02);
+  color: #c0c7d1;
+  font-size: 0.8rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.locale-switch:hover {
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #eef1f5;
 }
 
 :deep(.header-btn-login.n-button) {

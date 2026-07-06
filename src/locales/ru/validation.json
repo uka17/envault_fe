@@ -1,0 +1,26 @@
+{
+  "email": {
+    "required": "Введите email",
+    "invalid": "Неверный формат email"
+  },
+  "name": {
+    "required": "Введите имя",
+    "invalid": "Имя может содержать только буквы"
+  },
+  "password": {
+    "required": "Введите пароль",
+    "complexity": "Пароль должен содержать минимум 8 символов, заглавную, строчную букву и цифру"
+  },
+  "confirmPassword": {
+    "required": "Подтвердите пароль",
+    "mismatch": "Пароли не совпадают"
+  },
+  "stash": {
+    "recipientRequired": "Введите email получателя",
+    "emailInvalid": "Неверный формат email",
+    "bodyRequired": "Введите текст сообщения",
+    "bodyEmpty": "Сообщение не может быть пустым",
+    "sendAtRequired": "Укажите дату и время отправки",
+    "sendAtFuture": "Дата должна быть в будущем"
+  }
+}

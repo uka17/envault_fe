@@ -1,0 +1,34 @@
+{
+  "dashboard": {
+    "totalStashes": "Всего stash'ей",
+    "planned": "Запланировано",
+    "sent": "Отправлено",
+    "filterAll": "Все",
+    "filterPlanned": "Запланированные",
+    "filterSent": "Отправленные",
+    "newStash": "Новый stash",
+    "snooze": "Отложить на 24 ч",
+    "statusSent": "Отправлено",
+    "statusPending": "Ожидает отправки",
+    "today": "Сегодня",
+    "tomorrow": "Завтра",
+    "inDays": "Через {n} дн.",
+    "inMonths": "Через {n} мес.",
+    "inYears": "Через {n} год | Через {n} года | Через {n} лет",
+    "loadFailed": "Не удалось загрузить stash'и"
+  },
+  "create": {
+    "backToStashes": "К моим stash'ам",
+    "brandTitle": "Новый stash",
+    "title": "Создать stash",
+    "subtitle": "Зашифрованное сообщение, которое будет отправлено получателю в нужный момент",
+    "recipientLabel": "Email получателя",
+    "recipientPlaceholder": "recipient\\@example.com",
+    "messageLabel": "Сообщение",
+    "messagePlaceholder": "Введите текст сообщения, которое будет зашифровано и отправлено...",
+    "sendAtLabel": "Дата и время отправки",
+    "sendAtPlaceholder": "Выберите дату и время",
+    "submit": "Создать stash",
+    "error": "Не удалось создать stash. Попробуйте ещё раз."
+  }
+}

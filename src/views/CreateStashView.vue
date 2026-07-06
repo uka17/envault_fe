@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { reactive, ref } from "vue";
+import { computed, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import {
   NAlert,
   NButton,
@@ -27,6 +28,7 @@ import { useStashStore } from "@/stores/stash";
 
 const router = useRouter();
 const stashStore = useStashStore();
+const { t } = useI18n();
 const formRef = ref<FormInst | null>(null);
 const isSubmitting = ref(false);
 const submitError = ref<string | null>(null);
@@ -37,31 +39,31 @@ const formValue = reactive({
   sendAt: null as number | null,
 });
 
-const rules: FormRules = {
+const rules = computed<FormRules>(() => ({
   to: [
-    { required: true, message: "Введите email получателя", trigger: ["input", "blur"] },
-    { type: "email", message: "Неверный формат email", trigger: ["input", "blur"] },
+    { required: true, message: t("validation.stash.recipientRequired"), trigger: ["input", "blur"] },
+    { type: "email", message: t("validation.stash.emailInvalid"), trigger: ["input", "blur"] },
   ],
   body: [
-    { required: true, message: "Введите текст сообщения", trigger: ["input", "blur"] },
-    { min: 1, message: "Сообщение не может быть пустым", trigger: ["input", "blur"] },
+    { required: true, message: t("validation.stash.bodyRequired"), trigger: ["input", "blur"] },
+    { min: 1, message: t("validation.stash.bodyEmpty"), trigger: ["input", "blur"] },
   ],
   sendAt: [
     {
       required: true,
       type: "number",
-      message: "Укажите дату и время отправки",
+      message: t("validation.stash.sendAtRequired"),
       trigger: ["change", "blur"],
     },
     {
       validator: (_rule, value: number | null) => {
         if (!value) return true;
-        return value > Date.now() || new Error("Дата должна быть в будущем");
+        return value > Date.now() || new Error(t("validation.stash.sendAtFuture"));
       },
       trigger: ["change", "blur"],
     },
   ],
-};
+}));
 
 /**
  * Validate the form and submit the stash to the API.
@@ -80,8 +82,7 @@ const submit = async (): Promise<void> => {
     router.push({ name: "dashboard" });
   } catch (e) {
     submitError.value =
-      (isAxiosError(e) && e.response?.data?.message?.translation) ||
-      "Не удалось создать stash. Попробуйте ещё раз.";
+      (isAxiosError(e) && e.response?.data?.message?.translation) || t("stash.create.error");
   } finally {
     isSubmitting.value = false;
   }
@@ -100,7 +101,7 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
             <n-icon :size="19" class="env-back-link__icon" aria-hidden="true">
               <ArrowBackSharp />
             </n-icon>
-            <span>К моим stash'ам</span>
+            <span>{{ t("stash.create.backToStashes") }}</span>
           </RouterLink>
         </div>
 
@@ -110,14 +111,14 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
               <LockClosedOutline />
             </n-icon>
           </div>
-          <n-text class="brand-title">Новый stash</n-text>
+          <n-text class="brand-title">{{ t("stash.create.brandTitle") }}</n-text>
         </n-space>
 
         <n-card :bordered="false" class="env-auth-card">
           <n-space vertical :size="22">
             <header class="card-header">
-              <h1>Создать stash</h1>
-              <p>Зашифрованное сообщение, которое будет отправлено получателю в нужный момент</p>
+              <h1>{{ t("stash.create.title") }}</h1>
+              <p>{{ t("stash.create.subtitle") }}</p>
             </header>
 
             <n-form
@@ -127,10 +128,10 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
               label-placement="top"
               class="env-auth-form"
             >
-              <n-form-item path="to" label="Email получателя">
+              <n-form-item path="to" :label="t('stash.create.recipientLabel')">
                 <n-input
                   v-model:value="formValue.to"
-                  placeholder="recipient@example.com"
+                  :placeholder="t('stash.create.recipientPlaceholder')"
                   size="large"
                 >
                   <template #prefix>
@@ -141,21 +142,21 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
                 </n-input>
               </n-form-item>
 
-              <n-form-item path="body" label="Сообщение">
+              <n-form-item path="body" :label="t('stash.create.messageLabel')">
                 <n-input
                   v-model:value="formValue.body"
                   type="textarea"
-                  placeholder="Введите текст сообщения, которое будет зашифровано и отправлено..."
+                  :placeholder="t('stash.create.messagePlaceholder')"
                   :autosize="{ minRows: 5, maxRows: 14 }"
                   class="body-textarea"
                 />
               </n-form-item>
 
-              <n-form-item path="sendAt" label="Дата и время отправки">
+              <n-form-item path="sendAt" :label="t('stash.create.sendAtLabel')">
                 <n-date-picker
                   v-model:value="formValue.sendAt"
                   type="datetime"
-                  placeholder="Выберите дату и время"
+                  :placeholder="t('stash.create.sendAtPlaceholder')"
                   :is-date-disabled="disablePastDate"
                   size="large"
                   class="date-picker"
@@ -170,7 +171,7 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
                   :loading="isSubmitting"
                   @click="submit"
                 >
-                  Создать stash
+                  {{ t("stash.create.submit") }}
                 </n-button>
               </div>
 

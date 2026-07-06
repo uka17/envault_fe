@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { reactive, ref, computed } from "vue";
+import { useI18n } from "vue-i18n";
 import {
   NLayout,
   NLayoutContent,
@@ -31,12 +32,13 @@ import { nameRules, requiredPasswordRules, newPasswordRules } from "@/utils/form
 
 const auth = useAuthStore();
 const message = useMessage();
+const { t, locale } = useI18n();
 
 const user = computed(() => auth.user);
 
 const registeredAt = computed(() => {
   if (!user.value?.createdOn) return "—";
-  return new Date(user.value.createdOn).toLocaleDateString("ru-RU", {
+  return new Date(user.value.createdOn).toLocaleDateString(locale.value, {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -64,10 +66,10 @@ async function submitEmailForm() {
   emailLoading.value = true;
   try {
     await auth.updateProfile({ email: newEmail.value });
-    message.success("Email обновлён");
+    message.success(t("profile.messages.emailUpdated"));
     showEmailForm.value = false;
   } catch {
-    message.error("Не удалось обновить email");
+    message.error(t("profile.messages.emailUpdateFailed"));
   } finally {
     emailLoading.value = false;
   }
@@ -79,7 +81,7 @@ const nameFormRef = ref<FormInst | null>(null);
 const nameFormValue = reactive({ name: "" });
 const nameLoading = ref(false);
 const nameError = ref("");
-const nameRulesConfig: FormRules = { name: nameRules };
+const nameRulesConfig = computed<FormRules>(() => ({ name: nameRules() }));
 
 /**
  * Open the name change form, pre-filling the current name.
@@ -99,10 +101,10 @@ async function submitNameForm() {
   nameLoading.value = true;
   try {
     await auth.updateProfile({ name: nameFormValue.name });
-    message.success("Имя обновлено");
+    message.success(t("profile.messages.nameUpdated"));
     showNameForm.value = false;
   } catch (err: unknown) {
-    nameError.value = getApiErrorMessage(err) ?? "Не удалось обновить имя. Попробуйте ещё раз.";
+    nameError.value = getApiErrorMessage(err) ?? t("profile.messages.nameUpdateFailed");
   } finally {
     nameLoading.value = false;
   }
@@ -115,10 +117,10 @@ const passwordFormValue = reactive({ currentPassword: "", newPassword: "" });
 const passwordLoading = ref(false);
 const passwordError = ref("");
 const passwordServerErrors = reactive({ currentPassword: "", newPassword: "" });
-const passwordRulesConfig: FormRules = {
-  currentPassword: requiredPasswordRules,
-  newPassword: newPasswordRules,
-};
+const passwordRulesConfig = computed<FormRules>(() => ({
+  currentPassword: requiredPasswordRules(),
+  newPassword: newPasswordRules(),
+}));
 
 /**
  * Open the password change form and reset fields.
@@ -146,7 +148,7 @@ async function submitPasswordForm() {
       currentPassword: passwordFormValue.currentPassword,
       newPassword: passwordFormValue.newPassword,
     });
-    message.success("Пароль изменён");
+    message.success(t("profile.messages.passwordUpdated"));
     showPasswordForm.value = false;
   } catch (err: unknown) {
     const { fieldErrors, genericErrors } = extractApiFieldErrors(err, ["currentPassword", "newPassword"] as const);
@@ -154,7 +156,7 @@ async function submitPasswordForm() {
       Object.assign(passwordServerErrors, fieldErrors);
     } else {
       passwordError.value =
-        genericErrors[0] ?? getApiErrorMessage(err) ?? "Не удалось изменить пароль. Проверьте текущий пароль.";
+        genericErrors[0] ?? getApiErrorMessage(err) ?? t("profile.messages.passwordUpdateFailed");
     }
   } finally {
     passwordLoading.value = false;
@@ -211,8 +213,8 @@ const sessions: Session[] = [
     <n-layout-content class="profile-content">
       <div class="profile-container">
         <header class="page-header">
-          <h1 class="page-title">Профиль</h1>
-          <p class="page-subtitle">Управление аккаунтом и настройками</p>
+          <h1 class="page-title">{{ t("profile.title") }}</h1>
+          <p class="page-subtitle">{{ t("profile.subtitle") }}</p>
         </header>
 
         <!-- Account section -->
@@ -222,8 +224,8 @@ const sessions: Session[] = [
               <PersonOutline />
             </n-icon>
             <div>
-              <h2 class="card-title">Аккаунт</h2>
-              <p class="card-subtitle">Основная информация о вашем аккаунте</p>
+              <h2 class="card-title">{{ t("profile.account.title") }}</h2>
+              <p class="card-subtitle">{{ t("profile.account.subtitle") }}</p>
             </div>
           </div>
 
@@ -235,11 +237,11 @@ const sessions: Session[] = [
                 <n-icon :size="16" class="info-icon">
                   <PersonOutline />
                 </n-icon>
-                <dt class="info-label">Имя</dt>
+                <dt class="info-label">{{ t("profile.account.name") }}</dt>
               </div>
               <dd class="info-value info-value--editable">
                 {{ user?.name ?? "—" }}
-                <button type="button" class="edit-link" @click="openNameForm">Изменить</button>
+                <button type="button" class="edit-link" @click="openNameForm">{{ t("profile.edit") }}</button>
               </dd>
             </div>
 
@@ -248,11 +250,11 @@ const sessions: Session[] = [
                 <n-icon :size="16" class="info-icon">
                   <MailOutline />
                 </n-icon>
-                <dt class="info-label">Email</dt>
+                <dt class="info-label">{{ t("profile.account.email") }}</dt>
               </div>
               <dd class="info-value info-value--editable">
                 {{ user?.email ?? "—" }}
-                <button type="button" class="edit-link" @click="openEmailForm">Изменить</button>
+                <button type="button" class="edit-link" @click="openEmailForm">{{ t("profile.edit") }}</button>
               </dd>
             </div>
 
@@ -261,7 +263,7 @@ const sessions: Session[] = [
                 <n-icon :size="16" class="info-icon">
                   <CalendarOutline />
                 </n-icon>
-                <dt class="info-label">Дата регистрации</dt>
+                <dt class="info-label">{{ t("profile.account.registeredAt") }}</dt>
               </div>
               <dd class="info-value">{{ registeredAt }}</dd>
             </div>
@@ -271,10 +273,10 @@ const sessions: Session[] = [
                 <n-icon :size="16" class="info-icon">
                   <CheckmarkCircleOutline />
                 </n-icon>
-                <dt class="info-label">Статус аккаунта</dt>
+                <dt class="info-label">{{ t("profile.account.status") }}</dt>
               </div>
               <dd class="info-value">
-                <span class="badge badge-active">Активен</span>
+                <span class="badge badge-active">{{ t("profile.account.active") }}</span>
               </dd>
             </div>
           </dl>
@@ -286,7 +288,7 @@ const sessions: Session[] = [
               <template #icon>
                 <n-icon><KeyOutline /></n-icon>
               </template>
-              Сменить пароль
+              {{ t("profile.account.changePassword") }}
             </n-button>
           </div>
 
@@ -299,8 +301,8 @@ const sessions: Session[] = [
               <ShieldOutline />
             </n-icon>
             <div>
-              <h2 class="card-title">Безопасность</h2>
-              <p class="card-subtitle">Двухфакторная аутентификация и активные сессии</p>
+              <h2 class="card-title">{{ t("profile.security.title") }}</h2>
+              <p class="card-subtitle">{{ t("profile.security.subtitle") }}</p>
             </div>
           </div>
 
@@ -312,9 +314,9 @@ const sessions: Session[] = [
                 <n-icon :size="17" class="info-icon">
                   <ShieldOutline />
                 </n-icon>
-                <span class="tfa-title">Двухфакторная аутентификация</span>
+                <span class="tfa-title">{{ t("profile.security.twoFactor") }}</span>
               </div>
-              <p class="tfa-hint">Рекомендуем включить для безопасности</p>
+              <p class="tfa-hint">{{ t("profile.security.twoFactorHint") }}</p>
             </div>
             <n-switch v-model:value="twoFactorEnabled" />
           </div>
@@ -322,14 +324,14 @@ const sessions: Session[] = [
           <div class="divider" />
 
           <div class="sessions-header">
-            <span class="sessions-label">Активные сессии</span>
+            <span class="sessions-label">{{ t("profile.security.activeSessions") }}</span>
             <n-button ghost size="small" class="end-all-btn">
               <template #icon>
                 <n-icon :size="15">
                   <LogOutOutline />
                 </n-icon>
               </template>
-              Завершить все
+              {{ t("profile.security.endAll") }}
             </n-button>
           </div>
 
@@ -342,7 +344,7 @@ const sessions: Session[] = [
                 <div>
                   <div class="session-browser-row">
                     <span class="session-browser">{{ session.browser }}</span>
-                    <span v-if="session.isCurrent" class="badge badge-current">текущая</span>
+                    <span v-if="session.isCurrent" class="badge badge-current">{{ t("profile.security.current") }}</span>
                   </div>
                   <p class="session-meta">{{ session.os }} · {{ session.ip }}</p>
                 </div>
@@ -357,17 +359,17 @@ const sessions: Session[] = [
 
         <!-- Danger zone -->
         <section class="profile-card danger-card">
-          <h2 class="danger-card-title">Опасная зона</h2>
+          <h2 class="danger-card-title">{{ t("profile.danger.title") }}</h2>
           <div class="danger-row">
             <div>
-              <p class="danger-row-label">Удалить аккаунт</p>
-              <p class="danger-row-hint">Все данные будут удалены без возможности восстановления.</p>
+              <p class="danger-row-label">{{ t("profile.danger.deleteAccount") }}</p>
+              <p class="danger-row-hint">{{ t("profile.danger.deleteHint") }}</p>
             </div>
             <n-button class="danger-btn">
               <template #icon>
                 <n-icon><TrashOutline /></n-icon>
               </template>
-              Удалить аккаунт
+              {{ t("profile.danger.deleteButton") }}
             </n-button>
           </div>
         </section>
@@ -378,21 +380,21 @@ const sessions: Session[] = [
     <n-modal
       v-model:show="showNameForm"
       preset="card"
-      title="Изменить имя"
+      :title="t('profile.modals.editName')"
       class="edit-modal"
       :style="{ maxWidth: '420px' }"
     >
       <n-form ref="nameFormRef" :model="nameFormValue" :rules="nameRulesConfig">
         <n-form-item
           path="name"
-          label="Новое имя"
+          :label="t('profile.modals.newNameLabel')"
           class="form-item"
           :feedback="nameError"
           :validation-status="nameError ? 'error' : undefined"
         >
           <n-input
             v-model:value="nameFormValue.name"
-            placeholder="Введите новое имя"
+            :placeholder="t('profile.modals.newNamePlaceholder')"
             :status="nameError ? 'error' : undefined"
             @update:value="nameError = ''"
             @keyup.enter="submitNameForm"
@@ -401,9 +403,9 @@ const sessions: Session[] = [
       </n-form>
       <template #footer>
         <div class="modal-footer">
-          <n-button ghost @click="showNameForm = false">Отмена</n-button>
+          <n-button ghost @click="showNameForm = false">{{ t("common.actions.cancel") }}</n-button>
           <n-button type="primary" :loading="nameLoading" @click="submitNameForm">
-            Сохранить
+            {{ t("common.actions.save") }}
           </n-button>
         </div>
       </template>
@@ -413,22 +415,22 @@ const sessions: Session[] = [
     <n-modal
       v-model:show="showEmailForm"
       preset="card"
-      title="Изменить email"
+      :title="t('profile.modals.editEmail')"
       class="edit-modal"
       :style="{ maxWidth: '420px' }"
     >
-      <n-form-item label="Новый email" class="form-item">
+      <n-form-item :label="t('profile.modals.newEmailLabel')" class="form-item">
         <n-input
           v-model:value="newEmail"
-          placeholder="Введите новый email"
+          :placeholder="t('profile.modals.newEmailPlaceholder')"
           @keyup.enter="submitEmailForm"
         />
       </n-form-item>
       <template #footer>
         <div class="modal-footer">
-          <n-button ghost @click="showEmailForm = false">Отмена</n-button>
+          <n-button ghost @click="showEmailForm = false">{{ t("common.actions.cancel") }}</n-button>
           <n-button type="primary" :loading="emailLoading" @click="submitEmailForm">
-            Сохранить
+            {{ t("common.actions.save") }}
           </n-button>
         </div>
       </template>
@@ -438,14 +440,14 @@ const sessions: Session[] = [
     <n-modal
       v-model:show="showPasswordForm"
       preset="card"
-      title="Сменить пароль"
+      :title="t('profile.modals.changePasswordTitle')"
       class="edit-modal"
       :style="{ maxWidth: '420px' }"
     >
       <n-form ref="passwordFormRef" :model="passwordFormValue" :rules="passwordRulesConfig">
         <n-form-item
           path="currentPassword"
-          label="Текущий пароль"
+          :label="t('profile.modals.currentPassword')"
           class="form-item"
           :feedback="passwordServerErrors.currentPassword"
           :validation-status="passwordServerErrors.currentPassword ? 'error' : undefined"
@@ -454,13 +456,13 @@ const sessions: Session[] = [
             v-model:value="passwordFormValue.currentPassword"
             type="password"
             show-password-on="click"
-            placeholder="Текущий пароль"
+            :placeholder="t('profile.modals.currentPassword')"
             @update:value="passwordServerErrors.currentPassword = ''"
           />
         </n-form-item>
         <n-form-item
           path="newPassword"
-          label="Новый пароль"
+          :label="t('profile.modals.newPassword')"
           class="form-item"
           :feedback="passwordServerErrors.newPassword"
           :validation-status="passwordServerErrors.newPassword ? 'error' : undefined"
@@ -469,7 +471,7 @@ const sessions: Session[] = [
             v-model:value="passwordFormValue.newPassword"
             type="password"
             show-password-on="click"
-            placeholder="Новый пароль"
+            :placeholder="t('profile.modals.newPassword')"
             @update:value="passwordServerErrors.newPassword = ''"
             @keyup.enter="submitPasswordForm"
           />
@@ -478,9 +480,9 @@ const sessions: Session[] = [
       <p v-if="passwordError" class="modal-error">{{ passwordError }}</p>
       <template #footer>
         <div class="modal-footer">
-          <n-button ghost @click="showPasswordForm = false">Отмена</n-button>
+          <n-button ghost @click="showPasswordForm = false">{{ t("common.actions.cancel") }}</n-button>
           <n-button type="primary" :loading="passwordLoading" @click="submitPasswordForm">
-            Сменить
+            {{ t("profile.modals.submitChange") }}
           </n-button>
         </div>
       </template>

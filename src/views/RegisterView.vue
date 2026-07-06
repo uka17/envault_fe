@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { reactive, ref } from "vue";
+import { computed, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import {
   NButton,
   NCard,
@@ -32,6 +33,7 @@ import { emailRules, nameRules, newPasswordRules, confirmPasswordRules } from "@
 const router = useRouter();
 const auth = useAuthStore();
 const message = useMessage();
+const { t } = useI18n();
 const formRef = ref<FormInst | null>(null);
 const isSubmitting = ref(false);
 
@@ -54,12 +56,12 @@ const serverErrors = reactive<Record<RegisterField, string>>({
   password: "",
 });
 
-const rules: FormRules = {
-  name: nameRules,
-  email: emailRules,
-  password: newPasswordRules,
+const rules = computed<FormRules>(() => ({
+  name: nameRules(),
+  email: emailRules(),
+  password: newPasswordRules(),
   confirmPassword: confirmPasswordRules(() => formValue.password),
-};
+}));
 
 const submit = async () => {
   await formRef.value?.validate();
@@ -90,7 +92,7 @@ function handleRegisterError(err: unknown) {
   const { fieldErrors, genericErrors } = extractApiFieldErrors(err, REGISTER_FIELDS);
 
   if (!Object.keys(fieldErrors).length && !genericErrors.length) {
-    message.error("Не удалось зарегистрироваться. Проверьте данные и попробуйте снова.");
+    message.error(t("auth.register.error"));
     return;
   }
 
@@ -108,7 +110,7 @@ function handleRegisterError(err: unknown) {
             <n-icon :size="19" class="env-back-link__icon" aria-hidden="true">
               <ArrowBackSharp />
             </n-icon>
-            <span>На главную</span>
+            <span>{{ t("common.backHome") }}</span>
           </RouterLink>
         </div>
 
@@ -118,26 +120,26 @@ function handleRegisterError(err: unknown) {
               <LockClosedOutline />
             </n-icon>
           </div>
-          <n-text class="brand-title">Envault</n-text>
+          <n-text class="brand-title">{{ t("common.appName") }}</n-text>
         </n-space>
 
         <n-card :bordered="false" class="env-auth-card">
           <n-space vertical :size="22">
             <header class="card-header">
-              <h1>Создание аккаунта</h1>
-              <p>Зарегистрируйтесь, чтобы начать отправлять stash'и</p>
+              <h1>{{ t("auth.register.title") }}</h1>
+              <p>{{ t("auth.register.subtitle") }}</p>
             </header>
 
             <n-form ref="formRef" :model="formValue" :rules="rules" label-placement="top" class="env-auth-form">
               <n-form-item
                 path="name"
-                label="Имя"
+                :label="t('auth.register.nameLabel')"
                 :feedback="serverErrors.name"
                 :validation-status="serverErrors.name ? 'error' : undefined"
               >
                 <n-input
                   v-model:value="formValue.name"
-                  placeholder="Иван Иванов"
+                  :placeholder="t('auth.register.namePlaceholder')"
                   size="large"
                   @update:value="serverErrors.name = ''"
                 >
@@ -151,13 +153,13 @@ function handleRegisterError(err: unknown) {
 
               <n-form-item
                 path="email"
-                label="Email"
+                :label="t('auth.register.emailLabel')"
                 :feedback="serverErrors.email"
                 :validation-status="serverErrors.email ? 'error' : undefined"
               >
                 <n-input
                   v-model:value="formValue.email"
-                  placeholder="your@email.com"
+                  :placeholder="t('auth.register.emailPlaceholder')"
                   size="large"
                   @update:value="serverErrors.email = ''"
                 >
@@ -171,7 +173,7 @@ function handleRegisterError(err: unknown) {
 
               <n-form-item
                 path="password"
-                label="Пароль"
+                :label="t('auth.register.passwordLabel')"
                 :feedback="serverErrors.password"
                 :validation-status="serverErrors.password ? 'error' : undefined"
               >
@@ -195,7 +197,7 @@ function handleRegisterError(err: unknown) {
                 </n-input>
               </n-form-item>
 
-              <n-form-item path="confirmPassword" label="Подтвердите пароль">
+              <n-form-item path="confirmPassword" :label="t('auth.register.confirmPasswordLabel')">
                 <n-input
                   v-model:value="formValue.confirmPassword"
                   :type="showConfirmPassword ? 'text' : 'password'"
@@ -227,13 +229,13 @@ function handleRegisterError(err: unknown) {
                 :loading="isSubmitting"
                 @click="submit"
               >
-                Создать аккаунт
+                {{ t("auth.register.submit") }}
               </n-button>
             </n-form>
 
             <footer class="card-footer">
-              <n-text depth="3">Уже есть аккаунт?</n-text>
-              <RouterLink to="/login" class="text-link login-link">Войти</RouterLink>
+              <n-text depth="3">{{ t("auth.register.haveAccount") }}</n-text>
+              <RouterLink to="/login" class="text-link login-link">{{ t("auth.register.loginLink") }}</RouterLink>
             </footer>
           </n-space>
         </n-card>
