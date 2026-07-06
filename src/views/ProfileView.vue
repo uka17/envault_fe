@@ -96,7 +96,11 @@ function openNameForm() {
  * Submit the name change form.
  */
 async function submitNameForm() {
-  await nameFormRef.value?.validate();
+  try {
+    await nameFormRef.value?.validate();
+  } catch {
+    return;
+  }
   nameError.value = "";
   nameLoading.value = true;
   try {
@@ -138,7 +142,11 @@ function openPasswordForm() {
  * Submit the password change form.
  */
 async function submitPasswordForm() {
-  await passwordFormRef.value?.validate();
+  try {
+    await passwordFormRef.value?.validate();
+  } catch {
+    return;
+  }
   passwordError.value = "";
   passwordServerErrors.currentPassword = "";
   passwordServerErrors.newPassword = "";

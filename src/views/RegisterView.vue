@@ -64,7 +64,11 @@ const rules = computed<FormRules>(() => ({
 }));
 
 const submit = async () => {
-  await formRef.value?.validate();
+  try {
+    await formRef.value?.validate();
+  } catch {
+    return;
+  }
   serverErrors.name = "";
   serverErrors.email = "";
   serverErrors.password = "";

@@ -70,7 +70,11 @@ const rules = computed<FormRules>(() => ({
  * Redirects to the dashboard on success.
  */
 const submit = async (): Promise<void> => {
-  await formRef.value?.validate();
+  try {
+    await formRef.value?.validate();
+  } catch {
+    return;
+  }
   isSubmitting.value = true;
   submitError.value = null;
   try {

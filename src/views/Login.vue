@@ -47,7 +47,11 @@ const rules = computed<FormRules>(() => ({
  * @returns {Promise<void>} Promise that resolves once the login attempt completes.
  */
 const submit = async () => {
-  await formRef.value?.validate();
+  try {
+    await formRef.value?.validate();
+  } catch {
+    return;
+  }
   isSubmitting.value = true;
   submitError.value = null;
   try {
