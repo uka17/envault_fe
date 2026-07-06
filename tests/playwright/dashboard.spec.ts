@@ -1,0 +1,90 @@
+import { expect, test, type Page } from "playwright/test";
+import { t, unescape } from "./i18n";
+
+/**
+ * Log the page into a mocked session and land on the dashboard with a fixed
+ * set of stashes served from the mocked `/stashes` endpoint.
+ * @param page Playwright page to authenticate.
+ */
+async function loginWithMockedStashes(page: Page) {
+  await page.route("**/api/v1/users/login", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ token: "fake-access-token" }),
+    });
+  });
+  await page.route("**/api/v1/users/whoami", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        id: 1,
+        email: "john@example.com",
+        name: "John Doe",
+        createdOn: new Date().toISOString(),
+        modifiedOn: new Date().toISOString(),
+      }),
+    });
+  });
+  await page.route("**/api/v1/stashes", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify([
+        {
+          id: 1,
+          to: "sent@example.com",
+          body: "Sent stash",
+          key: "key-1",
+          isSent: true,
+          sendAt: new Date(Date.now() - 86400000).toISOString(),
+          createdOn: new Date().toISOString(),
+          modifiedOn: new Date().toISOString(),
+        },
+        {
+          id: 2,
+          to: "planned@example.com",
+          body: "Planned stash",
+          key: "key-2",
+          isSent: false,
+          sendAt: new Date(Date.now() + 86400000).toISOString(),
+          createdOn: new Date().toISOString(),
+          modifiedOn: new Date().toISOString(),
+        },
+      ]),
+    });
+  });
+
+  await page.goto("/login");
+  await page.getByPlaceholder(unescape(t.auth.login.emailPlaceholder)).fill("john@example.com");
+  await page.locator('input[type="password"]').fill("Passw0rd1");
+  await page.getByRole("button", { name: t.auth.login.submit }).click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+}
+
+test.describe("Dashboard", () => {
+  test("shows summary counters and the stash list", async ({ page }) => {
+    await loginWithMockedStashes(page);
+
+    await expect(page.getByText("sent@example.com")).toBeVisible();
+    await expect(page.getByText("planned@example.com")).toBeVisible();
+  });
+
+  test("filters the list to planned stashes only", async ({ page }) => {
+    await loginWithMockedStashes(page);
+
+    await page.getByRole("button", { name: t.stash.dashboard.filterPlanned, exact: true }).click();
+
+    await expect(page.getByText("planned@example.com")).toBeVisible();
+    await expect(page.getByText("sent@example.com")).toHaveCount(0);
+  });
+
+  test("navigates to the create stash page", async ({ page }) => {
+    await loginWithMockedStashes(page);
+
+    await page.getByRole("button", { name: t.stash.dashboard.newStash }).click();
+
+    await expect(page).toHaveURL(/\/stash\/new$/);
+  });
+});
