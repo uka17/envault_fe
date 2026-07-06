@@ -2,6 +2,7 @@
 import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import {
+  NAlert,
   NButton,
   NCard,
   NForm,
@@ -17,12 +18,14 @@ import {
 } from "naive-ui";
 import { ArrowBackSharp, EyeOffOutline, EyeOutline, KeyOutline, LockClosedOutline, MailOutline } from "@vicons/ionicons5";
 import { useAuthStore } from "@/stores/auth";
+import { getApiErrorMessage } from "@/api/apiError";
 import { emailRules, requiredPasswordRules } from "@/utils/formRules";
 
 const router = useRouter();
 const auth = useAuthStore();
 const formRef = ref<FormInst | null>(null);
 const isSubmitting = ref(false);
+const submitError = ref<string | null>(null);
 
 const formValue = reactive({
   email: "",
@@ -36,12 +39,20 @@ const rules: FormRules = {
   password: requiredPasswordRules,
 };
 
+/**
+ * Validates the login form and authenticates the user.
+ * On failure, displays the error message inside the form; on success, redirects to the dashboard.
+ * @returns {Promise<void>} Promise that resolves once the login attempt completes.
+ */
 const submit = async () => {
   await formRef.value?.validate();
   isSubmitting.value = true;
+  submitError.value = null;
   try {
     await auth.login(formValue.email, formValue.password);
     router.push({ name: "dashboard" });
+  } catch (err) {
+    submitError.value = getApiErrorMessage(err) ?? "Не удалось войти. Проверьте email и пароль.";
   } finally {
     isSubmitting.value = false;
   }
@@ -107,6 +118,16 @@ const submit = async () => {
                   </template>
                 </n-input>
               </n-form-item>
+
+              <n-alert
+                v-if="submitError"
+                type="error"
+                :bordered="false"
+                class="submit-error"
+                style="margin-bottom: 12px;"
+              >
+                {{ submitError }}
+              </n-alert>
 
               <n-button type="primary" size="large" class="submit-btn" block :loading="isSubmitting" @click="submit">
                 Войти
