@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { reactive, ref, computed } from "vue";
 import {
   NLayout,
   NLayoutContent,
@@ -7,9 +7,12 @@ import {
   NSwitch,
   NButton,
   NInput,
+  NForm,
   NFormItem,
   NModal,
   useMessage,
+  type FormInst,
+  type FormRules,
 } from "naive-ui";
 import AppHeader from "@/components/AppHeader.vue";
 import {
@@ -23,7 +26,8 @@ import {
   KeyOutline,
 } from "@vicons/ionicons5";
 import { useAuthStore } from "@/stores/auth";
-import { getApiErrorMessage } from "@/api/apiError";
+import { getApiErrorMessage, extractApiFieldErrors } from "@/api/apiError";
+import { nameRules, requiredPasswordRules, newPasswordRules } from "@/utils/formRules";
 
 const auth = useAuthStore();
 const message = useMessage();
@@ -71,15 +75,17 @@ async function submitEmailForm() {
 
 // Name form
 const showNameForm = ref(false);
-const newName = ref("");
+const nameFormRef = ref<FormInst | null>(null);
+const nameFormValue = reactive({ name: "" });
 const nameLoading = ref(false);
 const nameError = ref("");
+const nameRulesConfig: FormRules = { name: nameRules };
 
 /**
  * Open the name change form, pre-filling the current name.
  */
 function openNameForm() {
-  newName.value = user.value?.name ?? "";
+  nameFormValue.name = user.value?.name ?? "";
   nameError.value = "";
   showNameForm.value = true;
 }
@@ -88,11 +94,11 @@ function openNameForm() {
  * Submit the name change form.
  */
 async function submitNameForm() {
-  if (!newName.value) return;
+  await nameFormRef.value?.validate();
   nameError.value = "";
   nameLoading.value = true;
   try {
-    await auth.updateProfile({ name: newName.value });
+    await auth.updateProfile({ name: nameFormValue.name });
     message.success("Имя обновлено");
     showNameForm.value = false;
   } catch (err: unknown) {
@@ -104,18 +110,25 @@ async function submitNameForm() {
 
 // Password form
 const showPasswordForm = ref(false);
-const currentPassword = ref("");
-const newPassword = ref("");
+const passwordFormRef = ref<FormInst | null>(null);
+const passwordFormValue = reactive({ currentPassword: "", newPassword: "" });
 const passwordLoading = ref(false);
 const passwordError = ref("");
+const passwordServerErrors = reactive({ currentPassword: "", newPassword: "" });
+const passwordRulesConfig: FormRules = {
+  currentPassword: requiredPasswordRules,
+  newPassword: newPasswordRules,
+};
 
 /**
  * Open the password change form and reset fields.
  */
 function openPasswordForm() {
-  currentPassword.value = "";
-  newPassword.value = "";
+  passwordFormValue.currentPassword = "";
+  passwordFormValue.newPassword = "";
   passwordError.value = "";
+  passwordServerErrors.currentPassword = "";
+  passwordServerErrors.newPassword = "";
   showPasswordForm.value = true;
 }
 
@@ -123,17 +136,26 @@ function openPasswordForm() {
  * Submit the password change form.
  */
 async function submitPasswordForm() {
-  if (!currentPassword.value || !newPassword.value) return;
+  await passwordFormRef.value?.validate();
   passwordError.value = "";
+  passwordServerErrors.currentPassword = "";
+  passwordServerErrors.newPassword = "";
   passwordLoading.value = true;
   try {
-    await auth.updatePassword({ currentPassword: currentPassword.value, newPassword: newPassword.value });
+    await auth.updatePassword({
+      currentPassword: passwordFormValue.currentPassword,
+      newPassword: passwordFormValue.newPassword,
+    });
     message.success("Пароль изменён");
     showPasswordForm.value = false;
-    currentPassword.value = "";
-    newPassword.value = "";
   } catch (err: unknown) {
-    passwordError.value = getApiErrorMessage(err) ?? "Не удалось изменить пароль. Проверьте текущий пароль.";
+    const { fieldErrors, genericErrors } = extractApiFieldErrors(err, ["currentPassword", "newPassword"] as const);
+    if (Object.keys(fieldErrors).length) {
+      Object.assign(passwordServerErrors, fieldErrors);
+    } else {
+      passwordError.value =
+        genericErrors[0] ?? getApiErrorMessage(err) ?? "Не удалось изменить пароль. Проверьте текущий пароль.";
+    }
   } finally {
     passwordLoading.value = false;
   }
@@ -360,14 +382,23 @@ const sessions: Session[] = [
       class="edit-modal"
       :style="{ maxWidth: '420px' }"
     >
-      <n-form-item label="Новое имя" class="form-item" :feedback="nameError" :validation-status="nameError ? 'error' : undefined">
-        <n-input
-          v-model:value="newName"
-          placeholder="Введите новое имя"
-          :status="nameError ? 'error' : undefined"
-          @keyup.enter="submitNameForm"
-        />
-      </n-form-item>
+      <n-form ref="nameFormRef" :model="nameFormValue" :rules="nameRulesConfig">
+        <n-form-item
+          path="name"
+          label="Новое имя"
+          class="form-item"
+          :feedback="nameError"
+          :validation-status="nameError ? 'error' : undefined"
+        >
+          <n-input
+            v-model:value="nameFormValue.name"
+            placeholder="Введите новое имя"
+            :status="nameError ? 'error' : undefined"
+            @update:value="nameError = ''"
+            @keyup.enter="submitNameForm"
+          />
+        </n-form-item>
+      </n-form>
       <template #footer>
         <div class="modal-footer">
           <n-button ghost @click="showNameForm = false">Отмена</n-button>
@@ -411,23 +442,39 @@ const sessions: Session[] = [
       class="edit-modal"
       :style="{ maxWidth: '420px' }"
     >
-      <n-form-item label="Текущий пароль" class="form-item">
-        <n-input
-          v-model:value="currentPassword"
-          type="password"
-          show-password-on="click"
-          placeholder="Текущий пароль"
-        />
-      </n-form-item>
-      <n-form-item label="Новый пароль" class="form-item">
-        <n-input
-          v-model:value="newPassword"
-          type="password"
-          show-password-on="click"
-          placeholder="Новый пароль"
-          @keyup.enter="submitPasswordForm"
-        />
-      </n-form-item>
+      <n-form ref="passwordFormRef" :model="passwordFormValue" :rules="passwordRulesConfig">
+        <n-form-item
+          path="currentPassword"
+          label="Текущий пароль"
+          class="form-item"
+          :feedback="passwordServerErrors.currentPassword"
+          :validation-status="passwordServerErrors.currentPassword ? 'error' : undefined"
+        >
+          <n-input
+            v-model:value="passwordFormValue.currentPassword"
+            type="password"
+            show-password-on="click"
+            placeholder="Текущий пароль"
+            @update:value="passwordServerErrors.currentPassword = ''"
+          />
+        </n-form-item>
+        <n-form-item
+          path="newPassword"
+          label="Новый пароль"
+          class="form-item"
+          :feedback="passwordServerErrors.newPassword"
+          :validation-status="passwordServerErrors.newPassword ? 'error' : undefined"
+        >
+          <n-input
+            v-model:value="passwordFormValue.newPassword"
+            type="password"
+            show-password-on="click"
+            placeholder="Новый пароль"
+            @update:value="passwordServerErrors.newPassword = ''"
+            @keyup.enter="submitPasswordForm"
+          />
+        </n-form-item>
+      </n-form>
       <p v-if="passwordError" class="modal-error">{{ passwordError }}</p>
       <template #footer>
         <div class="modal-footer">

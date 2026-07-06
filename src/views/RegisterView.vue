@@ -27,6 +27,7 @@ import {
 } from "@vicons/ionicons5";
 import { useAuthStore } from "@/stores/auth";
 import { extractApiFieldErrors } from "@/api/apiError";
+import { emailRules, nameRules, newPasswordRules, confirmPasswordRules } from "@/utils/formRules";
 
 const router = useRouter();
 const auth = useAuthStore();
@@ -53,34 +54,11 @@ const serverErrors = reactive<Record<RegisterField, string>>({
   password: "",
 });
 
-const NAME_REGEXP = /^\p{L}+(?:[ '-]\p{L}+)*$/u;
-const PASSWORD_REGEXP = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
-
 const rules: FormRules = {
-  name: [
-    { required: true, message: "Введите имя", trigger: ["input", "blur"] },
-    { pattern: NAME_REGEXP, message: "Имя может содержать только буквы", trigger: ["input", "blur"] },
-  ],
-  email: [
-    { required: true, message: "Введите email", trigger: ["input", "blur"] },
-    { type: "email", message: "Неверный формат email", trigger: ["input", "blur"] },
-  ],
-  password: [
-    { required: true, message: "Введите пароль", trigger: ["input", "blur"] },
-    {
-      pattern: PASSWORD_REGEXP,
-      message: "Пароль должен содержать минимум 8 символов, заглавную, строчную букву и цифру",
-      trigger: ["input", "blur"],
-    },
-  ],
-  confirmPassword: [
-    { required: true, message: "Подтвердите пароль", trigger: ["input", "blur"] },
-    {
-      validator: () =>
-        formValue.confirmPassword === formValue.password ? true : new Error("Пароли не совпадают"),
-      trigger: ["input", "blur"],
-    },
-  ],
+  name: nameRules,
+  email: emailRules,
+  password: newPasswordRules,
+  confirmPassword: confirmPasswordRules(() => formValue.password),
 };
 
 const submit = async () => {

@@ -17,6 +17,7 @@ import {
 } from "naive-ui";
 import { ArrowBackSharp, EyeOffOutline, EyeOutline, KeyOutline, LockClosedOutline, MailOutline } from "@vicons/ionicons5";
 import { useAuthStore } from "@/stores/auth";
+import { emailRules, requiredPasswordRules } from "@/utils/formRules";
 
 const router = useRouter();
 const auth = useAuthStore();
@@ -31,11 +32,8 @@ const formValue = reactive({
 const showPassword = ref(false);
 
 const rules: FormRules = {
-  email: [
-    { required: true, message: "Введите email", trigger: ["input", "blur"] },
-    { type: "email", message: "Неверный формат email", trigger: ["input", "blur"] },
-  ],
-  password: [{ required: true, message: "Введите пароль", trigger: ["input", "blur"] }],
+  email: emailRules,
+  password: requiredPasswordRules,
 };
 
 const submit = async () => {
