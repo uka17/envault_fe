@@ -1,0 +1,13 @@
+version: 2
+
+secret:
+  ignored-matches:
+    - name: synthetic test password (Passw0rd)
+      match: "Passw0rd"
+    - name: synthetic test password (Passw0rd1)
+      match: "Passw0rd1"
+    - name: synthetic test password (Passw0rd2)
+      match: "Passw0rd2"
+  ignored-paths:
+    - "src/**/__tests__/**"
+    - "tests/playwright/**"
