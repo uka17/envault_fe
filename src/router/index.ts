@@ -5,6 +5,7 @@ import RegisterView from "@/views/RegisterView.vue";
 import DashboardView from "@/views/DashboardView.vue";
 import ProfileView from "@/views/ProfileView.vue";
 import CreateStashView from "@/views/CreateStashView.vue";
+import { useAuthStore } from "@/stores/auth";
 
 export const routes = [
   {
@@ -31,6 +32,16 @@ export const routes = [
     path: "/profile",
     name: "profile",
     component: ProfileView,
+    /**
+     * Refetch the current user profile every time this route is entered,
+     * so the profile page always reflects the latest server state
+     * instead of a possibly stale cached value in the auth store.
+     * @returns Nothing; navigation proceeds unconditionally after the fetch attempt.
+     */
+    beforeEnter: async () => {
+      const auth = useAuthStore();
+      await auth.fetchUser();
+    },
   },
   {
     path: "/stash/new",
