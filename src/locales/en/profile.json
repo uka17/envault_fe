@@ -18,8 +18,22 @@
     "twoFactor": "Two-factor authentication",
     "twoFactorHint": "We recommend enabling this for extra security",
     "activeSessions": "Active sessions",
-    "endAll": "End all",
-    "current": "current"
+    "endAll": "Terminate other sessions",
+    "endSession": "End session",
+    "current": "current",
+    "loadFailed": "Failed to load sessions",
+    "noSessions": "No active sessions",
+    "modals": {
+      "endSessionTitle": "End session",
+      "endSessionText": "The device will be signed out and will need to log in again.",
+      "endAllTitle": "End all other sessions",
+      "endAllText": "All other devices will be signed out. The current session will stay active."
+    },
+    "messages": {
+      "sessionTerminateFailed": "Failed to end session",
+      "otherSessionsTerminated": "Other sessions ended",
+      "otherSessionsTerminateFailed": "Failed to end other sessions"
+    }
   },
   "danger": {
     "title": "Danger zone",

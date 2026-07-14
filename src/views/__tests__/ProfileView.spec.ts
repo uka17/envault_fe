@@ -3,7 +3,9 @@ import { flushPromises, DOMWrapper } from "@vue/test-utils";
 import ProfileView from "../ProfileView.vue";
 import { mountWithProviders } from "@/test/mountWithProviders";
 import { useAuthStore } from "@/stores/auth";
+import { useSessionsStore } from "@/stores/sessions";
 import { updateProfileApi, updatePasswordApi } from "@/api/authApi";
+import { getSessionsApi, terminateSessionApi, terminateOtherSessionsApi } from "@/api/sessionApi";
 
 vi.mock("@/api/authApi", () => ({
   updateProfileApi: vi.fn(),
@@ -14,6 +16,31 @@ vi.mock("@/api/authApi", () => ({
   checkAuthApi: vi.fn(),
   registerApi: vi.fn(),
 }));
+
+vi.mock("@/api/sessionApi", () => ({
+  getSessionsApi: vi.fn(),
+  terminateSessionApi: vi.fn(),
+  terminateOtherSessionsApi: vi.fn(),
+}));
+
+const baseSession = {
+  id: 1,
+  expiresAt: "2026-12-31T23:59:59.000Z",
+  revokedAt: null,
+  userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Chrome/120.0.0.0 Safari/537.36",
+  ip: "192.168.1.1",
+  createdOn: "2025-01-01T00:00:00.000Z",
+  modifiedOn: "2025-01-01T00:00:00.000Z",
+  current: true,
+};
+
+const otherSession = {
+  ...baseSession,
+  id: 2,
+  userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+  ip: "10.0.0.5",
+  current: false,
+};
 
 const baseUser = {
   id: 1,
@@ -40,12 +67,14 @@ async function mountProfile() {
   const auth = useAuthStore();
   auth.accessToken = "tok";
   auth.user = { ...baseUser };
+  await flushPromises();
   await result.wrapper.vm.$nextTick();
   return result;
 }
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.mocked(getSessionsApi).mockResolvedValue([baseSession, otherSession]);
   document.body.innerHTML = "";
 });
 
@@ -180,6 +209,61 @@ describe("ProfileView.vue", () => {
       await flushPromises();
 
       expect(document.body.textContent).toContain("Current password is wrong");
+    });
+  });
+
+  describe("sessions", () => {
+    it("loads and renders active sessions with the current one flagged", async () => {
+      const { wrapper } = await mountProfile();
+
+      expect(getSessionsApi).toHaveBeenCalled();
+      expect(wrapper.text()).toContain("Chrome 120");
+      expect(wrapper.text()).toContain("Firefox 121");
+      expect(wrapper.text()).toContain("current");
+    });
+
+    it("shows a load error message when fetching sessions fails", async () => {
+      vi.mocked(getSessionsApi).mockRejectedValue(new Error("network error"));
+      const { wrapper } = await mountProfile();
+
+      expect(wrapper.text()).toContain("Failed to load sessions");
+    });
+
+    it("terminates a single non-current session after confirmation", async () => {
+      vi.mocked(terminateSessionApi).mockResolvedValue(undefined);
+      const { wrapper } = await mountProfile();
+      const sessionsStore = useSessionsStore();
+
+      await wrapper.find(".session-end-btn").trigger("click");
+      await flushPromises();
+      await modalSaveButton().trigger("click");
+      await flushPromises();
+
+      expect(terminateSessionApi).toHaveBeenCalledWith(2);
+      expect(sessionsStore.sessions.map((s) => s.id)).toEqual([1]);
+    });
+
+    it("terminates all other sessions after confirmation", async () => {
+      vi.mocked(terminateOtherSessionsApi).mockResolvedValue(undefined);
+      const { wrapper } = await mountProfile();
+      const sessionsStore = useSessionsStore();
+
+      const endAllBtn = wrapper.findAll("button").find((b) => b.text().includes("Terminate other sessions"));
+      await endAllBtn?.trigger("click");
+      await flushPromises();
+      await modalSaveButton().trigger("click");
+      await flushPromises();
+
+      expect(terminateOtherSessionsApi).toHaveBeenCalled();
+      expect(sessionsStore.sessions.map((s) => s.id)).toEqual([1]);
+    });
+
+    it("hides the terminate-other-sessions link when there are no other sessions", async () => {
+      vi.mocked(getSessionsApi).mockResolvedValue([baseSession]);
+      const { wrapper } = await mountProfile();
+
+      const endAllBtn = wrapper.findAll("button").find((b) => b.text().includes("Terminate other sessions"));
+      expect(endAllBtn).toBeUndefined();
     });
   });
 });

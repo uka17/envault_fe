@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref, computed } from "vue";
+import { reactive, ref, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   NLayout,
@@ -11,6 +11,7 @@ import {
   NForm,
   NFormItem,
   NModal,
+  NSpin,
   useMessage,
   type FormInst,
   type FormRules,
@@ -21,16 +22,22 @@ import {
   CalendarOutline,
   CheckmarkCircleOutline,
   ShieldOutline,
+  ShieldCheckmarkOutline,
+  DesktopOutline,
   PersonOutline,
   LogOutOutline,
   TrashOutline,
   KeyOutline,
+  CloseOutline,
 } from "@vicons/ionicons5";
 import { useAuthStore } from "@/stores/auth";
+import { useSessionsStore } from "@/stores/sessions";
 import { getApiErrorMessage, extractApiFieldErrors } from "@/api/apiError";
 import { nameRules, requiredPasswordRules, newPasswordRules } from "@/utils/formRules";
+import { parseUserAgent } from "@/utils/userAgent";
 
 const auth = useAuthStore();
+const sessionsStore = useSessionsStore();
 const message = useMessage();
 const { t, locale } = useI18n();
 
@@ -173,45 +180,86 @@ async function submitPasswordForm() {
 
 const twoFactorEnabled = ref(false);
 
-interface Session {
-  id: string;
-  browser: string;
-  os: string;
-  ip: string;
-  date: string;
-  time: string;
-  isCurrent: boolean;
+const sessions = computed(() => sessionsStore.sessions);
+const sessionsLoading = computed(() => sessionsStore.loading);
+const sessionsError = computed(() => sessionsStore.error);
+const hasOtherSessions = computed(() => sessions.value.some((s) => !s.current));
+
+/**
+ * Format an ISO date-time string as separate localized date and time strings for display.
+ * @param iso ISO date-time string.
+ * @returns Object with localized `date` and `time` strings.
+ */
+function formatSessionDate(iso: string): { date: string; time: string } {
+  const d = new Date(iso);
+  return {
+    date: d.toLocaleDateString(locale.value, { day: "numeric", month: "long", year: "numeric" }),
+    time: d.toLocaleTimeString(locale.value, { hour: "2-digit", minute: "2-digit" }),
+  };
 }
 
-const sessions: Session[] = [
-  {
-    id: "1",
-    browser: "Chrome 120",
-    os: "macOS",
-    ip: "192.168.1.1",
-    date: "23 февраля 2026 г.",
-    time: "14:30",
-    isCurrent: true,
-  },
-  {
-    id: "2",
-    browser: "Safari 17",
-    os: "iPhone",
-    ip: "10.0.0.5",
-    date: "22 февраля 2026 г.",
-    time: "09:15",
-    isCurrent: false,
-  },
-  {
-    id: "3",
-    browser: "Firefox 121",
-    os: "Windows",
-    ip: "172.16.0.3",
-    date: "20 февраля 2026 г.",
-    time: "18:45",
-    isCurrent: false,
-  },
-];
+/**
+ * Derive a human-readable browser/OS label from a session's raw User-Agent string.
+ * @param userAgent Raw User-Agent header string.
+ * @returns Object with `browser` and `os` display names.
+ */
+function sessionDevice(userAgent: string) {
+  return parseUserAgent(userAgent);
+}
+
+onMounted(() => {
+  sessionsStore.fetchSessions();
+});
+
+// Terminate single session
+const showTerminateSessionModal = ref(false);
+const terminateTargetId = ref<number | null>(null);
+const terminateSessionLoading = ref(false);
+
+/**
+ * Open the confirmation modal for terminating a single session.
+ * @param id Session ID to terminate.
+ */
+function confirmTerminateSession(id: number) {
+  terminateTargetId.value = id;
+  showTerminateSessionModal.value = true;
+}
+
+/**
+ * Terminate the session selected for termination.
+ */
+async function terminateSession() {
+  if (terminateTargetId.value === null) return;
+  terminateSessionLoading.value = true;
+  try {
+    await sessionsStore.terminateSession(terminateTargetId.value);
+    showTerminateSessionModal.value = false;
+  } catch {
+    message.error(t("profile.security.messages.sessionTerminateFailed"));
+  } finally {
+    terminateSessionLoading.value = false;
+  }
+}
+
+// Terminate all other sessions
+const showTerminateAllModal = ref(false);
+const terminateAllLoading = ref(false);
+
+/**
+ * Terminate every session except the current one.
+ */
+async function terminateOtherSessions() {
+  terminateAllLoading.value = true;
+  try {
+    await sessionsStore.terminateOtherSessions();
+    message.success(t("profile.security.messages.otherSessionsTerminated"));
+    showTerminateAllModal.value = false;
+  } catch {
+    message.error(t("profile.security.messages.otherSessionsTerminateFailed"));
+  } finally {
+    terminateAllLoading.value = false;
+  }
+}
 </script>
 
 <template>
@@ -320,7 +368,7 @@ const sessions: Session[] = [
             <div class="tfa-info">
               <div class="tfa-title-row">
                 <n-icon :size="17" class="info-icon">
-                  <ShieldOutline />
+                  <ShieldCheckmarkOutline />
                 </n-icon>
                 <span class="tfa-title">{{ t("profile.security.twoFactor") }}</span>
               </div>
@@ -333,36 +381,55 @@ const sessions: Session[] = [
 
           <div class="sessions-header">
             <span class="sessions-label">{{ t("profile.security.activeSessions") }}</span>
-            <n-button ghost size="small" class="end-all-btn">
+            <n-button
+              v-if="hasOtherSessions"
+              size="small"
+              class="danger-btn"
+              @click="showTerminateAllModal = true"
+            >
               <template #icon>
-                <n-icon :size="15">
-                  <LogOutOutline />
-                </n-icon>
+                <n-icon><LogOutOutline /></n-icon>
               </template>
               {{ t("profile.security.endAll") }}
             </n-button>
           </div>
 
-          <ul class="sessions-list">
-            <li v-for="session in sessions" :key="session.id" class="session-row">
-              <div class="session-left">
-                <n-icon :size="17" class="info-icon session-device-icon">
-                  <ShieldOutline />
-                </n-icon>
-                <div>
-                  <div class="session-browser-row">
-                    <span class="session-browser">{{ session.browser }}</span>
-                    <span v-if="session.isCurrent" class="badge badge-current">{{ t("profile.security.current") }}</span>
+          <n-spin :show="sessionsLoading">
+            <p v-if="sessionsError" class="sessions-error">{{ sessionsError }}</p>
+            <p v-else-if="!sessionsLoading && !sessions.length" class="sessions-empty">
+              {{ t("profile.security.noSessions") }}
+            </p>
+            <ul v-else class="sessions-list">
+              <li v-for="session in sessions" :key="session.id" class="session-row">
+                <div class="session-left">
+                  <n-icon :size="34" class="info-icon session-device-icon">
+                    <DesktopOutline />
+                  </n-icon>
+                  <div>
+                    <div class="session-browser-row">
+                      <span class="session-browser">{{ sessionDevice(session.userAgent).browser }}</span>
+                      <span v-if="session.current" class="session-current-label">{{ t("profile.security.current") }}</span>
+                    </div>
+                    <p class="session-meta">
+                      {{ sessionDevice(session.userAgent).os }} · {{ session.ip }}
+                    </p>
+                    <p class="session-meta session-datetime">
+                      {{ formatSessionDate(session.createdOn).date }} · {{ formatSessionDate(session.createdOn).time }}
+                    </p>
                   </div>
-                  <p class="session-meta">{{ session.os }} · {{ session.ip }}</p>
                 </div>
-              </div>
-              <div class="session-right">
-                <span class="session-date">{{ session.date }}</span>
-                <span class="session-time">{{ session.time }}</span>
-              </div>
-            </li>
-          </ul>
+                <button
+                  v-if="!session.current"
+                  type="button"
+                  class="session-end-btn"
+                  :aria-label="t('profile.security.endSession')"
+                  @click="confirmTerminateSession(session.id)"
+                >
+                  <n-icon :size="16"><CloseOutline /></n-icon>
+                </button>
+              </li>
+            </ul>
+          </n-spin>
         </section>
 
         <!-- Danger zone -->
@@ -491,6 +558,44 @@ const sessions: Session[] = [
           <n-button ghost @click="showPasswordForm = false">{{ t("common.actions.cancel") }}</n-button>
           <n-button type="primary" :loading="passwordLoading" @click="submitPasswordForm">
             {{ t("profile.modals.submitChange") }}
+          </n-button>
+        </div>
+      </template>
+    </n-modal>
+
+    <!-- Terminate single session confirmation -->
+    <n-modal
+      v-model:show="showTerminateSessionModal"
+      preset="card"
+      :title="t('profile.security.modals.endSessionTitle')"
+      class="edit-modal"
+      :style="{ maxWidth: '420px' }"
+    >
+      <p>{{ t("profile.security.modals.endSessionText") }}</p>
+      <template #footer>
+        <div class="modal-footer">
+          <n-button ghost @click="showTerminateSessionModal = false">{{ t("common.actions.cancel") }}</n-button>
+          <n-button type="error" :loading="terminateSessionLoading" @click="terminateSession">
+            {{ t("profile.security.endSession") }}
+          </n-button>
+        </div>
+      </template>
+    </n-modal>
+
+    <!-- Terminate all other sessions confirmation -->
+    <n-modal
+      v-model:show="showTerminateAllModal"
+      preset="card"
+      :title="t('profile.security.modals.endAllTitle')"
+      class="edit-modal"
+      :style="{ maxWidth: '420px' }"
+    >
+      <p>{{ t("profile.security.modals.endAllText") }}</p>
+      <template #footer>
+        <div class="modal-footer">
+          <n-button ghost @click="showTerminateAllModal = false">{{ t("common.actions.cancel") }}</n-button>
+          <n-button type="error" :loading="terminateAllLoading" @click="terminateOtherSessions">
+            {{ t("profile.security.endAll") }}
           </n-button>
         </div>
       </template>
@@ -626,11 +731,10 @@ const sessions: Session[] = [
   border: 1px solid rgba(67, 176, 129, 0.3);
 }
 
-.badge-current {
-  color: #c0c7d1;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  font-size: 0.76rem;
+.session-current-label {
+  color: #48bf84;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 .account-actions {
@@ -769,16 +873,6 @@ const sessions: Session[] = [
   color: #c0c7d1;
 }
 
-:deep(.end-all-btn.n-button) {
-  border-color: rgba(137, 116, 180, 0.4);
-  color: #c0c7d1;
-}
-
-:deep(.end-all-btn.n-button:hover) {
-  border-color: rgba(157, 138, 202, 0.8);
-  color: #eef1f5;
-}
-
 .sessions-list {
   list-style: none;
   padding: 0;
@@ -789,13 +883,45 @@ const sessions: Session[] = [
 
 .session-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
   padding: 0.85rem 1rem;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.07);
   background: rgba(255, 255, 255, 0.02);
+}
+
+.session-end-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid rgba(224, 92, 92, 0.3);
+  background: transparent;
+  color: #e05c5c;
+  cursor: pointer;
+}
+
+.session-end-btn:hover {
+  background: rgba(224, 92, 92, 0.1);
+  border-color: rgba(224, 92, 92, 0.6);
+}
+
+.sessions-error {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #e05c5c;
+}
+
+.sessions-empty {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #7f8497;
 }
 
 .session-left {
@@ -826,21 +952,8 @@ const sessions: Session[] = [
   color: #5a5e70;
 }
 
-.session-right {
-  text-align: right;
-  flex-shrink: 0;
-}
-
-.session-date {
-  display: block;
-  font-size: 0.88rem;
+.session-datetime {
   color: #8f93a3;
-}
-
-.session-time {
-  display: block;
-  font-size: 0.88rem;
-  color: #5a5e70;
 }
 
 @media (max-width: 600px) {
@@ -852,10 +965,6 @@ const sessions: Session[] = [
     flex-direction: column;
     align-items: flex-start;
     gap: 0.6rem;
-  }
-
-  .session-right {
-    text-align: left;
   }
 }
 </style>
