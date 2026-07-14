@@ -33,7 +33,7 @@ import {
 import { useAuthStore } from "@/stores/auth";
 import { useSessionsStore } from "@/stores/sessions";
 import { getApiErrorMessage, extractApiFieldErrors } from "@/api/apiError";
-import { nameRules, requiredPasswordRules, newPasswordRules } from "@/utils/formRules";
+import { nameRules, requiredPasswordRules, newPasswordRules, confirmPasswordRules } from "@/utils/formRules";
 import { parseUserAgent } from "@/utils/userAgent";
 
 const auth = useAuthStore();
@@ -124,13 +124,14 @@ async function submitNameForm() {
 // Password form
 const showPasswordForm = ref(false);
 const passwordFormRef = ref<FormInst | null>(null);
-const passwordFormValue = reactive({ currentPassword: "", newPassword: "" });
+const passwordFormValue = reactive({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
 const passwordLoading = ref(false);
 const passwordError = ref("");
 const passwordServerErrors = reactive({ currentPassword: "", newPassword: "" });
 const passwordRulesConfig = computed<FormRules>(() => ({
   currentPassword: requiredPasswordRules(),
   newPassword: newPasswordRules(),
+  confirmNewPassword: confirmPasswordRules(() => passwordFormValue.newPassword),
 }));
 
 /**
@@ -139,6 +140,7 @@ const passwordRulesConfig = computed<FormRules>(() => ({
 function openPasswordForm() {
   passwordFormValue.currentPassword = "";
   passwordFormValue.newPassword = "";
+  passwordFormValue.confirmNewPassword = "";
   passwordError.value = "";
   passwordServerErrors.currentPassword = "";
   passwordServerErrors.newPassword = "";
@@ -548,6 +550,18 @@ async function terminateOtherSessions() {
             show-password-on="click"
             :placeholder="t('profile.modals.newPassword')"
             @update:value="passwordServerErrors.newPassword = ''"
+          />
+        </n-form-item>
+        <n-form-item
+          path="confirmNewPassword"
+          :label="t('profile.modals.confirmNewPassword')"
+          class="form-item"
+        >
+          <n-input
+            v-model:value="passwordFormValue.confirmNewPassword"
+            type="password"
+            show-password-on="click"
+            :placeholder="t('profile.modals.confirmNewPassword')"
             @keyup.enter="submitPasswordForm"
           />
         </n-form-item>

@@ -159,7 +159,7 @@ describe("ProfileView.vue", () => {
       await changePasswordBtn?.trigger("click");
       await flushPromises();
 
-      expect(modalInputs()).toHaveLength(2);
+      expect(modalInputs()).toHaveLength(3);
     });
 
     it("submits the password change successfully", async () => {
@@ -171,9 +171,10 @@ describe("ProfileView.vue", () => {
       await changePasswordBtn?.trigger("click");
       await flushPromises();
 
-      const [currentPasswordInput, newPasswordInput] = modalInputs();
+      const [currentPasswordInput, newPasswordInput, confirmNewPasswordInput] = modalInputs();
       await currentPasswordInput.setValue("OldPass1");
       await newPasswordInput.setValue("NewPass1");
+      await confirmNewPasswordInput.setValue("NewPass1");
       await modalSaveButton().trigger("click");
       await flushPromises();
 
@@ -181,6 +182,25 @@ describe("ProfileView.vue", () => {
         currentPassword: "OldPass1",
         newPassword: "NewPass1",
       });
+    });
+
+    it("does not submit when the confirmation does not match the new password", async () => {
+      const { wrapper } = await mountProfile();
+      const changePasswordBtn = wrapper
+        .findAll("button")
+        .find((b) => b.text().includes("Change password"));
+      await changePasswordBtn?.trigger("click");
+      await flushPromises();
+
+      const [currentPasswordInput, newPasswordInput, confirmNewPasswordInput] = modalInputs();
+      await currentPasswordInput.setValue("OldPass1");
+      await newPasswordInput.setValue("NewPass1");
+      await confirmNewPasswordInput.setValue("Mismatch1");
+      await modalSaveButton().trigger("click");
+      await flushPromises();
+
+      expect(updatePasswordApi).not.toHaveBeenCalled();
+      expect(document.body.textContent).toContain("Passwords do not match");
     });
 
     it("maps known field errors from the server onto the password form", async () => {
@@ -201,9 +221,10 @@ describe("ProfileView.vue", () => {
       await changePasswordBtn?.trigger("click");
       await flushPromises();
 
-      const [currentPasswordInput, newPasswordInput] = modalInputs();
+      const [currentPasswordInput, newPasswordInput, confirmNewPasswordInput] = modalInputs();
       await currentPasswordInput.setValue("WrongPass1");
       await newPasswordInput.setValue("NewPass1");
+      await confirmNewPasswordInput.setValue("NewPass1");
       await modalSaveButton().trigger("click");
       await flushPromises();
       await flushPromises();

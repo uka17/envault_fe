@@ -51,6 +51,7 @@
     "changePasswordTitle": "Change password",
     "currentPassword": "Current password",
     "newPassword": "New password",
+    "confirmNewPassword": "Confirm new password",
     "submitChange": "Change"
   },
   "messages": {

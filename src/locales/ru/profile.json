@@ -51,6 +51,7 @@
     "changePasswordTitle": "Сменить пароль",
     "currentPassword": "Текущий пароль",
     "newPassword": "Новый пароль",
+    "confirmNewPassword": "Подтвердите новый пароль",
     "submitChange": "Сменить"
   },
   "messages": {
