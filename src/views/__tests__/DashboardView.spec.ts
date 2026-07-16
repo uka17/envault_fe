@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { flushPromises } from "@vue/test-utils";
 import DashboardView from "../DashboardView.vue";
 import { mountWithProviders } from "@/test/mountWithProviders";
-import { getStashesApi, snoozeStashApi } from "@/api/stashApi";
+import { getStashesApi, snoozeStashApi, deleteStashApi } from "@/api/stashApi";
 
 vi.mock("@/api/stashApi", () => ({
   getStashesApi: vi.fn(),
@@ -25,6 +25,13 @@ const makeStash = (
   modifiedOn: "",
   ...overrides,
 });
+
+/** naive-ui's NModal teleports its content to document.body, so modal content must be queried there. */
+function modalButton(text: string): HTMLElement | undefined {
+  return Array.from(document.querySelectorAll(".n-modal .modal-footer button")).find(
+    (btn) => btn.textContent?.trim() === text,
+  ) as HTMLElement | undefined;
+}
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -95,5 +102,43 @@ describe("DashboardView.vue", () => {
     await wrapper.find(".new-stash-btn").trigger("click");
 
     expect(pushSpy).toHaveBeenCalledWith({ name: "create-stash" });
+  });
+
+  it("shows a confirmation modal before deleting a stash and deletes it on confirm", async () => {
+    vi.mocked(getStashesApi).mockResolvedValue([makeStash({ id: 1 })]);
+    vi.mocked(deleteStashApi).mockResolvedValue(undefined);
+    const { wrapper } = await mountWithProviders(DashboardView);
+    await flushPromises();
+
+    await wrapper.find(".delete-btn").trigger("click");
+    await flushPromises();
+
+    expect(deleteStashApi).not.toHaveBeenCalled();
+    expect(document.body.textContent).toContain("Delete stash");
+
+    const confirmButton = modalButton("Delete");
+    expect(confirmButton).toBeTruthy();
+    confirmButton!.click();
+    await flushPromises();
+
+    expect(deleteStashApi).toHaveBeenCalledWith(1);
+    expect(wrapper.findAll(".stash-row")).toHaveLength(0);
+  });
+
+  it("does not delete a stash when the modal is cancelled", async () => {
+    vi.mocked(getStashesApi).mockResolvedValue([makeStash({ id: 1 })]);
+    const { wrapper } = await mountWithProviders(DashboardView);
+    await flushPromises();
+
+    await wrapper.find(".delete-btn").trigger("click");
+    await flushPromises();
+
+    const cancelButton = modalButton("Cancel");
+    expect(cancelButton).toBeTruthy();
+    cancelButton!.click();
+    await flushPromises();
+
+    expect(deleteStashApi).not.toHaveBeenCalled();
+    expect(wrapper.findAll(".stash-row")).toHaveLength(1);
   });
 });

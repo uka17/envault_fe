@@ -112,4 +112,53 @@ test.describe("Dashboard", () => {
     await expect(page.getByText("planned@example.com")).toBeVisible();
     await expect(page.getByRole("button", { name: t.common.nav.start })).toHaveCount(0);
   });
+
+  test("asks for confirmation before deleting a stash and removes it once confirmed", async ({
+    page,
+  }) => {
+    await loginWithMockedStashes(page);
+    let deleteRequested = false;
+    await page.route("**/api/v1/stashes/2", async (route) => {
+      if (route.request().method() === "DELETE") {
+        deleteRequested = true;
+        await route.fulfill({ status: 200, contentType: "application/json", body: "{}" });
+        return;
+      }
+      await route.continue();
+    });
+
+    await page
+      .locator(".stash-row", { hasText: "planned@example.com" })
+      .getByRole("button", { name: t.stash.dashboard.delete })
+      .click();
+
+    await expect(page.getByText(t.stash.dashboard.modals.deleteText)).toBeVisible();
+    expect(deleteRequested).toBe(false);
+
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: t.stash.dashboard.modals.deleteConfirm, exact: true })
+      .click();
+
+    await expect(page.getByText("planned@example.com")).toHaveCount(0);
+    expect(deleteRequested).toBe(true);
+  });
+
+  test("keeps the stash when the delete confirmation is cancelled", async ({ page }) => {
+    await loginWithMockedStashes(page);
+
+    await page
+      .locator(".stash-row", { hasText: "planned@example.com" })
+      .getByRole("button", { name: t.stash.dashboard.delete })
+      .click();
+    await expect(page.getByText(t.stash.dashboard.modals.deleteText)).toBeVisible();
+
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: t.common.actions.cancel })
+      .click();
+
+    await expect(page.getByText(t.stash.dashboard.modals.deleteText)).toHaveCount(0);
+    await expect(page.getByText("planned@example.com")).toBeVisible();
+  });
 });

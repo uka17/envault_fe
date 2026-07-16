@@ -2,7 +2,7 @@
 import { computed, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { NButton, NIcon, NLayout, NLayoutContent } from "naive-ui";
+import { NButton, NIcon, NLayout, NLayoutContent, NModal, useMessage } from "naive-ui";
 import AppHeader from "@/components/AppHeader.vue";
 import { useStashStore } from "@/stores/stash";
 import {
@@ -12,6 +12,7 @@ import {
   PaperPlaneOutline,
   TimeOutline,
   AddOutline,
+  TrashOutline,
 } from "@vicons/ionicons5";
 
 type DashboardFilter = "all" | "planned" | "sent";
@@ -19,8 +20,12 @@ type DashboardFilter = "all" | "planned" | "sent";
 const router = useRouter();
 const stashStore = useStashStore();
 const { t, locale } = useI18n();
+const message = useMessage();
 const activeFilter = ref<DashboardFilter>("all");
 const snoozeLoadingId = ref<number | null>(null);
+const showDeleteModal = ref(false);
+const deleteTargetId = ref<number | null>(null);
+const deleteLoadingId = ref<number | null>(null);
 
 onMounted(() => {
   stashStore.fetchStashes();
@@ -84,6 +89,33 @@ const handleSnooze = async (id: number): Promise<void> => {
     await stashStore.snoozeStash(id, 24);
   } finally {
     snoozeLoadingId.value = null;
+  }
+};
+
+/**
+ * Open the delete confirmation modal for a given stash.
+ * @param id Stash ID to delete.
+ */
+const confirmDeleteStash = (id: number): void => {
+  deleteTargetId.value = id;
+  showDeleteModal.value = true;
+};
+
+/**
+ * Delete the stash currently selected for deletion after user confirmation.
+ */
+const handleDeleteStash = async (): Promise<void> => {
+  if (deleteTargetId.value === null) return;
+  const id = deleteTargetId.value;
+  deleteLoadingId.value = id;
+  try {
+    await stashStore.deleteStash(id);
+    showDeleteModal.value = false;
+  } catch {
+    message.error(t("stash.dashboard.deleteFailed"));
+  } finally {
+    deleteLoadingId.value = null;
+    deleteTargetId.value = null;
   }
 };
 </script>
@@ -217,11 +249,42 @@ const handleSnooze = async (id: number): Promise<void> => {
                 </template>
                 {{ t("stash.dashboard.snooze") }}
               </n-button>
+              <n-button
+                ghost
+                class="delete-btn"
+                :loading="deleteLoadingId === stash.id"
+                @click="confirmDeleteStash(stash.id)"
+              >
+                <template #icon>
+                  <n-icon :size="16">
+                    <TrashOutline />
+                  </n-icon>
+                </template>
+                {{ t("stash.dashboard.delete") }}
+              </n-button>
             </div>
           </article>
         </section>
       </div>
     </n-layout-content>
+
+    <n-modal
+      v-model:show="showDeleteModal"
+      preset="card"
+      :title="t('stash.dashboard.modals.deleteTitle')"
+      class="edit-modal"
+      :style="{ maxWidth: '420px' }"
+    >
+      <p>{{ t("stash.dashboard.modals.deleteText") }}</p>
+      <template #footer>
+        <div class="modal-footer">
+          <n-button ghost @click="showDeleteModal = false">{{ t("common.actions.cancel") }}</n-button>
+          <n-button type="error" :loading="deleteLoadingId !== null" @click="handleDeleteStash">
+            {{ t("stash.dashboard.modals.deleteConfirm") }}
+          </n-button>
+        </div>
+      </template>
+    </n-modal>
   </n-layout>
 </template>
 
@@ -444,6 +507,7 @@ const handleSnooze = async (id: number): Promise<void> => {
   min-width: 182px;
   display: flex;
   justify-content: flex-end;
+  gap: 0.6rem;
 }
 
 :deep(.postpone-btn.n-button) {
@@ -457,6 +521,25 @@ const handleSnooze = async (id: number): Promise<void> => {
 :deep(.postpone-btn.n-button:hover) {
   color: #ffffff;
   border-color: rgba(157, 138, 202, 0.9);
+}
+
+:deep(.delete-btn.n-button) {
+  height: 38px;
+  border-radius: 10px;
+  color: #e8a3a3;
+  border: 1px solid rgba(200, 90, 90, 0.4);
+  background: rgba(255, 255, 255, 0.01);
+}
+
+:deep(.delete-btn.n-button:hover) {
+  color: #ff8f8f;
+  border-color: rgba(220, 100, 100, 0.8);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
 }
 
 @media (max-width: 1080px) {

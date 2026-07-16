@@ -8,6 +8,8 @@
     "filterSent": "Отправленные",
     "newStash": "Новый stash",
     "snooze": "Отложить на 24 ч",
+    "delete": "Удалить",
+    "deleteFailed": "Не удалось удалить stash",
     "statusSent": "Отправлено",
     "statusPending": "Ожидает отправки",
     "today": "Сегодня",
@@ -15,7 +17,12 @@
     "inDays": "Через {n} дн.",
     "inMonths": "Через {n} мес.",
     "inYears": "Через {n} год | Через {n} года | Через {n} лет",
-    "loadFailed": "Не удалось загрузить stash'и"
+    "loadFailed": "Не удалось загрузить stash'и",
+    "modals": {
+      "deleteTitle": "Удаление stash'а",
+      "deleteText": "Это действие необратимо. Вы уверены, что хотите удалить этот stash?",
+      "deleteConfirm": "Удалить"
+    }
   },
   "create": {
     "backToStashes": "К моим stash'ам",

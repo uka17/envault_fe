@@ -8,6 +8,8 @@
     "filterSent": "Sent",
     "newStash": "New stash",
     "snooze": "Snooze 24h",
+    "delete": "Delete",
+    "deleteFailed": "Failed to delete stash",
     "statusSent": "Sent",
     "statusPending": "Awaiting delivery",
     "today": "Today",
@@ -15,7 +17,12 @@
     "inDays": "in {n} day | in {n} days",
     "inMonths": "in {n} month | in {n} months",
     "inYears": "in {n} year | in {n} years",
-    "loadFailed": "Failed to load stashes"
+    "loadFailed": "Failed to load stashes",
+    "modals": {
+      "deleteTitle": "Delete stash",
+      "deleteText": "This action cannot be undone. Are you sure you want to delete this stash?",
+      "deleteConfirm": "Delete"
+    }
   },
   "create": {
     "backToStashes": "Back to my stashes",
