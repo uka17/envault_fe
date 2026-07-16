@@ -1,6 +1,8 @@
 import { http } from "./http";
+import { publicHttp } from "./publicHttp";
 
 const STASHES_URL = "/stashes";
+const PUBLIC_STASHES_URL = "/public/stashes";
 
 export interface StashResponse {
   id: number;
@@ -67,5 +69,36 @@ export async function deleteStashApi(id: number): Promise<void> {
  */
 export async function snoozeStashApi(id: number, hours: number): Promise<StashResponse> {
   const { data } = await http.post<StashResponse>(`${STASHES_URL}/${id}/snooze/${hours}`);
+  return data;
+}
+
+export interface PublicStashInfo {
+  subject: string | null;
+  sendAt: string;
+}
+
+export interface UnlockedStash extends PublicStashInfo {
+  body: string;
+}
+
+/**
+ * Check whether a public stash is available and fetch the information
+ * required to display the key input form. Does not require authentication.
+ * @param token Public access token from the unlock link.
+ * @returns Public stash info (subject and scheduled send time).
+ */
+export async function getPublicStashApi(token: string): Promise<PublicStashInfo> {
+  const { data } = await publicHttp.get<PublicStashInfo>(`${PUBLIC_STASHES_URL}/${token}`);
+  return data;
+}
+
+/**
+ * Unlock a public stash using its decryption key. Does not require authentication.
+ * @param token Public access token from the unlock link.
+ * @param key Decryption key for the stash.
+ * @returns Decrypted stash content.
+ */
+export async function unlockStashApi(token: string, key: string): Promise<UnlockedStash> {
+  const { data } = await publicHttp.post<UnlockedStash>(`${PUBLIC_STASHES_URL}/${token}/unlock`, { key });
   return data;
 }

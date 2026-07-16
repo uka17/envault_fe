@@ -39,5 +39,18 @@
     "sendAtPlaceholder": "Select date and time",
     "submit": "Create stash",
     "error": "Failed to create stash. Please try again."
+  },
+  "unlock": {
+    "brandTitle": "Unlock stash",
+    "loading": "Checking link...",
+    "invalidTitle": "Link unavailable",
+    "invalidMessage": "This link is invalid or has expired.",
+    "title": "Enter your key",
+    "subtitle": "Enter the decryption key you were given to view this message",
+    "keyLabel": "Decryption key",
+    "keyPlaceholder": "Enter the decryption key",
+    "submit": "Unlock",
+    "error": "Failed to unlock. Please check your key and try again.",
+    "noSubject": "No subject"
   }
 }

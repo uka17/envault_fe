@@ -5,6 +5,7 @@ import RegisterView from "@/views/RegisterView.vue";
 import DashboardView from "@/views/DashboardView.vue";
 import ProfileView from "@/views/ProfileView.vue";
 import CreateStashView from "@/views/CreateStashView.vue";
+import UnlockStashView from "@/views/UnlockStashView.vue";
 import { useAuthStore } from "@/stores/auth";
 
 export const routes = [
@@ -47,6 +48,11 @@ export const routes = [
     path: "/stash/new",
     name: "create-stash",
     component: CreateStashView,
+  },
+  {
+    path: "/unlock/:token",
+    name: "unlock-stash",
+    component: UnlockStashView,
   },
 ];
 
