@@ -10,9 +10,10 @@ vi.mock("@/api/stashApi", () => ({
   snoozeStashApi: vi.fn(),
 }));
 
-const makeStash = (overrides: Partial<{ id: number; isSent: boolean }> = {}) => ({
+const makeStash = (overrides: Partial<{ id: number; isSent: boolean; subject: string | null }> = {}) => ({
   id: 1,
   to: "a@b.com",
+  subject: null,
   body: "hello",
   key: "k",
   isSent: false,

@@ -52,6 +52,7 @@ async function loginWithMockedStashes(page: Page) {
         {
           id: 2,
           to: "planned@example.com",
+          subject: "Planned subject",
           body: "Planned stash",
           key: "key-2",
           isSent: false,
@@ -76,6 +77,12 @@ test.describe("Dashboard", () => {
 
     await expect(page.getByText("sent@example.com")).toBeVisible();
     await expect(page.getByText("planned@example.com")).toBeVisible();
+  });
+
+  test("shows the subject when present and omits it when absent", async ({ page }) => {
+    await loginWithMockedStashes(page);
+
+    await expect(page.getByText("Planned subject")).toBeVisible();
   });
 
   test("filters the list to planned stashes only", async ({ page }) => {

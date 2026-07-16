@@ -5,6 +5,7 @@ const STASHES_URL = "/stashes";
 export interface StashResponse {
   id: number;
   to: string;
+  subject: string | null;
   body: string;
   key: string;
   isSent: boolean;
@@ -16,6 +17,7 @@ export interface StashResponse {
 export interface StashCreatePayload {
   body: string;
   to: string;
+  subject?: string | null;
   sendAt: string;
 }
 
@@ -40,7 +42,7 @@ export async function getStashApi(id: number): Promise<StashResponse> {
 
 /**
  * Create a new stash for the authenticated user.
- * @param payload Stash body, recipient email, and scheduled send time.
+ * @param payload Stash body, recipient email, optional subject, and scheduled send time.
  * @returns Created stash object.
  */
 export async function createStashApi(payload: StashCreatePayload): Promise<StashResponse> {

@@ -15,6 +15,7 @@ const mockedHttp = vi.mocked(http, true);
 const stash = {
   id: 1,
   to: "a@b.com",
+  subject: null,
   body: "hello",
   key: "k",
   isSent: false,
@@ -61,6 +62,25 @@ describe("createStashApi", () => {
       sendAt: stash.sendAt,
     });
     expect(result).toEqual(stash);
+  });
+
+  it("posts a new stash payload with an optional subject", async () => {
+    mockedHttp.post.mockResolvedValue({ data: { ...stash, subject: "Hi there" } });
+
+    const result = await createStashApi({
+      to: "a@b.com",
+      subject: "Hi there",
+      body: "hello",
+      sendAt: stash.sendAt,
+    });
+
+    expect(mockedHttp.post).toHaveBeenCalledWith("/stashes", {
+      to: "a@b.com",
+      subject: "Hi there",
+      body: "hello",
+      sendAt: stash.sendAt,
+    });
+    expect(result.subject).toEqual("Hi there");
   });
 });
 

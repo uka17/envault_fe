@@ -187,6 +187,7 @@ const handleSnooze = async (id: number): Promise<void> => {
                 </n-icon>
                 <strong class="recipient-name">{{ stash.to }}</strong>
               </div>
+              <p v-if="stash.subject" class="stash-subject">{{ stash.subject }}</p>
             </div>
 
             <div class="schedule-block">
@@ -397,6 +398,12 @@ const handleSnooze = async (id: number): Promise<void> => {
 .recipient-name {
   font-size: 2rem;
   font-weight: 670;
+}
+
+.stash-subject {
+  color: #7f8497;
+  font-size: 0.95rem;
+  margin: 0;
 }
 
 .recipient-mail-row {

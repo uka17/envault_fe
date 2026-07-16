@@ -24,6 +24,8 @@
     "subtitle": "Зашифрованное сообщение, которое будет отправлено получателю в нужный момент",
     "recipientLabel": "Email получателя",
     "recipientPlaceholder": "recipient\\@example.com",
+    "subjectLabel": "Тема",
+    "subjectPlaceholder": "Введите тему сообщения",
     "messageLabel": "Сообщение",
     "messagePlaceholder": "Введите текст сообщения, которое будет зашифровано и отправлено...",
     "sendAtLabel": "Дата и время отправки",

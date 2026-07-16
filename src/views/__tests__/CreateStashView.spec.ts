@@ -14,6 +14,7 @@ vi.mock("@/api/stashApi", () => ({
 const stash = {
   id: 1,
   to: "a@b.com",
+  subject: null,
   body: "hello",
   key: "k",
   isSent: false,
@@ -79,9 +80,35 @@ describe("CreateStashView.vue", () => {
 
     expect(createStashApi).toHaveBeenCalledWith({
       to: "a@b.com",
+      subject: null,
       body: "hello there",
       sendAt: new Date(Date.parse(stash.sendAt)).toISOString(),
     });
     expect(pushSpy).toHaveBeenCalledWith({ name: "dashboard" });
+  });
+
+  it("includes the subject in the payload when provided", async () => {
+    vi.mocked(createStashApi).mockResolvedValue(stash);
+    const { wrapper } = await mountWithProviders(CreateStashView);
+
+    const inputs = wrapper.findAll("input");
+    await inputs[0].setValue("a@b.com");
+    await inputs[1].setValue("Important update");
+    await wrapper.find("textarea").setValue("hello there");
+    const inner = wrapper.findComponent(CreateStashView);
+    (inner.vm as unknown as { formValue: { sendAt: number | null } }).formValue.sendAt = Date.parse(
+      stash.sendAt,
+    );
+
+    await wrapper.find("button.submit-btn").trigger("click");
+    await flushPromises();
+    await flushPromises();
+
+    expect(createStashApi).toHaveBeenCalledWith({
+      to: "a@b.com",
+      subject: "Important update",
+      body: "hello there",
+      sendAt: new Date(Date.parse(stash.sendAt)).toISOString(),
+    });
   });
 });

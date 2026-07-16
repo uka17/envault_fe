@@ -35,6 +35,7 @@ const submitError = ref<string | null>(null);
 
 const formValue = reactive({
   to: "",
+  subject: "",
   body: "",
   sendAt: null as number | null,
 });
@@ -80,6 +81,7 @@ const submit = async (): Promise<void> => {
   try {
     await stashStore.createStash({
       to: formValue.to,
+      subject: formValue.subject || null,
       body: formValue.body,
       sendAt: new Date(formValue.sendAt!).toISOString(),
     });
@@ -144,6 +146,14 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
                     </n-icon>
                   </template>
                 </n-input>
+              </n-form-item>
+
+              <n-form-item path="subject" :label="t('stash.create.subjectLabel')">
+                <n-input
+                  v-model:value="formValue.subject"
+                  :placeholder="t('stash.create.subjectPlaceholder')"
+                  size="large"
+                />
               </n-form-item>
 
               <n-form-item path="body" :label="t('stash.create.messageLabel')">
