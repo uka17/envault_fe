@@ -14,6 +14,13 @@ async function loginWithMockedStashes(page: Page) {
       body: JSON.stringify({ token: "fake-access-token" }),
     });
   });
+  await page.route("**/api/v1/token/refresh", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ token: "fake-access-token" }),
+    });
+  });
   await page.route("**/api/v1/users/whoami", async (route) => {
     await route.fulfill({
       status: 200,
@@ -86,5 +93,16 @@ test.describe("Dashboard", () => {
     await page.getByRole("button", { name: t.stash.dashboard.newStash }).click();
 
     await expect(page).toHaveURL(/\/stash\/new$/);
+  });
+
+  test("shows the stash list on the home page instead of the landing page", async ({ page }) => {
+    await loginWithMockedStashes(page);
+
+    await page.goto("/");
+
+    await expect(page).toHaveURL("/");
+    await expect(page.getByText("sent@example.com")).toBeVisible();
+    await expect(page.getByText("planned@example.com")).toBeVisible();
+    await expect(page.getByRole("button", { name: t.common.nav.start })).toHaveCount(0);
   });
 });

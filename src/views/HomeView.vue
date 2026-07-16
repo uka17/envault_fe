@@ -16,6 +16,8 @@ import {
   NText,
 } from "naive-ui";
 import AppHeader from "@/components/AppHeader.vue";
+import DashboardView from "@/views/DashboardView.vue";
+import { useAuthStore } from "@/stores/auth";
 import {
   LockClosedOutline,
   SettingsOutline,
@@ -25,6 +27,7 @@ import {
 
 const router = useRouter();
 const { t } = useI18n();
+const authStore = useAuthStore();
 
 /**
  * Navigates to the login page.
@@ -38,7 +41,9 @@ const toSignup = () => router.push("/register");
 </script>
 
 <template>
-  <n-layout class="homepage envault-page-shell">
+  <DashboardView v-if="authStore.isAuthenticated" />
+
+  <n-layout v-else class="homepage envault-page-shell">
     <AppHeader />
 
     <n-layout-content class="hero">
