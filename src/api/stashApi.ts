@@ -9,7 +9,6 @@ export interface StashResponse {
   to: string;
   subject: string | null;
   body: string;
-  key: string;
   isSent: boolean;
   sendAt: string;
   createdOn: string;
@@ -17,6 +16,7 @@ export interface StashResponse {
 }
 
 export interface StashCreatePayload {
+  /** Stash message, already encrypted client-side with the sender's key. */
   body: string;
   to: string;
   subject?: string | null;
@@ -72,33 +72,21 @@ export async function snoozeStashApi(id: number, hours: number): Promise<StashRe
   return data;
 }
 
-export interface PublicStashInfo {
+export interface PublicStashResponse {
   subject: string | null;
   sendAt: string;
-}
-
-export interface UnlockedStash extends PublicStashInfo {
+  /** Stash message body, still encrypted — decrypted client-side with the recipient's key. */
   body: string;
 }
 
 /**
- * Check whether a public stash is available and fetch the information
- * required to display the key input form. Does not require authentication.
+ * Fetch a public stash by its access token, including its encrypted body.
+ * The body is decrypted entirely client-side; the server never sees the key.
+ * Does not require authentication.
  * @param token Public access token from the unlock link.
- * @returns Public stash info (subject and scheduled send time).
+ * @returns Public stash content (subject, scheduled send time, and encrypted body).
  */
-export async function getPublicStashApi(token: string): Promise<PublicStashInfo> {
-  const { data } = await publicHttp.get<PublicStashInfo>(`${PUBLIC_STASHES_URL}/${token}`);
-  return data;
-}
-
-/**
- * Unlock a public stash using its decryption key. Does not require authentication.
- * @param token Public access token from the unlock link.
- * @param key Decryption key for the stash.
- * @returns Decrypted stash content.
- */
-export async function unlockStashApi(token: string, key: string): Promise<UnlockedStash> {
-  const { data } = await publicHttp.post<UnlockedStash>(`${PUBLIC_STASHES_URL}/${token}/unlock`, { key });
+export async function getPublicStashApi(token: string): Promise<PublicStashResponse> {
+  const { data } = await publicHttp.get<PublicStashResponse>(`${PUBLIC_STASHES_URL}/${token}`);
   return data;
 }

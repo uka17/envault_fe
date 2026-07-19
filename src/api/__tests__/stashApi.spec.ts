@@ -1,6 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { http } from "../http";
-import { getStashesApi, getStashApi, createStashApi, deleteStashApi, snoozeStashApi } from "../stashApi";
+import { publicHttp } from "../publicHttp";
+import {
+  getStashesApi,
+  getStashApi,
+  createStashApi,
+  deleteStashApi,
+  snoozeStashApi,
+  getPublicStashApi,
+} from "../stashApi";
 
 vi.mock("../http", () => ({
   http: {
@@ -10,14 +18,20 @@ vi.mock("../http", () => ({
   },
 }));
 
+vi.mock("../publicHttp", () => ({
+  publicHttp: {
+    get: vi.fn(),
+  },
+}));
+
 const mockedHttp = vi.mocked(http, true);
+const mockedPublicHttp = vi.mocked(publicHttp, true);
 
 const stash = {
   id: 1,
   to: "a@b.com",
   subject: null,
   body: "hello",
-  key: "k",
   isSent: false,
   sendAt: "2026-01-01T00:00:00.000Z",
   createdOn: "",
@@ -102,5 +116,17 @@ describe("snoozeStashApi", () => {
 
     expect(mockedHttp.post).toHaveBeenCalledWith("/stashes/1/snooze/24");
     expect(result).toEqual(stash);
+  });
+});
+
+describe("getPublicStashApi", () => {
+  it("fetches a public stash by token, including its still-encrypted body", async () => {
+    const publicStash = { subject: "Hi", sendAt: stash.sendAt, body: "v1.salt.iv.ciphertext" };
+    mockedPublicHttp.get.mockResolvedValue({ data: publicStash });
+
+    const result = await getPublicStashApi("abcdefgh23456789jkmn");
+
+    expect(mockedPublicHttp.get).toHaveBeenCalledWith("/public/stashes/abcdefgh23456789jkmn");
+    expect(result).toEqual(publicStash);
   });
 });

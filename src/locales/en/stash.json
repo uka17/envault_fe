@@ -35,10 +35,19 @@
     "subjectPlaceholder": "Enter a subject line",
     "messageLabel": "Message",
     "messagePlaceholder": "Enter the message text that will be encrypted and sent...",
+    "keyLabel": "Encryption key",
+    "keyPlaceholder": "Enter or generate an encryption key",
+    "keyGenerate": "Generate",
+    "keyHint": "This key encrypts your message in the browser before it's sent — the server never sees it. Share it with the recipient through a separate channel.",
     "sendAtLabel": "Send date and time",
     "sendAtPlaceholder": "Select date and time",
     "submit": "Create stash",
-    "error": "Failed to create stash. Please try again."
+    "error": "Failed to create stash. Please try again.",
+    "savedTitle": "Stash created",
+    "savedMessage": "Save this key now — it is never stored anywhere and cannot be recovered later.",
+    "savedCopy": "Copy",
+    "savedCopied": "Copied!",
+    "savedContinue": "Continue to dashboard"
   },
   "unlock": {
     "brandTitle": "Unlock stash",

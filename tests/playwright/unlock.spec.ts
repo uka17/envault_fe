@@ -1,5 +1,6 @@
 import { expect, test } from "playwright/test";
 import { t } from "./i18n";
+import { encryptStashBody } from "../../src/utils/stashCrypto";
 
 const token = "abcdefgh23456789jkmn";
 
@@ -19,18 +20,12 @@ test.describe("Unlock stash", () => {
   });
 
   test("shows a neutral error when the key is wrong", async ({ page }) => {
+    const ciphertext = await encryptStashBody("the secret message", "correct-key");
     await page.route(`**/api/public/stashes/${token}`, async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ subject: "Hello", sendAt: new Date().toISOString() }),
-      });
-    });
-    await page.route(`**/api/public/stashes/${token}/unlock`, async (route) => {
-      await route.fulfill({
-        status: 404,
-        contentType: "application/json",
-        body: JSON.stringify({ message: "Invalid link or key" }),
+        body: JSON.stringify({ subject: "Hello", sendAt: new Date().toISOString(), body: ciphertext }),
       });
     });
 
@@ -41,23 +36,15 @@ test.describe("Unlock stash", () => {
     await expect(page.locator(".submit-error")).toBeVisible();
   });
 
-  test("unlocks and shows the decrypted content for the correct key", async ({ page }) => {
+  test("decrypts and shows the content locally for the correct key, with a single network call", async ({ page }) => {
+    const ciphertext = await encryptStashBody("the secret message", "correct-key");
+    let requestCount = 0;
     await page.route(`**/api/public/stashes/${token}`, async (route) => {
+      requestCount++;
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ subject: "Hello", sendAt: new Date().toISOString() }),
-      });
-    });
-    await page.route(`**/api/public/stashes/${token}/unlock`, async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          subject: "Hello",
-          sendAt: new Date().toISOString(),
-          body: "the secret message",
-        }),
+        body: JSON.stringify({ subject: "Hello", sendAt: new Date().toISOString(), body: ciphertext }),
       });
     });
 
@@ -66,5 +53,6 @@ test.describe("Unlock stash", () => {
     await page.getByRole("button", { name: t.stash.unlock.submit }).click();
 
     await expect(page.getByText("the secret message")).toBeVisible();
+    expect(requestCount).toBe(1);
   });
 });

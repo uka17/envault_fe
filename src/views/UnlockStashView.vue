@@ -19,12 +19,8 @@ import {
 } from "naive-ui";
 import { KeyOutline, LockClosedOutline, LockOpenOutline } from "@vicons/ionicons5";
 import { isAxiosError } from "axios";
-import {
-  getPublicStashApi,
-  unlockStashApi,
-  type PublicStashInfo,
-  type UnlockedStash,
-} from "@/api/stashApi";
+import { getPublicStashApi, type PublicStashResponse } from "@/api/stashApi";
+import { decryptStashBody } from "@/utils/stashCrypto";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -32,10 +28,10 @@ const { t } = useI18n();
 const formRef = ref<FormInst | null>(null);
 const isLoadingInfo = ref(true);
 const isLinkInvalid = ref(false);
-const stashInfo = ref<PublicStashInfo | null>(null);
+const stashInfo = ref<PublicStashResponse | null>(null);
 const isSubmitting = ref(false);
 const submitError = ref<string | null>(null);
-const unlockedStash = ref<UnlockedStash | null>(null);
+const unlockedBody = ref<string | null>(null);
 
 const formValue = reactive({
   key: "",
@@ -48,8 +44,8 @@ const rules = computed<FormRules>(() => ({
 }));
 
 /**
- * Load the public stash availability info for the token in the current route.
- * Shows a neutral "invalid link" state on any failure.
+ * Load the public stash (including its still-encrypted body) for the token
+ * in the current route. Shows a neutral "invalid link" state on any failure.
  * @returns Nothing; updates local state.
  */
 const loadStashInfo = async (): Promise<void> => {
@@ -70,8 +66,8 @@ watch(() => route.params.token, () => {
 }, { immediate: true });
 
 /**
- * Validate the key input and attempt to unlock the stash.
- * Shows the decrypted content on success.
+ * Validates the key input and attempts to decrypt the stash body locally,
+ * in the browser. The key never leaves the client.
  * @returns Nothing; updates local state.
  */
 const submit = async (): Promise<void> => {
@@ -83,7 +79,12 @@ const submit = async (): Promise<void> => {
   isSubmitting.value = true;
   submitError.value = null;
   try {
-    unlockedStash.value = await unlockStashApi(route.params.token as string, formValue.key);
+    const decrypted = stashInfo.value ? await decryptStashBody(stashInfo.value.body, formValue.key) : null;
+    if (decrypted === null) {
+      submitError.value = t("stash.unlock.error");
+      return;
+    }
+    unlockedBody.value = decrypted;
   } catch (e) {
     submitError.value =
       (isAxiosError(e) && e.response?.data?.message?.translation) || t("stash.unlock.error");
@@ -100,7 +101,7 @@ const submit = async (): Promise<void> => {
         <n-space vertical align="center" :size="14" class="brand-block">
           <div class="brand-badge">
             <n-icon :size="28">
-              <LockClosedOutline v-if="!unlockedStash" />
+              <LockClosedOutline v-if="!unlockedBody" />
               <LockOpenOutline v-else />
             </n-icon>
           </div>
@@ -119,11 +120,11 @@ const submit = async (): Promise<void> => {
             </header>
           </n-space>
 
-          <n-space v-else-if="unlockedStash" vertical :size="22" class="unlocked-content">
+          <n-space v-else-if="unlockedBody" vertical :size="22" class="unlocked-content">
             <header class="card-header">
-              <h1>{{ unlockedStash.subject || t("stash.unlock.noSubject") }}</h1>
+              <h1>{{ stashInfo?.subject || t("stash.unlock.noSubject") }}</h1>
             </header>
-            <n-text class="unlocked-body">{{ unlockedStash.body }}</n-text>
+            <n-text class="unlocked-body">{{ unlockedBody }}</n-text>
           </n-space>
 
           <n-space v-else vertical :size="22">

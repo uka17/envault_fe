@@ -11,6 +11,7 @@ import {
   NFormItem,
   NIcon,
   NInput,
+  NInputGroup,
   NLayout,
   NLayoutContent,
   NSpace,
@@ -20,11 +21,16 @@ import {
 } from "naive-ui";
 import {
   ArrowBackSharp,
+  KeyOutline,
   LockClosedOutline,
   MailOutline,
+  RefreshOutline,
 } from "@vicons/ionicons5";
 import { isAxiosError } from "axios";
 import { useStashStore } from "@/stores/stash";
+import { encryptStashBody, generateStashKey } from "@/utils/stashCrypto";
+
+const MIN_KEY_LENGTH = 12;
 
 const router = useRouter();
 const stashStore = useStashStore();
@@ -32,11 +38,14 @@ const { t } = useI18n();
 const formRef = ref<FormInst | null>(null);
 const isSubmitting = ref(false);
 const submitError = ref<string | null>(null);
+const createdKey = ref<string | null>(null);
+const keyCopied = ref(false);
 
 const formValue = reactive({
   to: "",
   subject: "",
   body: "",
+  key: "",
   sendAt: null as number | null,
 });
 
@@ -48,6 +57,14 @@ const rules = computed<FormRules>(() => ({
   body: [
     { required: true, message: t("validation.stash.bodyRequired"), trigger: ["input", "blur"] },
     { min: 1, message: t("validation.stash.bodyEmpty"), trigger: ["input", "blur"] },
+  ],
+  key: [
+    { required: true, message: t("validation.stash.keyRequired"), trigger: ["input", "blur"] },
+    {
+      min: MIN_KEY_LENGTH,
+      message: t("validation.stash.keyTooShort", { n: MIN_KEY_LENGTH }),
+      trigger: ["input", "blur"],
+    },
   ],
   sendAt: [
     {
@@ -66,9 +83,15 @@ const rules = computed<FormRules>(() => ({
   ],
 }));
 
+/** Fills the key field with a freshly generated random passphrase. */
+const generateKey = (): void => {
+  formValue.key = generateStashKey();
+};
+
 /**
- * Validate the form and submit the stash to the API.
- * Redirects to the dashboard on success.
+ * Validates the form, encrypts the message body client-side with the
+ * user-supplied key, and submits the already-encrypted stash to the API.
+ * Shows the key one last time on success, since it is never stored anywhere.
  */
 const submit = async (): Promise<void> => {
   try {
@@ -79,19 +102,33 @@ const submit = async (): Promise<void> => {
   isSubmitting.value = true;
   submitError.value = null;
   try {
+    const encryptedBody = await encryptStashBody(formValue.body, formValue.key);
     await stashStore.createStash({
       to: formValue.to,
       subject: formValue.subject || null,
-      body: formValue.body,
+      body: encryptedBody,
       sendAt: new Date(formValue.sendAt!).toISOString(),
     });
-    router.push({ name: "dashboard" });
+    createdKey.value = formValue.key;
   } catch (e) {
     submitError.value =
       (isAxiosError(e) && e.response?.data?.message?.translation) || t("stash.create.error");
   } finally {
     isSubmitting.value = false;
   }
+};
+
+/** Copies the encryption key to the clipboard and shows a brief confirmation. */
+const copyKey = async (): Promise<void> => {
+  if (!createdKey.value) return;
+  await navigator.clipboard.writeText(createdKey.value);
+  keyCopied.value = true;
+  setTimeout(() => (keyCopied.value = false), 2000);
+};
+
+/** Leaves the "key saved" confirmation and returns to the dashboard. */
+const continueToDashboard = (): void => {
+  router.push({ name: "dashboard" });
 };
 
 /** Disallow selecting dates in the past in the date picker. */
@@ -121,7 +158,27 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
         </n-space>
 
         <n-card :bordered="false" class="env-auth-card">
-          <n-space vertical :size="22">
+          <n-space v-if="createdKey" vertical :size="22" class="key-saved-content">
+            <header class="card-header">
+              <h1>{{ t("stash.create.savedTitle") }}</h1>
+              <p>{{ t("stash.create.savedMessage") }}</p>
+            </header>
+
+            <n-input-group>
+              <n-input :value="createdKey" readonly size="large" />
+              <n-button size="large" @click="copyKey">
+                {{ keyCopied ? t("stash.create.savedCopied") : t("stash.create.savedCopy") }}
+              </n-button>
+            </n-input-group>
+
+            <div class="submit-row">
+              <n-button type="primary" size="large" class="submit-btn" @click="continueToDashboard">
+                {{ t("stash.create.savedContinue") }}
+              </n-button>
+            </div>
+          </n-space>
+
+          <n-space v-else vertical :size="22">
             <header class="card-header">
               <h1>{{ t("stash.create.title") }}</h1>
               <p>{{ t("stash.create.subtitle") }}</p>
@@ -164,6 +221,33 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
                   :autosize="{ minRows: 5, maxRows: 14 }"
                   class="body-textarea"
                 />
+              </n-form-item>
+
+              <n-form-item path="key" :label="t('stash.create.keyLabel')">
+                <n-input-group>
+                  <n-input
+                    v-model:value="formValue.key"
+                    type="password"
+                    show-password-on="click"
+                    :placeholder="t('stash.create.keyPlaceholder')"
+                    size="large"
+                  >
+                    <template #prefix>
+                      <n-icon :size="18">
+                        <KeyOutline />
+                      </n-icon>
+                    </template>
+                  </n-input>
+                  <n-button size="large" @click="generateKey">
+                    <template #icon>
+                      <n-icon><RefreshOutline /></n-icon>
+                    </template>
+                    {{ t("stash.create.keyGenerate") }}
+                  </n-button>
+                </n-input-group>
+                <template #feedback>
+                  <n-text depth="3" class="key-hint">{{ t("stash.create.keyHint") }}</n-text>
+                </template>
               </n-form-item>
 
               <n-form-item path="sendAt" :label="t('stash.create.sendAtLabel')">

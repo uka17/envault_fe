@@ -22,6 +22,7 @@
     "bodyEmpty": "Message cannot be empty",
     "sendAtRequired": "Specify send date and time",
     "sendAtFuture": "Date must be in the future",
-    "keyRequired": "Enter the decryption key"
+    "keyRequired": "Enter the decryption key",
+    "keyTooShort": "The key must be at least {n} characters long"
   }
 }

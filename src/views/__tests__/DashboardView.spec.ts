@@ -18,7 +18,6 @@ const makeStash = (
   to: "a@b.com",
   subject: null,
   body: "hello",
-  key: "k",
   isSent: false,
   sendAt: "2099-01-01T00:00:00.000Z",
   createdOn: "",
