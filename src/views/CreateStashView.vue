@@ -280,7 +280,10 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
       :style="{ maxWidth: '520px' }"
     >
       <n-space vertical :size="18">
-        <p>{{ t("stash.create.savedMessage") }}</p>
+        <n-alert type="warning" :bordered="false" :show-icon="true">
+          {{ t("stash.create.savedMessage") }}
+        </n-alert>
+        <n-text depth="3">{{ t("stash.create.keyHint") }}</n-text>
 
         <n-input-group>
           <n-input :value="createdKey" readonly size="large" />
