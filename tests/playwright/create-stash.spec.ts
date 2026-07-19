@@ -88,7 +88,7 @@ test.describe("Create stash", () => {
     await page.getByRole("button", { name: t.stash.create.keyGenerate }).click();
     await pickFutureSendDate(page);
 
-    const keyValue = await page.locator('input[type="password"]').inputValue();
+    const keyValue = await page.getByPlaceholder(unescape(t.stash.create.keyPlaceholder)).inputValue();
     expect(keyValue.length).toBeGreaterThan(0);
 
     await page.getByRole("button", { name: t.stash.create.submit }).click();
@@ -118,7 +118,7 @@ test.describe("Create stash", () => {
 
     await page.getByPlaceholder(unescape(t.stash.create.recipientPlaceholder)).fill("recipient@example.com");
     await page.getByPlaceholder(unescape(t.stash.create.messagePlaceholder)).fill("the secret message");
-    await page.locator('input[type="password"]').fill("short");
+    await page.getByPlaceholder(unescape(t.stash.create.keyPlaceholder)).fill("short");
     await pickFutureSendDate(page);
 
     await page.getByRole("button", { name: t.stash.create.submit }).click();

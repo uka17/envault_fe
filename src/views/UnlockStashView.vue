@@ -145,6 +145,7 @@ const submit = async (): Promise<void> => {
                   v-model:value="formValue.key"
                   type="password"
                   show-password-on="click"
+                  :input-props="{ autocomplete: 'new-password' }"
                   :placeholder="t('stash.unlock.keyPlaceholder')"
                   size="large"
                 >

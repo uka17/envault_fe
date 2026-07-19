@@ -14,6 +14,7 @@ import {
   NInputGroup,
   NLayout,
   NLayoutContent,
+  NModal,
   NSpace,
   NText,
   type FormInst,
@@ -158,27 +159,7 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
         </n-space>
 
         <n-card :bordered="false" class="env-auth-card">
-          <n-space v-if="createdKey" vertical :size="22" class="key-saved-content">
-            <header class="card-header">
-              <h1>{{ t("stash.create.savedTitle") }}</h1>
-              <p>{{ t("stash.create.savedMessage") }}</p>
-            </header>
-
-            <n-input-group>
-              <n-input :value="createdKey" readonly size="large" />
-              <n-button size="large" @click="copyKey">
-                {{ keyCopied ? t("stash.create.savedCopied") : t("stash.create.savedCopy") }}
-              </n-button>
-            </n-input-group>
-
-            <div class="submit-row">
-              <n-button type="primary" size="large" class="submit-btn" @click="continueToDashboard">
-                {{ t("stash.create.savedContinue") }}
-              </n-button>
-            </div>
-          </n-space>
-
-          <n-space v-else vertical :size="22">
+          <n-space vertical :size="22">
             <header class="card-header">
               <h1>{{ t("stash.create.title") }}</h1>
               <p>{{ t("stash.create.subtitle") }}</p>
@@ -227,8 +208,7 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
                 <n-input-group>
                   <n-input
                     v-model:value="formValue.key"
-                    type="password"
-                    show-password-on="click"
+                    :input-props="{ autocomplete: 'new-password' }"
                     :placeholder="t('stash.create.keyPlaceholder')"
                     size="large"
                   >
@@ -281,6 +261,33 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
         </n-card>
       </div>
     </n-layout-content>
+
+    <n-modal
+      :show="!!createdKey"
+      preset="card"
+      :closable="false"
+      :mask-closable="false"
+      :close-on-esc="false"
+      :title="t('stash.create.savedTitle')"
+      :style="{ maxWidth: '520px' }"
+    >
+      <n-space vertical :size="18">
+        <p>{{ t("stash.create.savedMessage") }}</p>
+
+        <n-input-group>
+          <n-input :value="createdKey" readonly size="large" />
+          <n-button size="large" @click="copyKey">
+            {{ keyCopied ? t("stash.create.savedCopied") : t("stash.create.savedCopy") }}
+          </n-button>
+        </n-input-group>
+
+        <div class="submit-row">
+          <n-button type="primary" size="large" class="submit-btn" @click="continueToDashboard">
+            {{ t("stash.create.savedContinue") }}
+          </n-button>
+        </div>
+      </n-space>
+    </n-modal>
   </n-layout>
 </template>
 
@@ -301,5 +308,10 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
   display: flex;
   justify-content: flex-end;
   margin-top: 0.25rem;
+}
+
+.key-hint {
+  display: block;
+  margin-bottom: 20px;
 }
 </style>

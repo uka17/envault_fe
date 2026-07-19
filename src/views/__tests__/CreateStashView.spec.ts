@@ -101,11 +101,13 @@ describe("CreateStashView.vue", () => {
     const decrypted = await decryptStashBody(payload.body, KEY);
     expect(decrypted).toBe("hello there");
 
+    // The "key saved" confirmation is a modal, teleported to document.body,
+    // so it lives outside the mounted wrapper's own DOM subtree.
     await vi.waitFor(() => {
-      expect(wrapper.text()).toContain("Stash created");
+      expect(document.body.textContent).toContain("Stash created");
     });
-    const keyInput = wrapper.find<HTMLInputElement>("input[readonly]");
-    expect(keyInput.element.value).toBe(KEY);
+    const keyInput = document.body.querySelector<HTMLInputElement>("input[readonly]");
+    expect(keyInput?.value).toBe(KEY);
   });
 
   it("includes the subject in the payload when provided", async () => {
