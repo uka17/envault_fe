@@ -71,6 +71,35 @@ describe("CreateStashView.vue", () => {
     expect(key.length).toBeGreaterThan(0);
   });
 
+  it("shows the too-short-key validation error instead of hiding it behind the key hint", async () => {
+    const { wrapper } = await mountWithProviders(CreateStashView);
+
+    const inputs = wrapper.findAll("input");
+    await inputs[2].setValue("short");
+    await inputs[2].trigger("blur");
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("The key must be at least 12 characters long");
+    expect(wrapper.text()).toContain("This key encrypts your message");
+  });
+
+  it("clears the too-short-key error reactively when Generate is clicked", async () => {
+    const { wrapper } = await mountWithProviders(CreateStashView);
+
+    const inputs = wrapper.findAll("input");
+    await inputs[2].setValue("short");
+    await inputs[2].trigger("blur");
+    await flushPromises();
+    expect(wrapper.text()).toContain("The key must be at least 12 characters long");
+
+    const buttons = wrapper.findAll("button");
+    const generateButton = buttons.find((b) => b.text().includes("Generate"));
+    await generateButton?.trigger("click");
+    await flushPromises();
+
+    expect(wrapper.text()).not.toContain("The key must be at least 12 characters long");
+  });
+
   it("shows a generic error message when submission fails", async () => {
     vi.mocked(createStashApi).mockRejectedValue(new Error("network error"));
     const { wrapper } = await mountWithProviders(CreateStashView);

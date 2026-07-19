@@ -18,6 +18,7 @@ import {
   NSpace,
   NText,
   type FormInst,
+  type FormItemInst,
   type FormRules,
 } from "naive-ui";
 import {
@@ -37,6 +38,7 @@ const router = useRouter();
 const stashStore = useStashStore();
 const { t } = useI18n();
 const formRef = ref<FormInst | null>(null);
+const keyFormItemRef = ref<FormItemInst | null>(null);
 const isSubmitting = ref(false);
 const submitError = ref<string | null>(null);
 const createdKey = ref<string | null>(null);
@@ -84,9 +86,15 @@ const rules = computed<FormRules>(() => ({
   ],
 }));
 
-/** Fills the key field with a freshly generated random passphrase. */
+/**
+ * Fills the key field with a freshly generated random passphrase.
+ * Re-runs the field's own validation afterwards, since setting the model
+ * value programmatically doesn't fire the input/blur events the form
+ * normally relies on to know a field needs revalidating.
+ */
 const generateKey = (): void => {
   formValue.key = generateStashKey();
+  keyFormItemRef.value?.validate();
 };
 
 /**
@@ -204,30 +212,30 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
                 />
               </n-form-item>
 
-              <n-form-item path="key" :label="t('stash.create.keyLabel')">
-                <n-input-group>
-                  <n-input
-                    v-model:value="formValue.key"
-                    :input-props="{ autocomplete: 'new-password' }"
-                    :placeholder="t('stash.create.keyPlaceholder')"
-                    size="large"
-                  >
-                    <template #prefix>
-                      <n-icon :size="18">
-                        <KeyOutline />
-                      </n-icon>
-                    </template>
-                  </n-input>
-                  <n-button size="large" @click="generateKey">
-                    <template #icon>
-                      <n-icon><RefreshOutline /></n-icon>
-                    </template>
-                    {{ t("stash.create.keyGenerate") }}
-                  </n-button>
-                </n-input-group>
-                <template #feedback>
+              <n-form-item ref="keyFormItemRef" path="key" :label="t('stash.create.keyLabel')">
+                <n-space vertical :size="8" class="key-field">
                   <n-text depth="3" class="key-hint">{{ t("stash.create.keyHint") }}</n-text>
-                </template>
+                  <n-input-group>
+                    <n-input
+                      v-model:value="formValue.key"
+                      :input-props="{ autocomplete: 'new-password' }"
+                      :placeholder="t('stash.create.keyPlaceholder')"
+                      size="large"
+                    >
+                      <template #prefix>
+                        <n-icon :size="18">
+                          <KeyOutline />
+                        </n-icon>
+                      </template>
+                    </n-input>
+                    <n-button size="large" @click="generateKey">
+                      <template #icon>
+                        <n-icon><RefreshOutline /></n-icon>
+                      </template>
+                      {{ t("stash.create.keyGenerate") }}
+                    </n-button>
+                  </n-input-group>
+                </n-space>
               </n-form-item>
 
               <n-form-item path="sendAt" :label="t('stash.create.sendAtLabel')">
@@ -312,6 +320,5 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
 
 .key-hint {
   display: block;
-  margin-bottom: 20px;
 }
 </style>
