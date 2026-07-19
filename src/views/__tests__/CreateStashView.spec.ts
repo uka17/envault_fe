@@ -15,7 +15,6 @@ vi.mock("@/api/stashApi", () => ({
 const stash = {
   id: 1,
   to: "a@b.com",
-  subject: null,
   body: "encrypted-body",
   isSent: false,
   sendAt: "2099-01-01T00:00:00.000Z",
@@ -30,7 +29,7 @@ async function fillRequiredFields(wrapper: Awaited<ReturnType<typeof mountWithPr
   const inputs = wrapper.findAll("input");
   await inputs[0].setValue("a@b.com");
   await wrapper.find("textarea").setValue("hello there");
-  await inputs[2].setValue(KEY);
+  await inputs[1].setValue(KEY);
   const inner = wrapper.findComponent(CreateStashView);
   (inner.vm as unknown as { formValue: { sendAt: number | null } }).formValue.sendAt = Date.parse(
     stash.sendAt,
@@ -75,8 +74,8 @@ describe("CreateStashView.vue", () => {
     const { wrapper } = await mountWithProviders(CreateStashView);
 
     const inputs = wrapper.findAll("input");
-    await inputs[2].setValue("short");
-    await inputs[2].trigger("blur");
+    await inputs[1].setValue("short");
+    await inputs[1].trigger("blur");
     await flushPromises();
 
     expect(wrapper.text()).toContain("The key must be at least 12 characters long");
@@ -87,8 +86,8 @@ describe("CreateStashView.vue", () => {
     const { wrapper } = await mountWithProviders(CreateStashView);
 
     const inputs = wrapper.findAll("input");
-    await inputs[2].setValue("short");
-    await inputs[2].trigger("blur");
+    await inputs[1].setValue("short");
+    await inputs[1].trigger("blur");
     await flushPromises();
     expect(wrapper.text()).toContain("The key must be at least 12 characters long");
 
@@ -123,7 +122,6 @@ describe("CreateStashView.vue", () => {
 
     const payload = vi.mocked(createStashApi).mock.calls[0][0];
     expect(payload.to).toBe("a@b.com");
-    expect(payload.subject).toBeNull();
     expect(payload.sendAt).toBe(new Date(Date.parse(stash.sendAt)).toISOString());
     expect(payload.body).not.toBe("hello there");
 
@@ -137,28 +135,5 @@ describe("CreateStashView.vue", () => {
     });
     const keyInput = document.body.querySelector<HTMLInputElement>("input[readonly]");
     expect(keyInput?.value).toBe(KEY);
-  });
-
-  it("includes the subject in the payload when provided", async () => {
-    vi.mocked(createStashApi).mockResolvedValue(stash);
-    const { wrapper } = await mountWithProviders(CreateStashView);
-
-    const inputs = wrapper.findAll("input");
-    await inputs[0].setValue("a@b.com");
-    await inputs[1].setValue("Important update");
-    await wrapper.find("textarea").setValue("hello there");
-    await inputs[2].setValue(KEY);
-    const inner = wrapper.findComponent(CreateStashView);
-    (inner.vm as unknown as { formValue: { sendAt: number | null } }).formValue.sendAt = Date.parse(
-      stash.sendAt,
-    );
-
-    await wrapper.find("button.submit-btn").trigger("click");
-    await vi.waitFor(() => {
-      expect(createStashApi).toHaveBeenCalledTimes(1);
-    });
-
-    const payload = vi.mocked(createStashApi).mock.calls[0][0];
-    expect(payload.subject).toBe("Important update");
   });
 });

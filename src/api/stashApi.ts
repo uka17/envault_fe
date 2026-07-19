@@ -7,7 +7,6 @@ const PUBLIC_STASHES_URL = "/public/stashes";
 export interface StashResponse {
   id: number;
   to: string;
-  subject: string | null;
   body: string;
   isSent: boolean;
   sendAt: string;
@@ -19,7 +18,6 @@ export interface StashCreatePayload {
   /** Stash message, already encrypted client-side with the sender's key. */
   body: string;
   to: string;
-  subject?: string | null;
   sendAt: string;
 }
 
@@ -44,7 +42,7 @@ export async function getStashApi(id: number): Promise<StashResponse> {
 
 /**
  * Create a new stash for the authenticated user.
- * @param payload Stash body, recipient email, optional subject, and scheduled send time.
+ * @param payload Stash body, recipient email, and scheduled send time.
  * @returns Created stash object.
  */
 export async function createStashApi(payload: StashCreatePayload): Promise<StashResponse> {
@@ -73,7 +71,6 @@ export async function snoozeStashApi(id: number, hours: number): Promise<StashRe
 }
 
 export interface PublicStashResponse {
-  subject: string | null;
   sendAt: string;
   /** Stash message body, still encrypted; decrypted client-side with the recipient's key. */
   body: string;
@@ -84,7 +81,7 @@ export interface PublicStashResponse {
  * The body is decrypted entirely client-side; the server never sees the key.
  * Does not require authentication.
  * @param token Public access token from the unlock link.
- * @returns Public stash content (subject, scheduled send time, and encrypted body).
+ * @returns Public stash content (scheduled send time and encrypted body).
  */
 export async function getPublicStashApi(token: string): Promise<PublicStashResponse> {
   const { data } = await publicHttp.get<PublicStashResponse>(`${PUBLIC_STASHES_URL}/${token}`);

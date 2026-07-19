@@ -30,7 +30,6 @@ const mockedPublicHttp = vi.mocked(publicHttp, true);
 const stash = {
   id: 1,
   to: "a@b.com",
-  subject: null,
   body: "hello",
   isSent: false,
   sendAt: "2026-01-01T00:00:00.000Z",
@@ -77,25 +76,6 @@ describe("createStashApi", () => {
     });
     expect(result).toEqual(stash);
   });
-
-  it("posts a new stash payload with an optional subject", async () => {
-    mockedHttp.post.mockResolvedValue({ data: { ...stash, subject: "Hi there" } });
-
-    const result = await createStashApi({
-      to: "a@b.com",
-      subject: "Hi there",
-      body: "hello",
-      sendAt: stash.sendAt,
-    });
-
-    expect(mockedHttp.post).toHaveBeenCalledWith("/stashes", {
-      to: "a@b.com",
-      subject: "Hi there",
-      body: "hello",
-      sendAt: stash.sendAt,
-    });
-    expect(result.subject).toEqual("Hi there");
-  });
 });
 
 describe("deleteStashApi", () => {
@@ -121,7 +101,7 @@ describe("snoozeStashApi", () => {
 
 describe("getPublicStashApi", () => {
   it("fetches a public stash by token, including its still-encrypted body", async () => {
-    const publicStash = { subject: "Hi", sendAt: stash.sendAt, body: "v1.salt.iv.ciphertext" };
+    const publicStash = { sendAt: stash.sendAt, body: "v1.salt.iv.ciphertext" };
     mockedPublicHttp.get.mockResolvedValue({ data: publicStash });
 
     const result = await getPublicStashApi("abcdefgh23456789jkmn");

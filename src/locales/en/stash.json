@@ -31,8 +31,6 @@
     "subtitle": "An encrypted message that will be delivered to the recipient at the right moment",
     "recipientLabel": "Recipient email",
     "recipientPlaceholder": "recipient\\@example.com",
-    "subjectLabel": "Subject",
-    "subjectPlaceholder": "Enter a subject line",
     "messageLabel": "Message",
     "messagePlaceholder": "Enter the message text that will be encrypted and sent...",
     "keyLabel": "Encryption key",
@@ -60,6 +58,6 @@
     "keyPlaceholder": "Enter the decryption key",
     "submit": "Unlock",
     "error": "Failed to unlock. Please check your key and try again.",
-    "noSubject": "No subject"
+    "unlockedTitle": "Message unlocked"
   }
 }

@@ -73,7 +73,6 @@ test.describe("Create stash", () => {
         body: JSON.stringify({
           id: 1,
           to: payload.to,
-          subject: payload.subject ?? null,
           body: payload.body,
           isSent: false,
           sendAt: payload.sendAt,

@@ -25,7 +25,7 @@ test.describe("Unlock stash", () => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ subject: "Hello", sendAt: new Date().toISOString(), body: ciphertext }),
+        body: JSON.stringify({ sendAt: new Date().toISOString(), body: ciphertext }),
       });
     });
 
@@ -44,7 +44,7 @@ test.describe("Unlock stash", () => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ subject: "Hello", sendAt: new Date().toISOString(), body: ciphertext }),
+        body: JSON.stringify({ sendAt: new Date().toISOString(), body: ciphertext }),
       });
     });
 

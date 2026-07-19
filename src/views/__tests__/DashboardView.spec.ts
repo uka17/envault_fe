@@ -12,11 +12,10 @@ vi.mock("@/api/stashApi", () => ({
 }));
 
 const makeStash = (
-  overrides: Partial<{ id: number; isSent: boolean; sendAt: string; subject: string | null }> = {},
+  overrides: Partial<{ id: number; isSent: boolean; sendAt: string }> = {},
 ) => ({
   id: 1,
   to: "a@b.com",
-  subject: null,
   body: "hello",
   isSent: false,
   sendAt: "2099-01-01T00:00:00.000Z",
@@ -77,19 +76,6 @@ describe("DashboardView.vue", () => {
     await flushPromises();
 
     expect(snoozeStashApi).toHaveBeenCalledWith(1, 24);
-  });
-
-  it("renders the subject when present and hides it when absent", async () => {
-    vi.mocked(getStashesApi).mockResolvedValue([
-      makeStash({ id: 1, subject: "Important update" }),
-      makeStash({ id: 2, subject: null }),
-    ]);
-    const { wrapper } = await mountWithProviders(DashboardView);
-    await flushPromises();
-
-    const rows = wrapper.findAll(".stash-row");
-    expect(rows[0].find(".stash-subject").text()).toBe("Important update");
-    expect(rows[1].find(".stash-subject").exists()).toBe(false);
   });
 
   it("navigates to the create-stash page", async () => {

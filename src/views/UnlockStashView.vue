@@ -122,7 +122,7 @@ const submit = async (): Promise<void> => {
 
           <n-space v-else-if="unlockedBody" vertical :size="22" class="unlocked-content">
             <header class="card-header">
-              <h1>{{ stashInfo?.subject || t("stash.unlock.noSubject") }}</h1>
+              <h1>{{ t("stash.unlock.unlockedTitle") }}</h1>
             </header>
             <n-text class="unlocked-body">{{ unlockedBody }}</n-text>
           </n-space>
