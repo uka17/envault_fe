@@ -75,7 +75,7 @@ export async function snoozeStashApi(id: number, hours: number): Promise<StashRe
 export interface PublicStashResponse {
   subject: string | null;
   sendAt: string;
-  /** Stash message body, still encrypted — decrypted client-side with the recipient's key. */
+  /** Stash message body, still encrypted; decrypted client-side with the recipient's key. */
   body: string;
 }
 
