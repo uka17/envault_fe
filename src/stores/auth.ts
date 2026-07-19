@@ -44,7 +44,7 @@ export const useAuthStore = defineStore("auth", {
 
     /**
      * Register a new user account.
-     * Does not authenticate the user — a separate login is required afterwards.
+     * Does not authenticate the user; a separate login is required afterwards.
      * @param payload Registration data (email, password, name).
      */
     async register(payload: RegisterPayload) {

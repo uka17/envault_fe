@@ -22,12 +22,12 @@ export function nameRules(): FormItemRule[] {
   ];
 }
 
-/** Just presence-checks a password — for fields like login or "current password" where the value already exists. */
+/** Just presence-checks a password, for fields like login or "current password" where the value already exists. */
 export function requiredPasswordRules(): FormItemRule[] {
   return [{ required: true, message: t("validation.password.required"), trigger: ["input", "blur"] }];
 }
 
-/** Presence + complexity check — for fields where a new password is being set (registration, password change). */
+/** Presence + complexity check, for fields where a new password is being set (registration, password change). */
 export function newPasswordRules(): FormItemRule[] {
   return [
     { required: true, message: t("validation.password.required"), trigger: ["input", "blur"] },

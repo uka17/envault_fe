@@ -44,7 +44,7 @@ const { t, locale } = useI18n();
 const user = computed(() => auth.user);
 
 const registeredAt = computed(() => {
-  if (!user.value?.createdOn) return "—";
+  if (!user.value?.createdOn) return "-";
   return new Date(user.value.createdOn).toLocaleDateString(locale.value, {
     day: "numeric",
     month: "long",
@@ -298,7 +298,7 @@ async function terminateOtherSessions() {
                 <dt class="info-label">{{ t("profile.account.name") }}</dt>
               </div>
               <dd class="info-value info-value--editable">
-                {{ user?.name ?? "—" }}
+                {{ user?.name ?? "-" }}
                 <button type="button" class="edit-link" @click="openNameForm">{{ t("profile.edit") }}</button>
               </dd>
             </div>
@@ -311,7 +311,7 @@ async function terminateOtherSessions() {
                 <dt class="info-label">{{ t("profile.account.email") }}</dt>
               </div>
               <dd class="info-value info-value--editable">
-                {{ user?.email ?? "—" }}
+                {{ user?.email ?? "-" }}
                 <button type="button" class="edit-link" @click="openEmailForm">{{ t("profile.edit") }}</button>
               </dd>
             </div>
