@@ -16,7 +16,7 @@ vi.mock("@/api/authApi", () => ({
 }));
 
 /** Builds a minimal AxiosError with the given field errors as its response body. */
-function makeFieldErrorResponse(errors: Array<{ path: string; msg: { translation: string } }>) {
+function makeFieldErrorResponse(errors: Array<{ field: string; message: string }>) {
   const err = new AxiosError("Request failed");
   err.response = { data: { errors }, status: 400, statusText: "Bad Request", headers: {}, config: {} as never };
   return err;
@@ -60,7 +60,7 @@ describe("RegisterView.vue", () => {
 
   it("maps known field errors from the server onto the form", async () => {
     vi.mocked(registerApi).mockRejectedValue(
-      makeFieldErrorResponse([{ path: "email", msg: { translation: "Email already taken" } }]),
+      makeFieldErrorResponse([{ field: "email", message: "Email already taken" }]),
     );
     const { wrapper, router } = await mountWithProviders(RegisterView);
     const pushSpy = vi.spyOn(router, "push");

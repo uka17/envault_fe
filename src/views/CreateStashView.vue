@@ -28,9 +28,9 @@ import {
   MailOutline,
   RefreshOutline,
 } from "@vicons/ionicons5";
-import { isAxiosError } from "axios";
 import { useStashStore } from "@/stores/stash";
 import { encryptStashBody, generateStashKey } from "@/utils/stashCrypto";
+import { getApiErrorMessage } from "@/api/apiError";
 
 const MIN_KEY_LENGTH = 12;
 
@@ -118,8 +118,7 @@ const submit = async (): Promise<void> => {
     });
     createdKey.value = formValue.key;
   } catch (e) {
-    submitError.value =
-      (isAxiosError(e) && e.response?.data?.message?.translation) || t("stash.create.error");
+    submitError.value = getApiErrorMessage(e) ?? t("stash.create.error");
   } finally {
     isSubmitting.value = false;
   }

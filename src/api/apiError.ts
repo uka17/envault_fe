@@ -1,23 +1,48 @@
 import axios from "axios";
+import { i18n } from "@/i18n";
+import { API_ERROR_I18N_KEYS } from "@/i18n/apiErrorCodes";
 
 export interface ApiFieldError {
-  path?: string;
-  msg?: { translation?: string; textCode?: string };
+  field?: string;
+  code?: string;
+  message?: string;
 }
 
 export interface ApiErrorResponse {
+  code?: string;
   message?: string;
   errors?: ApiFieldError[];
 }
 
 /**
- * Extract the first user-facing translation message from an API error response.
+ * Translate a backend error code to the active locale, falling back to the
+ * backend's own (English) message when the code isn't in the known map.
+ * @param code Stable backend error code, if present.
+ * @param fallback English fallback text sent by the backend.
+ * @returns Localized message, or undefined if neither a mapped code nor fallback text is available.
+ */
+function localize(code: string | undefined, fallback: string | undefined): string | undefined {
+  const i18nKey = code ? API_ERROR_I18N_KEYS[code] : undefined;
+  return i18nKey ? i18n.global.t(i18nKey) : fallback;
+}
+
+/**
+ * Extract the first user-facing error message from an API error response,
+ * localized via the backend error code when it's recognized.
  * @param err Error thrown by an API call.
- * @returns Translated error message, or undefined if the error isn't in the expected format.
+ * @returns Localized error message, or undefined if the error isn't in the expected format.
  */
 export function getApiErrorMessage(err: unknown): string | undefined {
   if (!axios.isAxiosError<ApiErrorResponse>(err)) return undefined;
-  return err.response?.data?.errors?.[0]?.msg?.translation;
+  const data = err.response?.data;
+
+  const firstFieldError = data?.errors?.[0];
+  if (firstFieldError) {
+    const message = localize(firstFieldError.code, firstFieldError.message);
+    if (message) return message;
+  }
+
+  return localize(data?.code, data?.message);
 }
 
 /**
@@ -37,11 +62,11 @@ export function extractApiFieldErrors<T extends string>(
   if (!axios.isAxiosError<ApiErrorResponse>(err)) return { fieldErrors, genericErrors };
 
   for (const fieldError of err.response?.data?.errors ?? []) {
-    const text = fieldError.msg?.translation;
+    const text = localize(fieldError.code, fieldError.message);
     if (!text) continue;
 
-    if (fieldError.path && (knownFields as readonly string[]).includes(fieldError.path)) {
-      fieldErrors[fieldError.path as T] = text;
+    if (fieldError.field && (knownFields as readonly string[]).includes(fieldError.field)) {
+      fieldErrors[fieldError.field as T] = text;
     } else {
       genericErrors.push(text);
     }
