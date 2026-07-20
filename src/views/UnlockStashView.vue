@@ -142,6 +142,7 @@ const submit = async (): Promise<void> => {
               <n-form-item path="key" :label="t('stash.unlock.keyLabel')">
                 <n-input
                   v-model:value="formValue.key"
+                  type="password"
                   :placeholder="t('stash.unlock.keyPlaceholder')"
                   size="large"
                 >
