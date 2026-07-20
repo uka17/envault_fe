@@ -30,7 +30,7 @@ test.describe("Unlock stash", () => {
     });
 
     await page.goto(`/unlock/${token}`);
-    await page.locator('input[type="password"]').fill("wrong-key");
+    await page.getByPlaceholder(t.stash.unlock.keyPlaceholder).fill("wrong-key");
     await page.getByRole("button", { name: t.stash.unlock.submit }).click();
 
     await expect(page.locator(".submit-error")).toBeVisible();
@@ -49,7 +49,7 @@ test.describe("Unlock stash", () => {
     });
 
     await page.goto(`/unlock/${token}`);
-    await page.locator('input[type="password"]').fill("correct-key");
+    await page.getByPlaceholder(t.stash.unlock.keyPlaceholder).fill("correct-key");
     await page.getByRole("button", { name: t.stash.unlock.submit }).click();
 
     await expect(page.getByText("the secret message")).toBeVisible();
