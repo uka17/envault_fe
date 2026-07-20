@@ -39,6 +39,36 @@ describe("AppHeader.vue", () => {
     expect(wrapper.find(".avatar-badge").exists()).toBe(false);
   });
 
+  it("navigates home when the brand link is clicked", async () => {
+    const { wrapper, router } = await mountHeader();
+    const pushSpy = vi.spyOn(router, "push");
+
+    await wrapper.find(".brand-link").trigger("click");
+
+    expect(pushSpy).toHaveBeenCalledWith({ name: "home" });
+  });
+
+  it("navigates to login and register from the header buttons", async () => {
+    const { wrapper, router } = await mountHeader();
+    const pushSpy = vi.spyOn(router, "push");
+
+    await wrapper.find(".header-btn-login").trigger("click");
+    expect(pushSpy).toHaveBeenCalledWith({ name: "login" });
+
+    await wrapper.find(".header-btn-start").trigger("click");
+    expect(pushSpy).toHaveBeenCalledWith({ name: "register" });
+  });
+
+  it("falls back to default initials and empty email when the user profile is missing", async () => {
+    const { wrapper } = await mountHeader();
+    const auth = useAuthStore();
+    auth.accessToken = "tok";
+    auth.user = null;
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.find(".avatar-badge").text()).toBe("US");
+  });
+
   it("shows the user avatar when authenticated", async () => {
     const { wrapper } = await mountHeader();
     const auth = useAuthStore();
@@ -73,10 +103,22 @@ describe("AppHeader.vue", () => {
     await wrapper.vm.$nextTick();
 
     await wrapper.find(".avatar-badge").trigger("click");
-    const items = Array.from(document.querySelectorAll(".dropdown-item")) as HTMLElement[];
+    let items = Array.from(document.querySelectorAll(".dropdown-item")) as HTMLElement[];
     items[0].click();
     await wrapper.vm.$nextTick();
     expect(pushSpy).toHaveBeenCalledWith({ name: "dashboard" });
+
+    await wrapper.find(".avatar-badge").trigger("click");
+    items = Array.from(document.querySelectorAll(".dropdown-item")) as HTMLElement[];
+    items[1].click();
+    await wrapper.vm.$nextTick();
+    expect(pushSpy).toHaveBeenCalledWith({ name: "create-stash" });
+
+    await wrapper.find(".avatar-badge").trigger("click");
+    items = Array.from(document.querySelectorAll(".dropdown-item")) as HTMLElement[];
+    items[2].click();
+    await wrapper.vm.$nextTick();
+    expect(pushSpy).toHaveBeenCalledWith({ name: "profile" });
   });
 
   it("logs out and redirects to login", async () => {
