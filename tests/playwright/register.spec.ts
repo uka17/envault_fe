@@ -59,7 +59,7 @@ test.describe("Register form", () => {
         status: 409,
         contentType: "application/json",
         body: JSON.stringify({
-          errors: [{ path: "email", msg: { translation: serverMessage } }],
+          errors: [{ field: "email", message: serverMessage }],
         }),
       });
     });

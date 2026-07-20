@@ -18,9 +18,9 @@ import {
   type FormRules,
 } from "naive-ui";
 import { KeyOutline, LockClosedOutline, LockOpenOutline } from "@vicons/ionicons5";
-import { isAxiosError } from "axios";
 import { getPublicStashApi, type PublicStashResponse } from "@/api/stashApi";
 import { decryptStashBody } from "@/utils/stashCrypto";
+import { getApiErrorMessage } from "@/api/apiError";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -86,8 +86,7 @@ const submit = async (): Promise<void> => {
     }
     unlockedBody.value = decrypted;
   } catch (e) {
-    submitError.value =
-      (isAxiosError(e) && e.response?.data?.message?.translation) || t("stash.unlock.error");
+    submitError.value = getApiErrorMessage(e) ?? t("stash.unlock.error");
   } finally {
     isSubmitting.value = false;
   }

@@ -1,6 +1,7 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { AxiosError } from "axios";
 import { getApiErrorMessage, extractApiFieldErrors } from "../apiError";
+import { setLocale } from "@/i18n";
 
 /** Builds a minimal AxiosError carrying the given response data. */
 function makeAxiosError(data: unknown): AxiosError {
@@ -16,74 +17,104 @@ function makeAxiosError(data: unknown): AxiosError {
 }
 
 describe("getApiErrorMessage", () => {
+  beforeEach(() => {
+    setLocale("en");
+  });
+
   it("returns undefined for non-axios errors", () => {
     expect(getApiErrorMessage(new Error("boom"))).toBeUndefined();
     expect(getApiErrorMessage("plain string")).toBeUndefined();
     expect(getApiErrorMessage(undefined)).toBeUndefined();
   });
 
-  it("returns undefined when the response has no errors array", () => {
-    const err = makeAxiosError({ message: "Something went wrong" });
+  it("returns undefined when the response has neither a message nor errors", () => {
+    const err = makeAxiosError({});
     expect(getApiErrorMessage(err)).toBeUndefined();
   });
 
-  it("returns the first error's translation", () => {
+  it("translates a top-level {code, message} error via the active locale", () => {
+    const err = makeAxiosError({ code: "user_not_found", message: "User not found" });
+    expect(getApiErrorMessage(err)).toBe("User not found");
+    setLocale("ru");
+    expect(getApiErrorMessage(err)).toBe("Пользователь не найден");
+  });
+
+  it("falls back to the backend's own message for an unmapped top-level code", () => {
+    const err = makeAxiosError({ code: "brand_new_code", message: "Something new happened" });
+    expect(getApiErrorMessage(err)).toBe("Something new happened");
+  });
+
+  it("translates the first field error via its code", () => {
     const err = makeAxiosError({
-      errors: [{ path: "email", msg: { translation: "Email is invalid" } }],
+      errors: [{ field: "email", code: "email_required", message: "Email is required" }],
     });
-    expect(getApiErrorMessage(err)).toBe("Email is invalid");
+    setLocale("ru");
+    expect(getApiErrorMessage(err)).toBe("Email обязателен");
+  });
+
+  it("falls back to the backend's own message for an unmapped field error code", () => {
+    const err = makeAxiosError({
+      errors: [{ field: "email", code: "brand_new_code", message: "Some new validation rule" }],
+    });
+    setLocale("ru");
+    expect(getApiErrorMessage(err)).toBe("Some new validation rule");
   });
 });
 
 describe("extractApiFieldErrors", () => {
   const KNOWN_FIELDS = ["name", "email", "password"] as const;
 
+  beforeEach(() => {
+    setLocale("en");
+  });
+
   it("returns empty results for non-axios errors", () => {
     const result = extractApiFieldErrors(new Error("boom"), KNOWN_FIELDS);
     expect(result).toEqual({ fieldErrors: {}, genericErrors: [] });
   });
 
-  it("maps known field errors onto fieldErrors", () => {
+  it("maps known field errors onto fieldErrors, translated via the backend code", () => {
+    setLocale("ru");
     const err = makeAxiosError({
-      errors: [{ path: "email", msg: { translation: "Email already used" } }],
+      errors: [{ field: "email", code: "user_already_exists", message: "Email is invalid or already taken" }],
     });
     const result = extractApiFieldErrors(err, KNOWN_FIELDS);
-    expect(result.fieldErrors).toEqual({ email: "Email already used" });
+    expect(result.fieldErrors).toEqual({ email: "Email некорректен или уже используется" });
     expect(result.genericErrors).toEqual([]);
   });
 
   it("routes errors for unknown fields into genericErrors", () => {
     const err = makeAxiosError({
-      errors: [{ path: "captcha", msg: { translation: "Captcha failed" } }],
+      errors: [{ field: "captcha", message: "Captcha failed" }],
     });
     const result = extractApiFieldErrors(err, KNOWN_FIELDS);
     expect(result.fieldErrors).toEqual({});
     expect(result.genericErrors).toEqual(["Captcha failed"]);
   });
 
-  it("routes errors without a path into genericErrors", () => {
+  it("routes errors without a field into genericErrors", () => {
     const err = makeAxiosError({
-      errors: [{ msg: { translation: "General failure" } }],
+      errors: [{ message: "General failure" }],
     });
     const result = extractApiFieldErrors(err, KNOWN_FIELDS);
     expect(result.genericErrors).toEqual(["General failure"]);
   });
 
-  it("skips errors without a translation message", () => {
+  it("skips errors without any resolvable message", () => {
     const err = makeAxiosError({
-      errors: [{ path: "email", msg: {} }],
+      errors: [{ field: "email" }],
     });
     const result = extractApiFieldErrors(err, KNOWN_FIELDS);
     expect(result.fieldErrors).toEqual({});
     expect(result.genericErrors).toEqual([]);
   });
 
-  it("handles a mix of known, unknown and missing-path errors", () => {
+  it("handles a mix of known, unknown and missing-field errors", () => {
     const err = makeAxiosError({
       errors: [
-        { path: "email", msg: { translation: "Email invalid" } },
-        { path: "captcha", msg: { translation: "Captcha failed" } },
-        { msg: { translation: "General failure" } },
+        { field: "email", message: "Email invalid" },
+        { field: "captcha", message: "Captcha failed" },
+        { message: "General failure" },
       ],
     });
     const result = extractApiFieldErrors(err, KNOWN_FIELDS);

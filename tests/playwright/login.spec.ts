@@ -9,7 +9,7 @@ test.describe("Login form", () => {
         status: 401,
         contentType: "application/json",
         body: JSON.stringify({
-          errors: [{ msg: { translation: serverMessage } }],
+          message: serverMessage,
         }),
       });
     });

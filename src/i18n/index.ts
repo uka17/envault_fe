@@ -6,6 +6,7 @@ import enValidation from "@/locales/en/validation.json";
 import enProfile from "@/locales/en/profile.json";
 import enStash from "@/locales/en/stash.json";
 import enHome from "@/locales/en/home.json";
+import enApiErrors from "@/locales/en/apiErrors.json";
 
 import ruCommon from "@/locales/ru/common.json";
 import ruAuth from "@/locales/ru/auth.json";
@@ -13,6 +14,7 @@ import ruValidation from "@/locales/ru/validation.json";
 import ruProfile from "@/locales/ru/profile.json";
 import ruStash from "@/locales/ru/stash.json";
 import ruHome from "@/locales/ru/home.json";
+import ruApiErrors from "@/locales/ru/apiErrors.json";
 
 export const SUPPORTED_LOCALES = ["en", "ru"] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
@@ -70,6 +72,7 @@ export const i18n = createI18n({
       profile: enProfile,
       stash: enStash,
       home: enHome,
+      apiErrors: enApiErrors,
     },
     ru: {
       common: ruCommon,
@@ -78,6 +81,7 @@ export const i18n = createI18n({
       profile: ruProfile,
       stash: ruStash,
       home: ruHome,
+      apiErrors: ruApiErrors,
     },
   },
 });

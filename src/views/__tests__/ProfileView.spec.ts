@@ -207,7 +207,7 @@ describe("ProfileView.vue", () => {
       const { AxiosError } = await import("axios");
       const err = new AxiosError("Request failed");
       err.response = {
-        data: { errors: [{ path: "currentPassword", msg: { translation: "Current password is wrong" } }] },
+        data: { errors: [{ field: "currentPassword", message: "Current password is wrong" }] },
         status: 400,
         statusText: "Bad Request",
         headers: {},
