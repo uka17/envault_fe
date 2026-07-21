@@ -622,8 +622,8 @@ async function terminateOtherSessions() {
   min-height: 100vh;
   color: var(--env-text);
   background:
-    radial-gradient(circle at 20% 10%, rgba(249, 115, 22, 0.22), transparent 30%),
-    radial-gradient(circle at 90% 80%, rgba(225, 29, 72, 0.12), transparent 35%),
+    radial-gradient(circle at 20% 10%, rgba(196, 122, 69, 0.14), transparent 30%),
+    radial-gradient(circle at 90% 80%, rgba(169, 66, 89, 0.08), transparent 35%),
     #080a0d;
 }
 

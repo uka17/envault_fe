@@ -223,7 +223,7 @@ const handleLogout = () => {
   color: var(--env-accent-soft);
   font-size: 0.9rem;
   font-weight: 600;
-  background: rgba(249, 115, 22, 0.18);
+  background: rgba(196, 122, 69, 0.14);
   cursor: pointer;
 }
 
@@ -304,7 +304,7 @@ const handleLogout = () => {
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--env-accent-soft);
-  background: rgba(249, 115, 22, 0.18);
+  background: rgba(196, 122, 69, 0.14);
   flex-shrink: 0;
 }
 

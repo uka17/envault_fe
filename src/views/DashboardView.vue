@@ -351,8 +351,8 @@ const handleRetry = (): void => {
   min-height: 100vh;
   color: var(--env-text);
   background:
-    radial-gradient(circle at 20% 10%, rgba(249, 115, 22, 0.22), transparent 30%),
-    radial-gradient(circle at 90% 80%, rgba(225, 29, 72, 0.12), transparent 35%), #080a0d;
+    radial-gradient(circle at 20% 10%, rgba(196, 122, 69, 0.14), transparent 30%),
+    radial-gradient(circle at 90% 80%, rgba(169, 66, 89, 0.08), transparent 35%), #080a0d;
 }
 
 .dashboard-container {
@@ -493,7 +493,7 @@ const handleRetry = (): void => {
 
 .stash-row {
   border-radius: 18px;
-  border: 1px solid rgba(249, 115, 22, 0.28);
+  border: 1px solid rgba(196, 122, 69, 0.18);
   background: linear-gradient(180deg, rgba(15, 17, 28, 0.96), rgba(11, 12, 22, 0.96));
   padding: 1.35rem 1.45rem;
   display: grid;
@@ -512,7 +512,7 @@ const handleRetry = (): void => {
 
 .status-badge.planned {
   color: var(--env-accent-soft);
-  background: rgba(249, 115, 22, 0.18);
+  background: rgba(196, 122, 69, 0.14);
 }
 
 .status-badge.sent {
@@ -586,13 +586,13 @@ const handleRetry = (): void => {
   height: 38px;
   border-radius: 4px;
   color: #dee2ec;
-  border: 1px solid rgba(249, 115, 22, 0.5);
+  border: 1px solid rgba(196, 122, 69, 0.4);
   background: rgba(255, 255, 255, 0.01);
 }
 
 :deep(.postpone-btn.n-button:hover) {
   color: #ffffff;
-  border-color: rgba(245, 166, 35, 0.9);
+  border-color: rgba(204, 164, 102, 0.7);
 }
 
 :deep(.delete-btn.n-button) {
@@ -799,7 +799,7 @@ const handleRetry = (): void => {
   border-radius: 16px;
   display: grid;
   place-items: center;
-  background: rgba(249, 115, 22, 0.14);
+  background: rgba(196, 122, 69, 0.14);
   color: var(--env-accent);
   margin-bottom: 0.9rem;
 }
