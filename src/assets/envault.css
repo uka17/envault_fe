@@ -1,7 +1,8 @@
 :root {
-  --env-accent: #8974b4;
-  --env-accent-soft: #9481bb;
-  --env-accent-deep: #6e569f;
+  --env-accent: #f97316;
+  --env-accent-soft: #f5a623;
+  --env-accent-deep: #c2410c;
+  --env-crimson: #e11d48;
   --env-text: #eef1f5;
   --env-muted: #c0c7d1;
   --env-surface: #10121c;
@@ -14,8 +15,8 @@
   background:
     linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px) 0 0 / 56px 56px,
     linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px) 0 0 / 56px 56px,
-    radial-gradient(circle at 20% 10%, rgba(137, 116, 180, 0.22), transparent 30%),
-    radial-gradient(circle at 90% 80%, rgba(137, 116, 180, 0.12), transparent 35%),
+    radial-gradient(circle at 20% 10%, rgba(249, 115, 22, 0.22), transparent 30%),
+    radial-gradient(circle at 90% 80%, rgba(225, 29, 72, 0.12), transparent 35%),
     #080a0d;
 }
 
@@ -30,6 +31,6 @@
   border-radius: 10px;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, var(--env-accent-soft) 0%, var(--env-accent-deep) 100%);
+  background: var(--env-accent);
   color: #ffffff;
 }

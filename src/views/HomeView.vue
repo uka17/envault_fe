@@ -134,7 +134,7 @@ const toSignup = () => router.push("/register");
 
 :deep(.btn-primary.n-button) {
   background: linear-gradient(135deg, var(--env-accent-soft) 0%, var(--env-accent-deep) 100%);
-  border-color: rgba(137, 116, 180, 0.6);
+  border-color: rgba(249, 115, 22, 0.6);
   box-shadow: none;
 }
 
@@ -151,7 +151,7 @@ const toSignup = () => router.push("/register");
 
 :deep(.btn-outline.n-button:hover) {
   color: #ffffff;
-  border-color: rgba(137, 116, 180, 0.8);
+  border-color: rgba(249, 115, 22, 0.8);
   background: rgba(255, 255, 255, 0.06);
 }
 
@@ -195,7 +195,7 @@ const toSignup = () => router.push("/register");
 
 .hero-title span {
   display: block;
-  background: linear-gradient(135deg, #b0a2cd 0%, var(--env-accent) 100%);
+  background: linear-gradient(135deg, var(--env-accent-soft) 0%, var(--env-crimson) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -232,8 +232,8 @@ const toSignup = () => router.push("/register");
   width: 46px;
   height: 46px;
   border-radius: 12px;
-  background: rgba(137, 116, 180, 0.18);
-  color: #baa9da;
+  background: rgba(249, 115, 22, 0.18);
+  color: var(--env-accent-soft);
   display: grid;
   place-items: center;
   margin-bottom: 0.95rem;

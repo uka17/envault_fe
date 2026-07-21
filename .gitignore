@@ -32,3 +32,4 @@ coverage
 logs/
 playwright-report/
 test-results/
+.claude/skills/impeccable

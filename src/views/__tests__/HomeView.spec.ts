@@ -31,7 +31,8 @@ describe("HomeView.vue", () => {
     await flushPromises();
 
     expect(wrapper.find(".hero").exists()).toBe(false);
-    expect(wrapper.find(".stash-list").exists()).toBe(true);
+    expect(wrapper.find(".dashboard-container").exists()).toBe(true);
+    expect(wrapper.find(".empty-state").exists()).toBe(true);
     expect(getStashesApi).toHaveBeenCalled();
   });
 });

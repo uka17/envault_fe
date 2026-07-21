@@ -179,7 +179,7 @@ Components are cut clean and precise: sharp edges on interactive controls, trans
 
 ### Inputs / Fields
 - **Style:** near-transparent fill (`rgba(255,255,255,0.03)`), hairline border, 4px radius, matching buttons.
-- **Focus:** border shifts to a translucent Kindled Orange (`rgba(249, 115, 22, 0.65-0.85)`), no glow, no box-shadow.
+- **Focus:** border brightens to a neutral white hairline (`rgba(255, 255, 255, 0.22)` on hover, `rgba(255, 255, 255, 0.32)` on focus), no accent color, no glow, no box-shadow. Kept deliberately quiet: the accent color is reserved for actions and status, not for every field the user touches.
 - **Autofill:** forced dark background and Paper White text so browser autofill styling can't break the dark theme.
 
 ### Navigation

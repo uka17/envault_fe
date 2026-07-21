@@ -211,7 +211,7 @@ const handleLogout = () => {
   border-radius: 10px;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, var(--env-accent-soft) 0%, var(--env-accent-deep) 100%);
+  background: var(--env-accent);
   color: #ffffff;
 }
 
@@ -220,10 +220,10 @@ const handleLogout = () => {
   height: 40px;
   border: none;
   border-radius: 50%;
-  color: #bca9d6;
+  color: var(--env-accent-soft);
   font-size: 0.9rem;
   font-weight: 600;
-  background: rgba(137, 116, 180, 0.18);
+  background: rgba(249, 115, 22, 0.18);
   cursor: pointer;
 }
 
@@ -303,8 +303,8 @@ const handleLogout = () => {
   place-items: center;
   font-size: 0.78rem;
   font-weight: 600;
-  color: #bca9d6;
-  background: rgba(137, 116, 180, 0.18);
+  color: var(--env-accent-soft);
+  background: rgba(249, 115, 22, 0.18);
   flex-shrink: 0;
 }
 

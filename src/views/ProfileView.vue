@@ -622,8 +622,8 @@ async function terminateOtherSessions() {
   min-height: 100vh;
   color: var(--env-text);
   background:
-    radial-gradient(circle at 20% 10%, rgba(137, 116, 180, 0.22), transparent 30%),
-    radial-gradient(circle at 90% 80%, rgba(137, 116, 180, 0.12), transparent 35%),
+    radial-gradient(circle at 20% 10%, rgba(249, 115, 22, 0.22), transparent 30%),
+    radial-gradient(circle at 90% 80%, rgba(225, 29, 72, 0.12), transparent 35%),
     #080a0d;
 }
 
@@ -668,7 +668,7 @@ async function terminateOtherSessions() {
 }
 
 .card-heading-icon {
-  color: #9d82d4;
+  color: var(--env-accent-soft);
   margin-top: 2px;
   flex-shrink: 0;
 }
@@ -816,7 +816,7 @@ async function terminateOtherSessions() {
   padding: 0;
   cursor: pointer;
   font-size: 0.83rem;
-  color: #9d82d4;
+  color: var(--env-accent-soft);
 }
 
 .edit-link:hover {

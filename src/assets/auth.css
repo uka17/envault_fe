@@ -81,8 +81,8 @@
   --n-color: rgba(255, 255, 255, 0.03);
   --n-color-focus: rgba(255, 255, 255, 0.04);
   --n-border: 1px solid rgba(255, 255, 255, 0.12);
-  --n-border-hover: 1px solid rgba(137, 116, 180, 0.65);
-  --n-border-focus: 1px solid rgba(137, 116, 180, 0.85);
+  --n-border-hover: 1px solid rgba(255, 255, 255, 0.22);
+  --n-border-focus: 1px solid rgba(255, 255, 255, 0.32);
   --n-text-color: #e6e8ee;
   --n-placeholder-color: #757c91;
 }
