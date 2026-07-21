@@ -2,9 +2,9 @@
 name: Envault
 description: End-to-end encrypted messages, delivered exactly when they're meant to arrive.
 colors:
-  amber-ember: "#f5a623"
-  kindled-orange: "#f97316"
-  deep-crimson: "#e11d48"
+  amber-ember: "#d8a250"
+  kindled-orange: "#d6712a"
+  deep-crimson: "#b3324f"
   void-black: "#080a0d"
   charcoal-surface: "#10121c"
   hairline-border: "#ffffff1a"
@@ -111,9 +111,9 @@ This replaces the system's previous cool-purple identity. Purple read as generic
 The palette pairs a solid warm accent with a near-black neutral scale. The amber-to-crimson gradient is reserved for the page's ambient glow, and, rarely, for typography; every UI component (buttons, brand marks, badges, pills) is a flat, solid fill.
 
 ### Primary
-- **Kindled Orange** (#f97316): the default solid accent. Primary buttons, the brand mark, links, focus rings, and icon strokes all use this one flat color.
-- **Amber Ember** (#f5a623): the lighter solid variant. Used for hover states on the primary accent, for "selected/active" states that need to read as distinct from a primary action (e.g. an active filter pill), and for the ambient glow's top-left stop.
-- **Deep Crimson** (#e11d48): almost entirely reserved for the ambient glow's second stop (bottom-right, cooler and fainter) and, if a heading ever earns a gradient treatment, its dark end. Not used as a flat component fill.
+- **Kindled Orange** (#d6712a): the default solid accent. Primary buttons, the brand mark, links, focus rings, and icon strokes all use this one flat color.
+- **Amber Ember** (#d8a250): the lighter solid variant. Used for hover states on the primary accent, for "selected/active" states that need to read as distinct from a primary action (e.g. an active filter pill), and for the ambient glow's top-left stop.
+- **Deep Crimson** (#b3324f): almost entirely reserved for the ambient glow's second stop (bottom-right, cooler and fainter) and, if a heading ever earns a gradient treatment, its dark end. Not used as a flat component fill.
 
 ### Neutral
 - **Void Black** (#080a0d): the page background. The darkest surface in the system; nothing sits behind it.
@@ -126,7 +126,7 @@ The palette pairs a solid warm accent with a near-black neutral scale. The amber
 - **Alert Red** (#ef4444): destructive actions and error states only (delete confirmations, failed requests, the logout danger item). Its hue sits at true red, not the pink-leaning Deep Crimson, so a warning never reads as "more brand."
 
 ### Ambient Glow
-The one legitimate multi-color gradient in the system is atmospheric, not a component: a radial glow at 20%/10% (Kindled Orange, 22% opacity) and a second, fainter one at 90%/80% (Deep Crimson, 12% opacity), both fading to transparent over Void Black. It sets the "ember in the dark" scene on every full-page background and is never used inside a card, button, or badge.
+The one legitimate multi-color gradient in the system is atmospheric, not a component: a radial glow at 20%/10% (Kindled Orange, 16% opacity) and a second, fainter one at 90%/80% (Deep Crimson, 9% opacity), both fading to transparent over Void Black. It sets the "ember in the dark" scene on every full-page background and is never used inside a card, button, or badge.
 
 ### Named Rules
 **The Solid Ember Rule.** The accent color is always a flat solid fill on components, never a gradient. A `linear-gradient` built from the ember colors (Amber Ember, Kindled Orange, Deep Crimson) on a button, brand mark, badge, or pill is a mistake, not a valid variant. The only places the ember colors are allowed to blend into a gradient are the page-level Ambient Glow and, occasionally, typography (see Typography's Named Rule). This doesn't apply to the neutral white-on-Charcoal translucency used for card depth (see Elevation); that's a tonal layering technique, not an accent gradient.
@@ -167,7 +167,7 @@ Components are cut clean and precise: sharp edges on interactive controls, trans
 
 ### Buttons
 - **Shape:** 4px radius on every button, input, and select (`--n-border-radius: 4px` overrides Naive UI's 12px default). Deliberately tighter than the cards around them.
-- **Primary:** solid Kindled Orange (#f97316), dark ink text (#14111d) for contrast, no border, no shadow, no gradient.
+- **Primary:** solid Kindled Orange (#d6712a), dark ink text (#14111d) for contrast, no border, no shadow, no gradient.
 - **Hover:** background brightens toward Amber Ember and the button lifts 1px (`translateY(-1px)`); still solid, still no shadow.
 - **Ghost / Secondary:** transparent background, translucent white border (`hairline-border`), muted-silver text that brightens to paper-white on hover.
 

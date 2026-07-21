@@ -26,6 +26,15 @@ a:hover {
   --n-box-shadow-active: none !important;
 }
 
+.n-input,
+.n-date-picker,
+.n-select,
+.n-base-selection {
+  --n-border-hover: 1px solid rgba(255, 255, 255, 0.22) !important;
+  --n-border-focus: 1px solid rgba(255, 255, 255, 0.32) !important;
+  --n-caret-color: var(--env-text) !important;
+}
+
 .n-input__input-el:-webkit-autofill,
 .n-input__input-el:-webkit-autofill:hover,
 .n-input__input-el:-webkit-autofill:focus,

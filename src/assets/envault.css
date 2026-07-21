@@ -1,8 +1,8 @@
 :root {
-  --env-accent: #f97316;
-  --env-accent-soft: #f5a623;
-  --env-accent-deep: #c2410c;
-  --env-crimson: #e11d48;
+  --env-accent: #d6712a;
+  --env-accent-soft: #d8a250;
+  --env-accent-deep: #994525;
+  --env-crimson: #b3324f;
   --env-text: #eef1f5;
   --env-muted: #c0c7d1;
   --env-surface: #10121c;
@@ -15,8 +15,8 @@
   background:
     linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px) 0 0 / 56px 56px,
     linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px) 0 0 / 56px 56px,
-    radial-gradient(circle at 20% 10%, rgba(249, 115, 22, 0.22), transparent 30%),
-    radial-gradient(circle at 90% 80%, rgba(225, 29, 72, 0.12), transparent 35%),
+    radial-gradient(circle at 20% 10%, rgba(214, 113, 42, 0.16), transparent 30%),
+    radial-gradient(circle at 90% 80%, rgba(179, 50, 79, 0.09), transparent 35%),
     #080a0d;
 }
 

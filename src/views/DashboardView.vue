@@ -465,11 +465,24 @@ const handleRetry = (): void => {
   color: #14111d;
   border: none;
   background: var(--env-accent);
+  transition:
+    background 0.18s ease,
+    transform 0.18s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 :deep(.new-stash-btn.n-button:hover) {
   background: var(--env-accent-soft);
   transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :deep(.new-stash-btn.n-button) {
+    transition: background 0.18s ease;
+  }
+
+  :deep(.new-stash-btn.n-button:hover) {
+    transform: none;
+  }
 }
 
 .stash-list {
