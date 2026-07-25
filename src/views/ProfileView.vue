@@ -654,7 +654,7 @@ async function terminateOtherSessions() {
 }
 
 .profile-card {
-  border-radius: 16px;
+  border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
   padding: 1.6rem;

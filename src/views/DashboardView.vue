@@ -462,27 +462,6 @@ const handleRetry = (): void => {
   height: 46px;
   font-size: 1.02rem;
   font-weight: 700;
-  color: #14111d;
-  border: none;
-  background: var(--env-accent);
-  transition:
-    background 0.18s ease,
-    transform 0.18s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-:deep(.new-stash-btn.n-button:hover) {
-  background: var(--env-accent-soft);
-  transform: translateY(-1px);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :deep(.new-stash-btn.n-button) {
-    transition: background 0.18s ease;
-  }
-
-  :deep(.new-stash-btn.n-button:hover) {
-    transform: none;
-  }
 }
 
 .stash-list {
@@ -492,7 +471,7 @@ const handleRetry = (): void => {
 }
 
 .stash-row {
-  border-radius: 18px;
+  border-radius: 6px;
   border: 1px solid rgba(196, 122, 69, 0.18);
   background: linear-gradient(180deg, rgba(15, 17, 28, 0.96), rgba(11, 12, 22, 0.96));
   padding: 1.35rem 1.45rem;
@@ -584,28 +563,32 @@ const handleRetry = (): void => {
 
 :deep(.postpone-btn.n-button) {
   height: 38px;
-  border-radius: 4px;
+  border-radius: 8px;
   color: #dee2ec;
-  border: 1px solid rgba(196, 122, 69, 0.4);
   background: rgba(255, 255, 255, 0.01);
+  --n-border: 1px solid rgba(196, 122, 69, 0.4);
+  --n-border-hover: 1px solid rgba(204, 164, 102, 0.7);
+  --n-border-focus: 1px solid rgba(204, 164, 102, 0.7);
+  --n-border-pressed: 1px solid rgba(204, 164, 102, 0.7);
 }
 
 :deep(.postpone-btn.n-button:hover) {
   color: #ffffff;
-  border-color: rgba(204, 164, 102, 0.7);
 }
 
 :deep(.delete-btn.n-button) {
   height: 38px;
-  border-radius: 4px;
-  color: #f2a3a3;
-  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 8px;
+  color: #ef4444;
   background: rgba(255, 255, 255, 0.01);
+  --n-border: 1px solid rgba(239, 68, 68, 0.4);
+  --n-border-hover: 1px solid rgba(239, 68, 68, 0.85);
+  --n-border-focus: 1px solid rgba(239, 68, 68, 0.85);
+  --n-border-pressed: 1px solid rgba(239, 68, 68, 0.85);
 }
 
 :deep(.delete-btn.n-button:hover) {
-  color: #ff9d9d;
-  border-color: rgba(239, 68, 68, 0.85);
+  color: #ff6b6b;
 }
 
 .modal-footer {
@@ -688,7 +671,7 @@ const handleRetry = (): void => {
 }
 
 .stash-row-skeleton {
-  border-radius: 18px;
+  border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: linear-gradient(180deg, rgba(15, 17, 28, 0.96), rgba(11, 12, 22, 0.96));
   padding: 1.35rem 1.45rem;
@@ -771,14 +754,16 @@ const handleRetry = (): void => {
 }
 
 :deep(.retry-btn.n-button) {
-  border-radius: 4px;
+  border-radius: 8px;
   color: #dee2ec;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  --n-border: 1px solid rgba(255, 255, 255, 0.16);
+  --n-border-hover: 1px solid rgba(255, 255, 255, 0.32);
+  --n-border-focus: 1px solid rgba(255, 255, 255, 0.32);
+  --n-border-pressed: 1px solid rgba(255, 255, 255, 0.32);
 }
 
 :deep(.retry-btn.n-button:hover) {
   color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.32);
 }
 
 .empty-state {

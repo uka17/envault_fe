@@ -132,44 +132,6 @@ const toSignup = () => router.push("/register");
 }
 
 
-:deep(.btn-primary.n-button) {
-  background: linear-gradient(135deg, var(--env-accent-soft) 0%, var(--env-accent-deep) 100%);
-  border-color: rgba(196, 122, 69, 0.45);
-  box-shadow: none;
-  transition: transform 0.18s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-:deep(.btn-primary.n-button:hover) {
-  transform: translateY(-1px);
-  box-shadow: none;
-}
-
-:deep(.btn-outline.n-button) {
-  color: #d4d8dd;
-  border-color: rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.02);
-  transition:
-    color 0.18s ease,
-    border-color 0.18s ease,
-    background 0.18s ease;
-}
-
-:deep(.btn-outline.n-button:hover) {
-  color: #ffffff;
-  border-color: rgba(196, 122, 69, 0.6);
-  background: rgba(255, 255, 255, 0.06);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :deep(.btn-primary.n-button) {
-    transition: none;
-  }
-
-  :deep(.btn-primary.n-button:hover) {
-    transform: none;
-  }
-}
-
 :deep(.btn-lg.n-button) {
   min-width: 220px;
 }

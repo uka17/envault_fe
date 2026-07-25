@@ -42,7 +42,7 @@
 
 /* Auth card */
 .env-auth-card.n-card {
-  border-radius: 16px;
+  border-radius: 6px;
   border: 1px solid var(--env-surface-border);
   background: linear-gradient(180deg, rgba(17, 19, 30, 0.96), rgba(13, 14, 25, 0.97));
   box-shadow: 0 24px 50px rgba(0, 0, 0, 0.38);
@@ -92,27 +92,6 @@
   margin-top: 0.25rem;
   height: 50px;
   font-weight: 700;
-  color: #16131f;
-  background: linear-gradient(135deg, var(--env-accent-soft) 0%, var(--env-accent) 100%);
-  border: none;
-  transition:
-    transform 0.18s cubic-bezier(0.25, 1, 0.5, 1),
-    filter 0.18s ease;
-}
-
-.submit-btn.n-button:hover {
-  filter: brightness(1.04);
-  transform: translateY(-1px);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .submit-btn.n-button {
-    transition: filter 0.18s ease;
-  }
-
-  .submit-btn.n-button:hover {
-    transform: none;
-  }
 }
 
 /* Password toggle */

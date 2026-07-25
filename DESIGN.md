@@ -9,7 +9,7 @@ colors:
   void-black: "#080a0d"
   charcoal-surface: "#10121c"
   hairline-border: "#ffffff1a"
-  paper-white: "#eef1f5"
+  paper-white: "#e2e5ea"
   muted-silver: "#c0c7d1"
   alert-red: "#ef4444"
 typography:
@@ -45,6 +45,8 @@ typography:
     letterSpacing: "0.02em"
 rounded:
   sm: "4px"
+  button: "8px"
+  compact: "6px"
   md: "12px"
   lg: "18px"
   xl: "28px"
@@ -58,25 +60,30 @@ components:
   button-primary:
     backgroundColor: "{colors.kindled-orange}"
     textColor: "#14111d"
-    rounded: "{rounded.sm}"
+    rounded: "{rounded.button}"
     padding: "0 28px"
     height: "44px"
   button-primary-hover:
     backgroundColor: "{colors.amber-ember}"
     textColor: "#14111d"
-    rounded: "{rounded.sm}"
+    rounded: "{rounded.button}"
     padding: "0 28px"
     height: "44px"
   button-ghost:
     backgroundColor: "transparent"
     textColor: "{colors.muted-silver}"
-    rounded: "{rounded.sm}"
+    rounded: "{rounded.button}"
     padding: "0 28px"
     height: "44px"
   card:
     backgroundColor: "{colors.charcoal-surface}"
     textColor: "{colors.paper-white}"
     rounded: "{rounded.lg}"
+    padding: "24px"
+  card-compact:
+    backgroundColor: "{colors.charcoal-surface}"
+    textColor: "{colors.paper-white}"
+    rounded: "{rounded.compact}"
     padding: "24px"
   input:
     backgroundColor: "#ffffff08"
@@ -105,7 +112,7 @@ This replaces the system's previous cool-purple identity. Purple read as generic
 - Near-black void with a solid warm accent; the amber-to-crimson gradient lives only in the ambient background glow, never on a component
 - Flat by default; depth comes from translucency, hairline borders, and blur, not drop shadows
 - One typeface (Inter) carries the entire system, differentiated by weight and size alone
-- Sharp, minimal precision in components: 4px radii on interactive controls, no bevel, no gloss
+- Sharp, minimal precision in components: 8px radii on buttons, 4px on inputs and selects, no bevel, no gloss
 
 ## 2. Colors: The Ember Palette
 
@@ -168,13 +175,13 @@ Envault is flat by default and stays that way deliberately: several components e
 Components are cut clean and precise: sharp edges on interactive controls, translucent surfaces at rest, and a solid ember fill reserved for the one action that matters most on any given screen.
 
 ### Buttons
-- **Shape:** 4px radius on every button, input, and select (`--n-border-radius: 4px` overrides Naive UI's 12px default). Deliberately tighter than the cards around them.
+- **Shape:** 8px radius on every button (`--n-border-radius: 8px` for `.n-button`, overriding Naive UI's 12px default), 4px on inputs and selects. Both tighter than the cards around them.
 - **Primary:** solid Kindled Orange (#c47a45), dark ink text (#14111d) for contrast, no border, no shadow, no gradient.
 - **Hover:** background brightens toward Amber Ember and the button lifts 1px (`translateY(-1px)`); still solid, still no shadow.
 - **Ghost / Secondary:** transparent background, translucent white border (`hairline-border`), muted-silver text that brightens to paper-white on hover.
 
 ### Cards
-- **Corner style:** 18px radius for content cards (feature cards), 16px for the auth card. Both round enough to feel soft against the sharp 4px buttons inside them.
+- **Corner style:** 18px radius for content cards (feature cards, dashboard summary cards). The auth/form card, profile page sections, and stash list rows use a tighter 6px radius instead, a middle ground between the 18px content cards and the 8px buttons inside them.
 - **Background:** a faint vertical gradient between two near-transparent whites over Charcoal Surface, giving the impression of a lit panel without any real shadow.
 - **Border:** the single hairline border, never a colored or side-only stripe.
 - **Internal padding:** 20-24px.

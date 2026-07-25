@@ -246,28 +246,11 @@ const handleLogout = () => {
 
 .locale-switch:hover {
   border-color: rgba(255, 255, 255, 0.35);
-  color: #eef1f5;
-}
-
-:deep(.header-btn-login.n-button) {
-  border-color: rgba(255, 255, 255, 0.2);
-  color: #c0c7d1;
-}
-
-:deep(.header-btn-login.n-button:hover) {
-  border-color: rgba(255, 255, 255, 0.4);
-  color: #eef1f5;
+  color: var(--env-text);
 }
 
 :deep(.header-btn-start.n-button) {
-  background: linear-gradient(135deg, var(--env-accent-soft) 0%, var(--env-accent) 100%);
-  border: none;
-  color: #14111d;
   font-weight: 600;
-}
-
-:deep(.header-btn-start.n-button:hover) {
-  filter: brightness(1.08);
 }
 
 .dropdown-backdrop {
@@ -338,7 +321,7 @@ const handleLogout = () => {
 
 .dropdown-item:hover {
   background: rgba(255, 255, 255, 0.06);
-  color: #eef1f5;
+  color: var(--env-text);
 }
 
 .dropdown-item--danger {
