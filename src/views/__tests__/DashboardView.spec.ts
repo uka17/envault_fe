@@ -12,7 +12,7 @@ vi.mock("@/api/stashApi", () => ({
 }));
 
 const makeStash = (
-  overrides: Partial<{ id: number; isSent: boolean; sendAt: string }> = {},
+  overrides: Partial<{ id: number; to: string; isSent: boolean; sendAt: string }> = {},
 ) => ({
   id: 1,
   to: "a@b.com",
@@ -89,8 +89,10 @@ describe("DashboardView.vue", () => {
     expect(pushSpy).toHaveBeenCalledWith({ name: "create-stash" });
   });
 
-  it("shows a confirmation modal before deleting a stash and deletes it on confirm", async () => {
-    vi.mocked(getStashesApi).mockResolvedValue([makeStash({ id: 1 })]);
+  it("shows a confirmation modal naming the recipient and scheduled date before deleting a stash and deletes it on confirm", async () => {
+    vi.mocked(getStashesApi).mockResolvedValue([
+      makeStash({ id: 1, to: "recipient@example.com", sendAt: "2099-03-15T10:00:00.000Z" }),
+    ]);
     vi.mocked(deleteStashApi).mockResolvedValue(undefined);
     const { wrapper } = await mountWithProviders(DashboardView);
     await flushPromises();
@@ -100,6 +102,8 @@ describe("DashboardView.vue", () => {
 
     expect(deleteStashApi).not.toHaveBeenCalled();
     expect(document.body.textContent).toContain("Delete stash");
+    expect(document.body.textContent).toContain("recipient@example.com");
+    expect(document.body.textContent).toContain("March 15, 2099");
 
     const confirmButton = modalButton("Delete");
     expect(confirmButton).toBeTruthy();

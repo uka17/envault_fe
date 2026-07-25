@@ -25,7 +25,8 @@
     "emptyFilteredMessage": "No stashes match this filter yet. Switch back to see everything.",
     "modals": {
       "deleteTitle": "Delete stash",
-      "deleteText": "This action cannot be undone. Are you sure you want to delete this stash?",
+      "deleteText": "Delete the message to {recipient}, scheduled for {date}? This cannot be undone.",
+      "deleteTextGeneric": "This action cannot be undone. Are you sure you want to delete this stash?",
       "deleteConfirm": "Delete"
     }
   },

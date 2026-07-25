@@ -103,6 +103,18 @@ const confirmDeleteStash = (id: number): void => {
 };
 
 /**
+ * Look up the full stash object currently targeted for deletion, so the
+ * confirmation modal can name the recipient and scheduled date instead of
+ * showing a generic message.
+ * @returns The stash matching `deleteTargetId`, or `undefined` if there is
+ * no target or it can no longer be found in the store.
+ */
+const deleteTargetStash = computed(() => {
+  if (deleteTargetId.value === null) return undefined;
+  return stashStore.stashes.find((s) => s.id === deleteTargetId.value);
+});
+
+/**
  * Delete the stash currently selected for deletion after user confirmation.
  */
 const handleDeleteStash = async (): Promise<void> => {
@@ -333,7 +345,16 @@ const handleRetry = (): void => {
       class="edit-modal"
       :style="{ maxWidth: '420px' }"
     >
-      <p>{{ t("stash.dashboard.modals.deleteText") }}</p>
+      <p>
+        {{
+          deleteTargetStash
+            ? t("stash.dashboard.modals.deleteText", {
+                recipient: deleteTargetStash.to,
+                date: formatDate(deleteTargetStash.sendAt),
+              })
+            : t("stash.dashboard.modals.deleteTextGeneric")
+        }}
+      </p>
       <template #footer>
         <div class="modal-footer">
           <n-button ghost @click="showDeleteModal = false">{{ t("common.actions.cancel") }}</n-button>
