@@ -10,6 +10,7 @@
     "snooze": "Отложить на 24 ч",
     "delete": "Удалить",
     "deleteFailed": "Не удалось удалить stash",
+    "snoozeFailed": "Не удалось отложить stash",
     "statusSent": "Отправлено",
     "statusPending": "Ожидает отправки",
     "today": "Сегодня",

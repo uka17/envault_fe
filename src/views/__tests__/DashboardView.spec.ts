@@ -78,6 +78,19 @@ describe("DashboardView.vue", () => {
     expect(snoozeStashApi).toHaveBeenCalledWith(1, 24);
   });
 
+  it("shows an error message when snoozing a stash fails", async () => {
+    vi.mocked(getStashesApi).mockResolvedValue([makeStash({ id: 1, isSent: false })]);
+    vi.mocked(snoozeStashApi).mockRejectedValue(new Error("network error"));
+    const { wrapper } = await mountWithProviders(DashboardView);
+    await flushPromises();
+
+    await wrapper.find(".postpone-btn").trigger("click");
+    await flushPromises();
+
+    expect(snoozeStashApi).toHaveBeenCalledWith(1, 24);
+    expect(document.body.textContent).toContain("Failed to snooze stash");
+  });
+
   it("navigates to the create-stash page", async () => {
     vi.mocked(getStashesApi).mockResolvedValue([]);
     const { wrapper, router } = await mountWithProviders(DashboardView);

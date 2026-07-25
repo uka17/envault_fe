@@ -81,13 +81,16 @@ const getSubtitle = (isSent: boolean, sendAt: string): string => {
 };
 
 /**
- * Snooze a stash by 24 hours.
+ * Snooze a stash by 24 hours. Shows an error message if the request fails,
+ * since a silently failed snooze could leave a scheduled delivery unpostponed.
  * @param id Stash ID to snooze.
  */
 const handleSnooze = async (id: number): Promise<void> => {
   snoozeLoadingId.value = id;
   try {
     await stashStore.snoozeStash(id, 24);
+  } catch {
+    message.error(t("stash.dashboard.snoozeFailed"));
   } finally {
     snoozeLoadingId.value = null;
   }
