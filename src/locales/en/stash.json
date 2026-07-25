@@ -10,6 +10,7 @@
     "snooze": "Snooze 24h",
     "delete": "Delete",
     "deleteFailed": "Failed to delete stash",
+    "snoozeFailed": "Failed to snooze stash",
     "statusSent": "Sent",
     "statusPending": "Awaiting delivery",
     "today": "Today",
