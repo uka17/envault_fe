@@ -39,7 +39,7 @@ describe("DashboardView.vue", () => {
   it("fetches and renders stashes on mount", async () => {
     vi.mocked(getStashesApi).mockResolvedValue([
       makeStash({ id: 1, isSent: false }),
-      makeStash({ id: 2, isSent: true }),
+      makeStash({ id: 2, isSent: false }),
     ]);
     const { wrapper } = await mountWithProviders(DashboardView);
     await flushPromises();
@@ -48,7 +48,7 @@ describe("DashboardView.vue", () => {
     expect(wrapper.findAll(".stash-row")).toHaveLength(2);
   });
 
-  it("filters stashes by planned/sent", async () => {
+  it("defaults to the planned filter and filters stashes by sent/all", async () => {
     vi.mocked(getStashesApi).mockResolvedValue([
       makeStash({ id: 1, isSent: false }),
       makeStash({ id: 2, isSent: true }),
@@ -56,13 +56,15 @@ describe("DashboardView.vue", () => {
     const { wrapper } = await mountWithProviders(DashboardView);
     await flushPromises();
 
-    const buttons = wrapper.findAll(".filter-pill");
-    await buttons[2].trigger("click");
     expect(wrapper.findAll(".stash-row")).toHaveLength(1);
     expect(wrapper.find(".stash-row .recipient-name").text()).toBe("a@b.com");
 
+    const buttons = wrapper.findAll(".filter-pill");
     await buttons[1].trigger("click");
     expect(wrapper.findAll(".stash-row")).toHaveLength(1);
+
+    await buttons[2].trigger("click");
+    expect(wrapper.findAll(".stash-row")).toHaveLength(2);
   });
 
   it("snoozes a planned stash for 24 hours", async () => {

@@ -22,7 +22,7 @@ const router = useRouter();
 const stashStore = useStashStore();
 const { t, locale } = useI18n();
 const message = useMessage();
-const activeFilter = ref<DashboardFilter>("all");
+const activeFilter = ref<DashboardFilter>("planned");
 const snoozeLoadingId = ref<number | null>(null);
 const showDeleteModal = ref(false);
 const deleteTargetId = ref<number | null>(null);
@@ -185,15 +185,6 @@ const handleRetry = (): void => {
           <div class="filter-group">
             <button
               type="button"
-              class="filter-pill"
-              :class="{ active: activeFilter === 'all' }"
-              @click="activeFilter = 'all'"
-            >
-              {{ t("stash.dashboard.filterAll") }}
-            </button>
-
-            <button
-              type="button"
               class="filter-pill with-icon"
               :class="{ active: activeFilter === 'planned' }"
               @click="activeFilter = 'planned'"
@@ -214,6 +205,15 @@ const handleRetry = (): void => {
                 <PaperPlaneOutline />
               </n-icon>
               {{ t("stash.dashboard.filterSent") }}
+            </button>
+
+            <button
+              type="button"
+              class="filter-pill"
+              :class="{ active: activeFilter === 'all' }"
+              @click="activeFilter = 'all'"
+            >
+              {{ t("stash.dashboard.filterAll") }}
             </button>
           </div>
 

@@ -90,20 +90,29 @@ async function loginWithMockedStashes(page: Page): Promise<{ plannedSendAt: stri
 }
 
 test.describe("Dashboard", () => {
-  test("shows summary counters and the stash list", async ({ page }) => {
+  test("shows summary counters and defaults to the planned stash list", async ({ page }) => {
     await loginWithMockedStashes(page);
-
-    await expect(page.getByText("sent@example.com")).toBeVisible();
-    await expect(page.getByText("planned@example.com")).toBeVisible();
-  });
-
-  test("filters the list to planned stashes only", async ({ page }) => {
-    await loginWithMockedStashes(page);
-
-    await page.getByRole("button", { name: t.stash.dashboard.filterPlanned, exact: true }).click();
 
     await expect(page.getByText("planned@example.com")).toBeVisible();
     await expect(page.getByText("sent@example.com")).toHaveCount(0);
+  });
+
+  test("filters the list to sent stashes only", async ({ page }) => {
+    await loginWithMockedStashes(page);
+
+    await page.getByRole("button", { name: t.stash.dashboard.filterSent, exact: true }).click();
+
+    await expect(page.getByText("sent@example.com")).toBeVisible();
+    await expect(page.getByText("planned@example.com")).toHaveCount(0);
+  });
+
+  test("filters the list to show all stashes", async ({ page }) => {
+    await loginWithMockedStashes(page);
+
+    await page.getByRole("button", { name: t.stash.dashboard.filterAll, exact: true }).click();
+
+    await expect(page.getByText("planned@example.com")).toBeVisible();
+    await expect(page.getByText("sent@example.com")).toBeVisible();
   });
 
   test("navigates to the create stash page", async ({ page }) => {
@@ -120,7 +129,6 @@ test.describe("Dashboard", () => {
     await page.goto("/");
 
     await expect(page).toHaveURL("/");
-    await expect(page.getByText("sent@example.com")).toBeVisible();
     await expect(page.getByText("planned@example.com")).toBeVisible();
     await expect(page.getByRole("button", { name: t.common.nav.start })).toHaveCount(0);
   });
