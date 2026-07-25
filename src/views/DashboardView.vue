@@ -464,6 +464,11 @@ const handleRetry = (): void => {
   font-weight: 700;
 }
 
+:deep(.new-stash-btn.n-button:focus-visible) {
+  outline: 2px solid var(--env-accent-soft);
+  outline-offset: 2px;
+}
+
 .stash-list {
   margin-top: 1.35rem;
   display: grid;
