@@ -622,8 +622,8 @@ async function terminateOtherSessions() {
   min-height: 100vh;
   color: var(--env-text);
   background:
-    radial-gradient(circle at 20% 10%, rgba(137, 116, 180, 0.22), transparent 30%),
-    radial-gradient(circle at 90% 80%, rgba(137, 116, 180, 0.12), transparent 35%),
+    radial-gradient(circle at 20% 10%, rgba(196, 122, 69, 0.14), transparent 30%),
+    radial-gradient(circle at 90% 80%, rgba(169, 66, 89, 0.08), transparent 35%),
     #080a0d;
 }
 
@@ -654,7 +654,7 @@ async function terminateOtherSessions() {
 }
 
 .profile-card {
-  border-radius: 16px;
+  border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
   padding: 1.6rem;
@@ -668,7 +668,7 @@ async function terminateOtherSessions() {
 }
 
 .card-heading-icon {
-  color: #9d82d4;
+  color: var(--env-accent-soft);
   margin-top: 2px;
   flex-shrink: 0;
 }
@@ -816,7 +816,7 @@ async function terminateOtherSessions() {
   padding: 0;
   cursor: pointer;
   font-size: 0.83rem;
-  color: #9d82d4;
+  color: var(--env-accent-soft);
 }
 
 .edit-link:hover {

@@ -18,6 +18,11 @@
     "inMonths": "in {n} month | in {n} months",
     "inYears": "in {n} year | in {n} years",
     "loadFailed": "Failed to load stashes",
+    "retry": "Try again",
+    "emptyTitle": "No stashes yet",
+    "emptyMessage": "Write a message, set the moment it should arrive, and Envault will hold it safely until then.",
+    "emptyFilteredTitle": "Nothing here",
+    "emptyFilteredMessage": "No stashes match this filter yet. Switch back to see everything.",
     "modals": {
       "deleteTitle": "Delete stash",
       "deleteText": "This action cannot be undone. Are you sure you want to delete this stash?",

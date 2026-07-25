@@ -211,7 +211,7 @@ const handleLogout = () => {
   border-radius: 10px;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, var(--env-accent-soft) 0%, var(--env-accent-deep) 100%);
+  background: var(--env-accent);
   color: #ffffff;
 }
 
@@ -220,10 +220,10 @@ const handleLogout = () => {
   height: 40px;
   border: none;
   border-radius: 50%;
-  color: #bca9d6;
+  color: var(--env-accent-soft);
   font-size: 0.9rem;
   font-weight: 600;
-  background: rgba(137, 116, 180, 0.18);
+  background: rgba(196, 122, 69, 0.14);
   cursor: pointer;
 }
 
@@ -246,28 +246,11 @@ const handleLogout = () => {
 
 .locale-switch:hover {
   border-color: rgba(255, 255, 255, 0.35);
-  color: #eef1f5;
-}
-
-:deep(.header-btn-login.n-button) {
-  border-color: rgba(255, 255, 255, 0.2);
-  color: #c0c7d1;
-}
-
-:deep(.header-btn-login.n-button:hover) {
-  border-color: rgba(255, 255, 255, 0.4);
-  color: #eef1f5;
+  color: var(--env-text);
 }
 
 :deep(.header-btn-start.n-button) {
-  background: linear-gradient(135deg, var(--env-accent-soft) 0%, var(--env-accent) 100%);
-  border: none;
-  color: #14111d;
   font-weight: 600;
-}
-
-:deep(.header-btn-start.n-button:hover) {
-  filter: brightness(1.08);
 }
 
 .dropdown-backdrop {
@@ -303,8 +286,8 @@ const handleLogout = () => {
   place-items: center;
   font-size: 0.78rem;
   font-weight: 600;
-  color: #bca9d6;
-  background: rgba(137, 116, 180, 0.18);
+  color: var(--env-accent-soft);
+  background: rgba(196, 122, 69, 0.14);
   flex-shrink: 0;
 }
 
@@ -338,7 +321,7 @@ const handleLogout = () => {
 
 .dropdown-item:hover {
   background: rgba(255, 255, 255, 0.06);
-  color: #eef1f5;
+  color: var(--env-text);
 }
 
 .dropdown-item--danger {

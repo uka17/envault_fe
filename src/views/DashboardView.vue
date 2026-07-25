@@ -6,6 +6,7 @@ import { NButton, NIcon, NLayout, NLayoutContent, NModal, useMessage } from "nai
 import AppHeader from "@/components/AppHeader.vue";
 import { useStashStore } from "@/stores/stash";
 import {
+  AlertCircleOutline,
   CheckmarkCircleOutline,
   LockClosedOutline,
   MailOutline,
@@ -118,6 +119,13 @@ const handleDeleteStash = async (): Promise<void> => {
     deleteTargetId.value = null;
   }
 };
+
+/**
+ * Retry loading the stash list after a failed fetch.
+ */
+const handleRetry = (): void => {
+  stashStore.fetchStashes();
+};
 </script>
 
 <template>
@@ -204,7 +212,58 @@ const handleDeleteStash = async (): Promise<void> => {
           </n-button>
         </section>
 
-        <section class="stash-list">
+        <section v-if="stashStore.loading" class="stash-list" aria-hidden="true">
+          <div v-for="n in 3" :key="n" class="stash-row-skeleton">
+            <div class="skeleton-block skeleton-badge" />
+            <div class="skeleton-block skeleton-line-group">
+              <div class="skeleton-block skeleton-line skeleton-line--wide" />
+              <div class="skeleton-block skeleton-line skeleton-line--narrow" />
+            </div>
+          </div>
+        </section>
+
+        <section v-else-if="stashStore.error" class="state-banner state-banner--error" role="alert">
+          <n-icon :size="22" class="state-banner-icon">
+            <AlertCircleOutline />
+          </n-icon>
+          <p class="state-banner-text">{{ stashStore.error }}</p>
+          <n-button ghost class="retry-btn" @click="handleRetry">
+            {{ t("stash.dashboard.retry") }}
+          </n-button>
+        </section>
+
+        <section v-else-if="filteredStashes.length === 0" class="empty-state">
+          <div class="empty-state-icon">
+            <n-icon :size="26">
+              <LockClosedOutline />
+            </n-icon>
+          </div>
+          <template v-if="stashStore.stashes.length === 0">
+            <h2 class="empty-state-title">{{ t("stash.dashboard.emptyTitle") }}</h2>
+            <p class="empty-state-text">{{ t("stash.dashboard.emptyMessage") }}</p>
+            <n-button
+              type="primary"
+              class="new-stash-btn empty-state-cta"
+              @click="router.push({ name: 'create-stash' })"
+            >
+              <template #icon>
+                <n-icon :size="18">
+                  <AddOutline />
+                </n-icon>
+              </template>
+              {{ t("stash.dashboard.newStash") }}
+            </n-button>
+          </template>
+          <template v-else>
+            <h2 class="empty-state-title">{{ t("stash.dashboard.emptyFilteredTitle") }}</h2>
+            <p class="empty-state-text">{{ t("stash.dashboard.emptyFilteredMessage") }}</p>
+            <button type="button" class="filter-pill" @click="activeFilter = 'all'">
+              {{ t("stash.dashboard.filterAll") }}
+            </button>
+          </template>
+        </section>
+
+        <section v-else class="stash-list">
           <article v-for="stash in filteredStashes" :key="stash.id" class="stash-row">
             <div class="status-badge" :class="stash.isSent ? 'sent' : 'planned'">
               <n-icon :size="24">
@@ -292,8 +351,8 @@ const handleDeleteStash = async (): Promise<void> => {
   min-height: 100vh;
   color: var(--env-text);
   background:
-    radial-gradient(circle at 20% 10%, rgba(137, 116, 180, 0.22), transparent 30%),
-    radial-gradient(circle at 90% 80%, rgba(137, 116, 180, 0.12), transparent 35%), #080a0d;
+    radial-gradient(circle at 20% 10%, rgba(196, 122, 69, 0.14), transparent 30%),
+    radial-gradient(circle at 90% 80%, rgba(169, 66, 89, 0.08), transparent 35%), #080a0d;
 }
 
 .dashboard-container {
@@ -312,7 +371,7 @@ const handleDeleteStash = async (): Promise<void> => {
 }
 
 .summary-card {
-  border-radius: 14px;
+  border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
   padding: 1.5rem;
@@ -321,8 +380,10 @@ const handleDeleteStash = async (): Promise<void> => {
 
 .summary-label {
   margin: 0;
-  color: #8f93a3;
-  font-size: 1rem;
+  color: var(--env-muted);
+  font-size: 0.8rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
 }
 
 .summary-value-row {
@@ -340,11 +401,11 @@ const handleDeleteStash = async (): Promise<void> => {
 }
 
 .summary-icon.lock {
-  color: #9d82d4;
+  color: var(--env-accent);
 }
 
 .summary-icon.planned {
-  color: #a38cdf;
+  color: var(--env-accent-soft);
 }
 
 .summary-icon.sent {
@@ -381,10 +442,15 @@ const handleDeleteStash = async (): Promise<void> => {
   cursor: pointer;
 }
 
+.filter-pill:focus-visible {
+  outline: 2px solid var(--env-accent-soft);
+  outline-offset: 2px;
+}
+
 .filter-pill.active {
-  color: #121020;
-  border-color: rgba(137, 116, 180, 0.8);
-  background: linear-gradient(135deg, #8e79b7 0%, #7f68ad 100%);
+  color: #14111d;
+  border-color: var(--env-accent);
+  background: var(--env-accent);
 }
 
 .filter-pill.with-icon {
@@ -396,14 +462,6 @@ const handleDeleteStash = async (): Promise<void> => {
   height: 46px;
   font-size: 1.02rem;
   font-weight: 700;
-  color: #14111d;
-  border: none;
-  background: linear-gradient(135deg, var(--env-accent-soft) 0%, var(--env-accent) 100%);
-}
-
-:deep(.new-stash-btn.n-button:hover) {
-  filter: brightness(1.05);
-  transform: translateY(-1px);
 }
 
 .stash-list {
@@ -413,8 +471,8 @@ const handleDeleteStash = async (): Promise<void> => {
 }
 
 .stash-row {
-  border-radius: 14px;
-  border: 1px solid rgba(137, 116, 180, 0.32);
+  border-radius: 6px;
+  border: 1px solid rgba(196, 122, 69, 0.18);
   background: linear-gradient(180deg, rgba(15, 17, 28, 0.96), rgba(11, 12, 22, 0.96));
   padding: 1.35rem 1.45rem;
   display: grid;
@@ -432,8 +490,8 @@ const handleDeleteStash = async (): Promise<void> => {
 }
 
 .status-badge.planned {
-  color: #a28be3;
-  background: rgba(137, 116, 180, 0.18);
+  color: var(--env-accent-soft);
+  background: rgba(196, 122, 69, 0.14);
 }
 
 .status-badge.sent {
@@ -458,8 +516,8 @@ const handleDeleteStash = async (): Promise<void> => {
 }
 
 .recipient-name {
-  font-size: 2rem;
-  font-weight: 670;
+  font-size: 1.05rem;
+  font-weight: 650;
 }
 
 .recipient-mail-row {
@@ -489,7 +547,7 @@ const handleDeleteStash = async (): Promise<void> => {
 }
 
 .scheduled-subtitle.planned {
-  color: #9588ba;
+  color: var(--env-accent-soft);
 }
 
 .scheduled-subtitle.sent {
@@ -505,28 +563,32 @@ const handleDeleteStash = async (): Promise<void> => {
 
 :deep(.postpone-btn.n-button) {
   height: 38px;
-  border-radius: 10px;
+  border-radius: 8px;
   color: #dee2ec;
-  border: 1px solid rgba(137, 116, 180, 0.5);
   background: rgba(255, 255, 255, 0.01);
+  --n-border: 1px solid rgba(196, 122, 69, 0.4);
+  --n-border-hover: 1px solid rgba(204, 164, 102, 0.7);
+  --n-border-focus: 1px solid rgba(204, 164, 102, 0.7);
+  --n-border-pressed: 1px solid rgba(204, 164, 102, 0.7);
 }
 
 :deep(.postpone-btn.n-button:hover) {
   color: #ffffff;
-  border-color: rgba(157, 138, 202, 0.9);
 }
 
 :deep(.delete-btn.n-button) {
   height: 38px;
-  border-radius: 10px;
-  color: #e8a3a3;
-  border: 1px solid rgba(200, 90, 90, 0.4);
+  border-radius: 8px;
+  color: #ef4444;
   background: rgba(255, 255, 255, 0.01);
+  --n-border: 1px solid rgba(239, 68, 68, 0.4);
+  --n-border-hover: 1px solid rgba(239, 68, 68, 0.85);
+  --n-border-focus: 1px solid rgba(239, 68, 68, 0.85);
+  --n-border-pressed: 1px solid rgba(239, 68, 68, 0.85);
 }
 
 :deep(.delete-btn.n-button:hover) {
-  color: #ff8f8f;
-  border-color: rgba(220, 100, 100, 0.8);
+  color: #ff6b6b;
 }
 
 .modal-footer {
@@ -595,14 +657,156 @@ const handleDeleteStash = async (): Promise<void> => {
     padding: 1rem;
   }
 
-  .recipient-name {
-    font-size: 1.65rem;
-  }
-
   .schedule-block,
   .row-action {
     padding-left: 0;
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-block {
+    animation: none;
+    opacity: 0.7;
+  }
+}
+
+.stash-row-skeleton {
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(15, 17, 28, 0.96), rgba(11, 12, 22, 0.96));
+  padding: 1.35rem 1.45rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.skeleton-block {
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.1) 37%,
+    rgba(255, 255, 255, 0.05) 63%
+  );
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+.skeleton-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: 13px;
+  flex-shrink: 0;
+}
+
+.skeleton-line-group {
+  flex: 1;
+  display: grid;
+  gap: 0.6rem;
+  background: none;
+}
+
+.skeleton-line {
+  height: 14px;
+}
+
+.skeleton-line--wide {
+  width: 45%;
+}
+
+.skeleton-line--narrow {
+  width: 25%;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.state-banner {
+  border-radius: 18px;
+  padding: 1.6rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  margin-top: 1.35rem;
+}
+
+.state-banner--error {
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.06);
+}
+
+.state-banner-icon {
+  color: #ef4444;
+}
+
+.state-banner-text {
+  margin: 0;
+  color: var(--env-text);
+  font-size: 0.95rem;
+}
+
+:deep(.retry-btn.n-button) {
+  border-radius: 8px;
+  color: #dee2ec;
+  --n-border: 1px solid rgba(255, 255, 255, 0.16);
+  --n-border-hover: 1px solid rgba(255, 255, 255, 0.32);
+  --n-border-focus: 1px solid rgba(255, 255, 255, 0.32);
+  --n-border-pressed: 1px solid rgba(255, 255, 255, 0.32);
+}
+
+:deep(.retry-btn.n-button:hover) {
+  color: #ffffff;
+}
+
+.empty-state {
+  margin-top: 1.35rem;
+  border-radius: 18px;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  padding: 3.2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.35rem;
+}
+
+.empty-state-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: rgba(196, 122, 69, 0.14);
+  color: var(--env-accent);
+  margin-bottom: 0.9rem;
+}
+
+.empty-state-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 650;
+  color: var(--env-text);
+}
+
+.empty-state-text {
+  margin: 0.4rem 0 1.4rem;
+  max-width: 42ch;
+  color: var(--env-muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 1080px) {
+  .stash-row-skeleton {
+    align-items: flex-start;
+  }
+}
 </style>

@@ -21,9 +21,50 @@ a:hover {
 .n-date-picker,
 .n-select,
 .n-base-selection {
-  --n-border-radius: 4px !important;
   --n-box-shadow-focus: none !important;
   --n-box-shadow-active: none !important;
+}
+
+.n-button {
+  --n-border-radius: 8px !important;
+}
+
+/*
+ * Shared hover-lift motion for every solid primary button (landing, auth, dashboard).
+ * Colors themselves come from GlobalThemeOverrides.Button in src/theme/naiveTheme.ts.
+ */
+.n-button--primary-type {
+  transition: transform 0.18s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.n-button--primary-type:hover {
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .n-button--primary-type {
+    transition: none;
+  }
+
+  .n-button--primary-type:hover {
+    transform: none;
+  }
+}
+
+.n-input,
+.n-date-picker,
+.n-select,
+.n-base-selection {
+  --n-border-radius: 4px !important;
+}
+
+.n-input,
+.n-date-picker,
+.n-select,
+.n-base-selection {
+  --n-border-hover: 1px solid rgba(255, 255, 255, 0.22) !important;
+  --n-border-focus: 1px solid rgba(255, 255, 255, 0.32) !important;
+  --n-caret-color: var(--env-text) !important;
 }
 
 .n-input__input-el:-webkit-autofill,
