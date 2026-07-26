@@ -180,6 +180,10 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
               label-placement="top"
               class="env-auth-form"
             >
+              <n-alert v-if="submitError" type="error" :bordered="false" class="submit-error">
+                {{ submitError }}
+              </n-alert>
+
               <n-form-item path="to" :label="t('stash.create.recipientLabel')">
                 <n-input
                   v-model:value="formValue.to"
@@ -252,10 +256,6 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
                   {{ t("stash.create.submit") }}
                 </n-button>
               </div>
-
-              <n-alert v-if="submitError" type="error" :bordered="false" class="submit-error" style="margin-top: 12px;">
-                {{ submitError }}
-              </n-alert>
             </n-form>
           </n-space>
         </n-card>
@@ -311,6 +311,10 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
   display: flex;
   justify-content: flex-end;
   margin-top: 0.25rem;
+}
+
+.submit-error {
+  margin-bottom: 0.75rem;
 }
 
 .key-hint {
