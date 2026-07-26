@@ -136,4 +136,21 @@ describe("CreateStashView.vue", () => {
     const keyInput = document.body.querySelector<HTMLInputElement>("input[readonly]");
     expect(keyInput?.value).toBe(KEY);
   });
+
+  it("shows a dedicated error when crypto.subtle is unavailable (insecure context)", async () => {
+    const { wrapper } = await mountWithProviders(CreateStashView);
+    await fillRequiredFields(wrapper);
+
+    const realSubtle = crypto.subtle;
+    Object.defineProperty(crypto, "subtle", { value: undefined, configurable: true });
+    try {
+      await wrapper.find("button.submit-btn").trigger("click");
+      await vi.waitFor(() => {
+        expect(wrapper.text()).toContain("Encryption isn't available on this connection");
+      });
+      expect(createStashApi).not.toHaveBeenCalled();
+    } finally {
+      Object.defineProperty(crypto, "subtle", { value: realSubtle, configurable: true });
+    }
+  });
 });

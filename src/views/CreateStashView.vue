@@ -29,7 +29,7 @@ import {
   RefreshOutline,
 } from "@vicons/ionicons5";
 import { useStashStore } from "@/stores/stash";
-import { encryptStashBody, generateStashKey } from "@/utils/stashCrypto";
+import { CryptoUnavailableError, encryptStashBody, generateStashKey } from "@/utils/stashCrypto";
 import { getApiErrorMessage } from "@/api/apiError";
 
 const MIN_KEY_LENGTH = 12;
@@ -118,7 +118,10 @@ const submit = async (): Promise<void> => {
     });
     createdKey.value = formValue.key;
   } catch (e) {
-    submitError.value = getApiErrorMessage(e) ?? t("stash.create.error");
+    submitError.value =
+      e instanceof CryptoUnavailableError
+        ? t("stash.insecureContextError")
+        : getApiErrorMessage(e) ?? t("stash.create.error");
   } finally {
     isSubmitting.value = false;
   }

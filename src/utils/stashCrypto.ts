@@ -4,6 +4,30 @@ const SALT_LENGTH_BYTES = 16;
 const IV_LENGTH_BYTES = 12;
 
 /**
+ * Thrown when the Web Crypto API's `subtle` interface isn't available.
+ * Browsers only expose it in a secure context (HTTPS or `localhost`), so this
+ * signals a deployment/access issue rather than a user input mistake.
+ */
+export class CryptoUnavailableError extends Error {
+  constructor() {
+    super("crypto.subtle is unavailable outside a secure context (HTTPS or localhost)");
+    this.name = "CryptoUnavailableError";
+  }
+}
+
+/**
+ * Verifies that `crypto.subtle` is available before attempting any
+ * encryption/decryption, so callers get a distinguishable error instead of a
+ * generic TypeError when the page is loaded outside a secure context.
+ * @throws {CryptoUnavailableError} If `crypto.subtle` is unavailable.
+ */
+function assertCryptoAvailable(): void {
+  if (typeof crypto === "undefined" || !crypto.subtle) {
+    throw new CryptoUnavailableError();
+  }
+}
+
+/**
  * Derives an AES-GCM key from a passphrase using PBKDF2.
  * @param key Passphrase entered by the user.
  * @param salt Random salt used for key derivation.
@@ -56,8 +80,10 @@ function fromBase64(base64: string): Uint8Array {
  * @param body Plaintext stash message.
  * @param key Passphrase used to encrypt (and later decrypt) the message.
  * @returns Self-describing ciphertext blob: `v1.<salt>.<iv>.<ciphertext>` (all base64).
+ * @throws {CryptoUnavailableError} If `crypto.subtle` is unavailable (page not loaded over HTTPS or localhost).
  */
 export async function encryptStashBody(body: string, key: string): Promise<string> {
+  assertCryptoAvailable();
   const salt = crypto.getRandomValues(new Uint8Array(SALT_LENGTH_BYTES));
   const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH_BYTES));
   const aesKey = await deriveAesKey(key, salt);
@@ -79,11 +105,13 @@ export async function encryptStashBody(body: string, key: string): Promise<strin
  * @param blob Ciphertext blob in `v1.<salt>.<iv>.<ciphertext>` format.
  * @param key Passphrase to attempt decryption with.
  * @returns Decrypted plaintext, or `null` if the blob is malformed or the key is wrong.
+ * @throws {CryptoUnavailableError} If `crypto.subtle` is unavailable (page not loaded over HTTPS or localhost).
  */
 export async function decryptStashBody(blob: string, key: string): Promise<string | null> {
   const parts = blob.split(".");
   if (parts.length !== 4 || parts[0] !== FORMAT_VERSION) return null;
 
+  assertCryptoAvailable();
   try {
     const [, saltB64, ivB64, ciphertextB64] = parts;
     const salt = fromBase64(saltB64);

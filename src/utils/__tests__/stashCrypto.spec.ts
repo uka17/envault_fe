@@ -1,5 +1,10 @@
-import { describe, it, expect } from "vitest";
-import { encryptStashBody, decryptStashBody, generateStashKey } from "../stashCrypto";
+import { describe, it, expect, afterEach } from "vitest";
+import {
+  CryptoUnavailableError,
+  encryptStashBody,
+  decryptStashBody,
+  generateStashKey,
+} from "../stashCrypto";
 
 describe("encryptStashBody / decryptStashBody", () => {
   it("decrypts a body encrypted with the same key", async() => {
@@ -44,6 +49,27 @@ describe("encryptStashBody / decryptStashBody", () => {
     const decrypted = await decryptStashBody(tampered, "some-key");
 
     expect(decrypted).toBeNull();
+  });
+});
+
+describe("encryptStashBody / decryptStashBody without crypto.subtle", () => {
+  const realSubtle = crypto.subtle;
+
+  afterEach(() => {
+    Object.defineProperty(crypto, "subtle", { value: realSubtle, configurable: true });
+  });
+
+  it("throws CryptoUnavailableError when encrypting outside a secure context", async() => {
+    Object.defineProperty(crypto, "subtle", { value: undefined, configurable: true });
+
+    await expect(encryptStashBody("hello world", "some-key")).rejects.toThrow(CryptoUnavailableError);
+  });
+
+  it("throws CryptoUnavailableError when decrypting a well-formed blob outside a secure context", async() => {
+    const encrypted = await encryptStashBody("hello world", "some-key");
+    Object.defineProperty(crypto, "subtle", { value: undefined, configurable: true });
+
+    await expect(decryptStashBody(encrypted, "some-key")).rejects.toThrow(CryptoUnavailableError);
   });
 });
 

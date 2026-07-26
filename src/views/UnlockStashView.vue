@@ -19,7 +19,7 @@ import {
 } from "naive-ui";
 import { KeyOutline, LockClosedOutline, LockOpenOutline } from "@vicons/ionicons5";
 import { getPublicStashApi, type PublicStashResponse } from "@/api/stashApi";
-import { decryptStashBody } from "@/utils/stashCrypto";
+import { CryptoUnavailableError, decryptStashBody } from "@/utils/stashCrypto";
 import { getApiErrorMessage } from "@/api/apiError";
 
 const route = useRoute();
@@ -86,7 +86,10 @@ const submit = async (): Promise<void> => {
     }
     unlockedBody.value = decrypted;
   } catch (e) {
-    submitError.value = getApiErrorMessage(e) ?? t("stash.unlock.error");
+    submitError.value =
+      e instanceof CryptoUnavailableError
+        ? t("stash.insecureContextError")
+        : getApiErrorMessage(e) ?? t("stash.unlock.error");
   } finally {
     isSubmitting.value = false;
   }

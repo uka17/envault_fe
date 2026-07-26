@@ -94,4 +94,26 @@ describe("UnlockStashView.vue", () => {
 
     expect(vi.mocked(getPublicStashApi).mock.calls.length).toBe(callsBeforeUnlock);
   });
+
+  it("shows a dedicated error when crypto.subtle is unavailable (insecure context)", async () => {
+    const ciphertext = await encryptStashBody("the secret message", "correct-key");
+    vi.mocked(getPublicStashApi).mockResolvedValue({ ...stashInfo, body: ciphertext });
+    const { wrapper, router } = await mountWithProviders(UnlockStashView);
+
+    await router.push({ path: `/unlock/${token}` });
+    await flushPromises();
+    await flushPromises();
+
+    const realSubtle = crypto.subtle;
+    Object.defineProperty(crypto, "subtle", { value: undefined, configurable: true });
+    try {
+      await wrapper.find("input").setValue("correct-key");
+      await wrapper.find("button.submit-btn").trigger("click");
+      await vi.waitFor(() => {
+        expect(wrapper.text()).toContain("Encryption isn't available on this connection");
+      });
+    } finally {
+      Object.defineProperty(crypto, "subtle", { value: realSubtle, configurable: true });
+    }
+  });
 });

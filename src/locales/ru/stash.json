@@ -1,4 +1,5 @@
 {
+  "insecureContextError": "Шифрование недоступно в этом соединении. Откройте Envault по HTTPS (или через localhost) и попробуйте снова.",
   "dashboard": {
     "totalStashes": "Всего stash'ей",
     "planned": "Запланировано",
