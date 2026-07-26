@@ -5,6 +5,7 @@ services:
       API: ${API}
     image: uka17/envault-nginx:latest
     container_name: envault-nginx
+    restart: unless-stopped
     ports:
       - "80:80"
     networks:
