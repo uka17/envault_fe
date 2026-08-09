@@ -8,7 +8,7 @@
 }
 
 .auth-shell {
-  width: min(560px, 100%);
+  width: min(560px, calc(100vw - 2rem));
 }
 
 .top-link-row {
