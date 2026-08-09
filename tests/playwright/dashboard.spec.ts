@@ -24,8 +24,8 @@ function formatDate(isoDate: string): string {
  * @returns The ISO send date used for the mocked planned stash, so tests can
  * assert on its interpolated, human-readable form.
  */
-async function loginWithMockedStashes(page: Page): Promise<{ plannedSendAt: string }> {
-  const plannedSendAt = new Date(Date.now() + 86400000).toISOString();
+async function loginWithMockedStashes(page: Page): Promise<{ plannedScheduledAt: string }> {
+  const plannedScheduledAt = new Date(Date.now() + 86400000).toISOString();
   await page.route("**/api/v1/users/login", async (route) => {
     await route.fulfill({
       status: 200,
@@ -63,7 +63,7 @@ async function loginWithMockedStashes(page: Page): Promise<{ plannedSendAt: stri
           to: "sent@example.com",
           body: "Sent stash",
           isSent: true,
-          sendAt: new Date(Date.now() - 86400000).toISOString(),
+          scheduledAt: new Date(Date.now() - 86400000).toISOString(),
           createdOn: new Date().toISOString(),
           modifiedOn: new Date().toISOString(),
         },
@@ -72,7 +72,7 @@ async function loginWithMockedStashes(page: Page): Promise<{ plannedSendAt: stri
           to: "planned@example.com",
           body: "Planned stash",
           isSent: false,
-          sendAt: plannedSendAt,
+          scheduledAt: plannedScheduledAt,
           createdOn: new Date().toISOString(),
           modifiedOn: new Date().toISOString(),
         },
@@ -86,7 +86,7 @@ async function loginWithMockedStashes(page: Page): Promise<{ plannedSendAt: stri
   await page.getByRole("button", { name: t.auth.login.submit }).click();
   await expect(page).toHaveURL(/\/dashboard$/);
 
-  return { plannedSendAt };
+  return { plannedScheduledAt };
 }
 
 test.describe("Dashboard", () => {
@@ -136,7 +136,7 @@ test.describe("Dashboard", () => {
   test("asks for confirmation naming the recipient and date before deleting a stash and removes it once confirmed", async ({
     page,
   }) => {
-    const { plannedSendAt } = await loginWithMockedStashes(page);
+    const { plannedScheduledAt } = await loginWithMockedStashes(page);
     let deleteRequested = false;
     await page.route("**/api/v1/stashes/2", async (route) => {
       if (route.request().method() === "DELETE") {
@@ -154,7 +154,7 @@ test.describe("Dashboard", () => {
 
     const expectedDeleteText = t.stash.dashboard.modals.deleteText
       .replace("{recipient}", "planned@example.com")
-      .replace("{date}", formatDate(plannedSendAt));
+      .replace("{date}", formatDate(plannedScheduledAt));
     await expect(page.getByRole("dialog").getByText(expectedDeleteText)).toBeVisible();
     expect(deleteRequested).toBe(false);
 
@@ -168,7 +168,7 @@ test.describe("Dashboard", () => {
   });
 
   test("keeps the stash when the delete confirmation is cancelled", async ({ page }) => {
-    const { plannedSendAt } = await loginWithMockedStashes(page);
+    const { plannedScheduledAt } = await loginWithMockedStashes(page);
 
     await page
       .locator(".stash-row", { hasText: "planned@example.com" })
@@ -176,7 +176,7 @@ test.describe("Dashboard", () => {
       .click();
     const expectedDeleteText = t.stash.dashboard.modals.deleteText
       .replace("{recipient}", "planned@example.com")
-      .replace("{date}", formatDate(plannedSendAt));
+      .replace("{date}", formatDate(plannedScheduledAt));
     await expect(page.getByRole("dialog").getByText(expectedDeleteText)).toBeVisible();
 
     await page

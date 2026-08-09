@@ -15,7 +15,8 @@ const makeStash = (overrides: Partial<{ id: number; isSent: boolean }> = {}) => 
   to: "a@b.com",
   body: "hello",
   isSent: false,
-  sendAt: "2026-01-01T00:00:00.000Z",
+  scheduledAt: "2026-01-01T00:00:00.000Z",
+  sentAt: null,
   createdOn: "",
   modifiedOn: "",
   ...overrides,
@@ -70,7 +71,7 @@ describe("createStash", () => {
     const store = useStashStore();
     store.stashes = [makeStash({ id: 1 })];
 
-    const result = await store.createStash({ to: "a@b.com", body: "hi", sendAt: created.sendAt });
+    const result = await store.createStash({ to: "a@b.com", body: "hi", scheduledAt: created.scheduledAt });
 
     expect(result).toEqual(created);
     expect(store.stashes[0]).toEqual(created);
@@ -93,7 +94,7 @@ describe("deleteStash", () => {
 describe("snoozeStash", () => {
   it("replaces the snoozed stash with the updated version", async () => {
     const updated = makeStash({ id: 1 });
-    updated.sendAt = "2026-02-01T00:00:00.000Z";
+    updated.scheduledAt = "2026-02-01T00:00:00.000Z";
     vi.mocked(snoozeStashApi).mockResolvedValue(updated);
     const store = useStashStore();
     store.stashes = [makeStash({ id: 1 }), makeStash({ id: 2 })];

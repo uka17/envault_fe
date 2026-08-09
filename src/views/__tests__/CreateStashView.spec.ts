@@ -17,7 +17,8 @@ const stash = {
   to: "a@b.com",
   body: "encrypted-body",
   isSent: false,
-  sendAt: "2099-01-01T00:00:00.000Z",
+  scheduledAt: "2099-01-01T00:00:00.000Z",
+  sentAt: null,
   createdOn: "",
   modifiedOn: "",
 };
@@ -31,8 +32,8 @@ async function fillRequiredFields(wrapper: Awaited<ReturnType<typeof mountWithPr
   await wrapper.find("textarea").setValue("hello there");
   await inputs[1].setValue(KEY);
   const inner = wrapper.findComponent(CreateStashView);
-  (inner.vm as unknown as { formValue: { sendAt: number | null } }).formValue.sendAt = Date.parse(
-    stash.sendAt,
+  (inner.vm as unknown as { formValue: { scheduledAt: number | null } }).formValue.scheduledAt = Date.parse(
+    stash.scheduledAt,
   );
   await flushPromises();
 }
@@ -122,7 +123,7 @@ describe("CreateStashView.vue", () => {
 
     const payload = vi.mocked(createStashApi).mock.calls[0][0];
     expect(payload.to).toBe("a@b.com");
-    expect(payload.sendAt).toBe(new Date(Date.parse(stash.sendAt)).toISOString());
+    expect(payload.scheduledAt).toBe(new Date(Date.parse(stash.scheduledAt)).toISOString());
     expect(payload.body).not.toBe("hello there");
 
     const decrypted = await decryptStashBody(payload.body, KEY);

@@ -9,7 +9,8 @@ export interface StashResponse {
   to: string;
   body: string;
   isSent: boolean;
-  sendAt: string;
+  scheduledAt: string;
+  sentAt: string | null;
   createdOn: string;
   modifiedOn: string;
 }
@@ -18,7 +19,7 @@ export interface StashCreatePayload {
   /** Stash message, already encrypted client-side with the sender's key. */
   body: string;
   to: string;
-  sendAt: string;
+  scheduledAt: string;
 }
 
 /**
@@ -71,7 +72,7 @@ export async function snoozeStashApi(id: number, hours: number): Promise<StashRe
 }
 
 export interface PublicStashResponse {
-  sendAt: string;
+  scheduledAt: string;
   /** Stash message body, still encrypted; decrypted client-side with the recipient's key. */
   body: string;
 }

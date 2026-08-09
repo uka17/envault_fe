@@ -48,7 +48,7 @@ const formValue = reactive({
   to: "",
   body: "",
   key: "",
-  sendAt: null as number | null,
+  scheduledAt: null as number | null,
 });
 
 const rules = computed<FormRules>(() => ({
@@ -68,17 +68,17 @@ const rules = computed<FormRules>(() => ({
       trigger: ["input", "blur"],
     },
   ],
-  sendAt: [
+  scheduledAt: [
     {
       required: true,
       type: "number",
-      message: t("validation.stash.sendAtRequired"),
+      message: t("validation.stash.scheduledAtRequired"),
       trigger: ["change", "blur"],
     },
     {
       validator: (_rule, value: number | null) => {
         if (!value) return true;
-        return value > Date.now() || new Error(t("validation.stash.sendAtFuture"));
+        return value > Date.now() || new Error(t("validation.stash.scheduledAtFuture"));
       },
       trigger: ["change", "blur"],
     },
@@ -114,7 +114,7 @@ const submit = async (): Promise<void> => {
     await stashStore.createStash({
       to: formValue.to,
       body: encryptedBody,
-      sendAt: new Date(formValue.sendAt!).toISOString(),
+      scheduledAt: new Date(formValue.scheduledAt!).toISOString(),
     });
     createdKey.value = formValue.key;
   } catch (e) {
@@ -234,11 +234,11 @@ const disablePastDate = (ts: number): boolean => ts < Date.now() - 86_400_000;
                 </n-space>
               </n-form-item>
 
-              <n-form-item path="sendAt" :label="t('stash.create.sendAtLabel')">
+              <n-form-item path="scheduledAt" :label="t('stash.create.scheduledAtLabel')">
                 <n-date-picker
-                  v-model:value="formValue.sendAt"
+                  v-model:value="formValue.scheduledAt"
                   type="datetime"
-                  :placeholder="t('stash.create.sendAtPlaceholder')"
+                  :placeholder="t('stash.create.scheduledAtPlaceholder')"
                   :is-date-disabled="disablePastDate"
                   size="large"
                   class="date-picker"

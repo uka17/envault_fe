@@ -63,12 +63,12 @@ const formatDate = (isoDate: string): string => {
 /**
  * Compute a human-readable subtitle for a stash based on its status and send time.
  * @param isSent Whether the stash has already been sent.
- * @param sendAt ISO 8601 date string of the scheduled send time.
+ * @param scheduledAt ISO 8601 date string of the scheduled send time.
  * @returns Subtitle string.
  */
-const getSubtitle = (isSent: boolean, sendAt: string): string => {
+const getSubtitle = (isSent: boolean, scheduledAt: string): string => {
   if (isSent) return t("stash.dashboard.statusSent");
-  const diff = new Date(sendAt).getTime() - Date.now();
+  const diff = new Date(scheduledAt).getTime() - Date.now();
   if (diff <= 0) return t("stash.dashboard.statusPending");
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   if (days === 0) return t("stash.dashboard.today");
@@ -300,10 +300,10 @@ const handleRetry = (): void => {
                 <n-icon :size="16">
                   <PaperPlaneOutline />
                 </n-icon>
-                <span>{{ formatDate(stash.sendAt) }}</span>
+                <span>{{ formatDate(stash.scheduledAt) }}</span>
               </p>
               <p class="scheduled-subtitle" :class="stash.isSent ? 'sent' : 'planned'">
-                {{ getSubtitle(stash.isSent, stash.sendAt) }}
+                {{ getSubtitle(stash.isSent, stash.scheduledAt) }}
               </p>
             </div>
 
@@ -353,7 +353,7 @@ const handleRetry = (): void => {
           deleteTargetStash
             ? t("stash.dashboard.modals.deleteText", {
                 recipient: deleteTargetStash.to,
-                date: formatDate(deleteTargetStash.sendAt),
+                date: formatDate(deleteTargetStash.scheduledAt),
               })
             : t("stash.dashboard.modals.deleteTextGeneric")
         }}

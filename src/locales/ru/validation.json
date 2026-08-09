@@ -20,8 +20,8 @@
     "emailInvalid": "Неверный формат email",
     "bodyRequired": "Введите текст сообщения",
     "bodyEmpty": "Сообщение не может быть пустым",
-    "sendAtRequired": "Укажите дату и время отправки",
-    "sendAtFuture": "Дата должна быть в будущем",
+    "scheduledAtRequired": "Укажите дату и время отправки",
+    "scheduledAtFuture": "Дата должна быть в будущем",
     "keyRequired": "Введите ключ расшифровки",
     "keyTooShort": "Ключ должен содержать не менее {n} символов"
   }

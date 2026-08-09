@@ -12,7 +12,7 @@ vi.mock("@/api/stashApi", () => ({
 const token = "abcdefgh23456789jkmn";
 
 const stashInfo = {
-  sendAt: "2099-01-01T00:00:00.000Z",
+  scheduledAt: "2099-01-01T00:00:00.000Z",
   body: "not-a-valid-ciphertext",
 };
 

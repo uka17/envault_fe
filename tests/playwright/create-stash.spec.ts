@@ -46,7 +46,7 @@ async function loginAndOpenCreateStash(page: Page) {
 
 /** Opens the send-date picker, picks a day next month, and confirms. */
 async function pickFutureSendDate(page: Page) {
-  await page.getByPlaceholder(unescape(t.stash.create.sendAtPlaceholder)).click();
+  await page.getByPlaceholder(unescape(t.stash.create.scheduledAtPlaceholder)).click();
   await page.locator(".n-date-panel-month__next").click();
   await page
     .locator(".n-date-panel-dates .n-date-panel-date:not(.n-date-panel-date--excluded):not(.n-date-panel-date--disabled)")
@@ -75,7 +75,7 @@ test.describe("Create stash", () => {
           to: payload.to,
           body: payload.body,
           isSent: false,
-          sendAt: payload.sendAt,
+          scheduledAt: payload.scheduledAt,
           createdOn: new Date().toISOString(),
           modifiedOn: new Date().toISOString(),
         }),

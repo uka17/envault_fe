@@ -32,7 +32,7 @@ const stash = {
   to: "a@b.com",
   body: "hello",
   isSent: false,
-  sendAt: "2026-01-01T00:00:00.000Z",
+  scheduledAt: "2026-01-01T00:00:00.000Z",
   createdOn: "",
   modifiedOn: "",
 };
@@ -67,12 +67,12 @@ describe("createStashApi", () => {
   it("posts a new stash payload", async () => {
     mockedHttp.post.mockResolvedValue({ data: stash });
 
-    const result = await createStashApi({ to: "a@b.com", body: "hello", sendAt: stash.sendAt });
+    const result = await createStashApi({ to: "a@b.com", body: "hello", scheduledAt: stash.scheduledAt });
 
     expect(mockedHttp.post).toHaveBeenCalledWith("/stashes", {
       to: "a@b.com",
       body: "hello",
-      sendAt: stash.sendAt,
+      scheduledAt: stash.scheduledAt,
     });
     expect(result).toEqual(stash);
   });
@@ -101,7 +101,7 @@ describe("snoozeStashApi", () => {
 
 describe("getPublicStashApi", () => {
   it("fetches a public stash by token, including its still-encrypted body", async () => {
-    const publicStash = { sendAt: stash.sendAt, body: "v1.salt.iv.ciphertext" };
+    const publicStash = { scheduledAt: stash.scheduledAt, body: "v1.salt.iv.ciphertext" };
     mockedPublicHttp.get.mockResolvedValue({ data: publicStash });
 
     const result = await getPublicStashApi("abcdefgh23456789jkmn");

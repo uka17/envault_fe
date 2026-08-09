@@ -12,13 +12,14 @@ vi.mock("@/api/stashApi", () => ({
 }));
 
 const makeStash = (
-  overrides: Partial<{ id: number; to: string; isSent: boolean; sendAt: string }> = {},
+  overrides: Partial<{ id: number; to: string; isSent: boolean; scheduledAt: string }> = {},
 ) => ({
   id: 1,
   to: "a@b.com",
   body: "hello",
   isSent: false,
-  sendAt: "2099-01-01T00:00:00.000Z",
+  scheduledAt: "2099-01-01T00:00:00.000Z",
+  sentAt: null,
   createdOn: "",
   modifiedOn: "",
   ...overrides,
@@ -69,7 +70,7 @@ describe("DashboardView.vue", () => {
 
   it("snoozes a planned stash for 24 hours", async () => {
     vi.mocked(getStashesApi).mockResolvedValue([makeStash({ id: 1, isSent: false })]);
-    const updated = makeStash({ id: 1, isSent: false, sendAt: "2099-02-01T00:00:00.000Z" });
+    const updated = makeStash({ id: 1, isSent: false, scheduledAt: "2099-02-01T00:00:00.000Z" });
     vi.mocked(snoozeStashApi).mockResolvedValue(updated);
     const { wrapper } = await mountWithProviders(DashboardView);
     await flushPromises();
@@ -106,7 +107,7 @@ describe("DashboardView.vue", () => {
 
   it("shows a confirmation modal naming the recipient and scheduled date before deleting a stash and deletes it on confirm", async () => {
     vi.mocked(getStashesApi).mockResolvedValue([
-      makeStash({ id: 1, to: "recipient@example.com", sendAt: "2099-03-15T10:00:00.000Z" }),
+      makeStash({ id: 1, to: "recipient@example.com", scheduledAt: "2099-03-15T10:00:00.000Z" }),
     ]);
     vi.mocked(deleteStashApi).mockResolvedValue(undefined);
     const { wrapper } = await mountWithProviders(DashboardView);

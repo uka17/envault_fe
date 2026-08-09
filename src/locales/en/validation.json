@@ -20,8 +20,8 @@
     "emailInvalid": "Invalid email format",
     "bodyRequired": "Enter message text",
     "bodyEmpty": "Message cannot be empty",
-    "sendAtRequired": "Specify send date and time",
-    "sendAtFuture": "Date must be in the future",
+    "scheduledAtRequired": "Specify send date and time",
+    "scheduledAtFuture": "Date must be in the future",
     "keyRequired": "Enter the decryption key",
     "keyTooShort": "The key must be at least {n} characters long"
   }
