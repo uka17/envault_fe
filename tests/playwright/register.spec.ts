@@ -26,7 +26,7 @@ test.describe("Register form", () => {
     await expect(page.getByText(t.validation.confirmPassword.mismatch)).toBeVisible();
   });
 
-  test("registers successfully and redirects to login", async ({ page }) => {
+  test("registers successfully and redirects to the verify-email page", async ({ page }) => {
     await page.route("**/api/v1/users", async (route) => {
       await route.fulfill({
         status: 201,
@@ -35,6 +35,7 @@ test.describe("Register form", () => {
           id: 1,
           email: "john@example.com",
           name: "John Doe",
+          emailVerifiedAt: null,
           createdOn: new Date().toISOString(),
           modifiedOn: new Date().toISOString(),
         }),
@@ -49,7 +50,7 @@ test.describe("Register form", () => {
     await page.locator('input[type="password"]').nth(1).fill("Passw0rd1");
     await page.getByRole("button", { name: t.auth.register.submit }).click();
 
-    await expect(page).toHaveURL(/\/login$/);
+    await expect(page).toHaveURL(/\/verify-email\?email=john@example\.com$/);
   });
 
   test("shows a field-level error returned by the server", async ({ page }) => {

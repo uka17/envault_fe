@@ -27,6 +27,13 @@ export function requiredPasswordRules(): FormItemRule[] {
   return [{ required: true, message: t("validation.password.required"), trigger: ["input", "blur"] }];
 }
 
+/** Presence-checks an email verification code. */
+export function verificationCodeRules(): FormItemRule[] {
+  return [
+    { required: true, message: t("validation.verificationCode.required"), trigger: ["input", "blur"] },
+  ];
+}
+
 /** Presence + complexity check, for fields where a new password is being set (registration, password change). */
 export function newPasswordRules(): FormItemRule[] {
   return [

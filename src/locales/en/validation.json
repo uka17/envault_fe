@@ -15,6 +15,9 @@
     "required": "Confirm your password",
     "mismatch": "Passwords do not match"
   },
+  "verificationCode": {
+    "required": "Enter the verification code"
+  },
   "stash": {
     "recipientRequired": "Enter recipient email",
     "emailInvalid": "Invalid email format",

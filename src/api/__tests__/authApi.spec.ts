@@ -8,6 +8,8 @@ import {
   checkAuthApi,
   updateProfileApi,
   updatePasswordApi,
+  verifyEmailApi,
+  resendVerificationApi,
 } from "../authApi";
 
 vi.mock("../http", () => ({
@@ -106,5 +108,25 @@ describe("updatePasswordApi", () => {
       currentPassword: "old",
       newPassword: "New1word",
     });
+  });
+});
+
+describe("verifyEmailApi", () => {
+  it("posts the code to the verify-email endpoint", async () => {
+    mockedHttp.post.mockResolvedValue({ data: undefined });
+
+    await verifyEmailApi("abc123");
+
+    expect(mockedHttp.post).toHaveBeenCalledWith("/users/verify-email", { code: "abc123" });
+  });
+});
+
+describe("resendVerificationApi", () => {
+  it("posts the email to the resend endpoint", async () => {
+    mockedHttp.post.mockResolvedValue({ data: undefined });
+
+    await resendVerificationApi("a@b.com");
+
+    expect(mockedHttp.post).toHaveBeenCalledWith("/users/verify-email/resend", { email: "a@b.com" });
   });
 });

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/HomeView.vue";
 import Login from "@/views/Login.vue";
 import RegisterView from "@/views/RegisterView.vue";
+import VerifyEmailView from "@/views/VerifyEmailView.vue";
 import DashboardView from "@/views/DashboardView.vue";
 import ProfileView from "@/views/ProfileView.vue";
 import CreateStashView from "@/views/CreateStashView.vue";
@@ -23,6 +24,11 @@ export const routes = [
     path: "/register",
     name: "register",
     component: RegisterView,
+  },
+  {
+    path: "/verify-email",
+    name: "verify-email",
+    component: VerifyEmailView,
   },
   {
     path: "/dashboard",

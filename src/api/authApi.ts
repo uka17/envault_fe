@@ -7,6 +7,8 @@ const USERS_WHOAMI_URL = "/users/whoami";
 const TOKEN_REFRESH_URL = "/token/refresh";
 const USERS_ME_URL = "/users/me";
 const USERS_ME_PASSWORD_URL = "/users/me/password";
+const USERS_VERIFY_EMAIL_URL = "/users/verify-email";
+const USERS_VERIFY_EMAIL_RESEND_URL = "/users/verify-email/resend";
 
 export interface LoginPayload {
   email: string;
@@ -23,6 +25,7 @@ export interface UserResponse {
   id: number;
   email: string;
   name: string;
+  emailVerifiedAt: string | null;
   createdOn: string;
   modifiedOn: string;
 }
@@ -100,4 +103,23 @@ export async function updateProfileApi(payload: UpdateProfilePayload): Promise<U
  */
 export async function updatePasswordApi(payload: UpdatePasswordPayload): Promise<void> {
   await http.patch(USERS_ME_PASSWORD_URL, payload);
+}
+
+/**
+ * Verify a user's email using the code received by email at registration time.
+ * @param code Verification code.
+ * @returns void
+ */
+export async function verifyEmailApi(code: string): Promise<void> {
+  await http.post(USERS_VERIFY_EMAIL_URL, { code });
+}
+
+/**
+ * Resend the email verification code. Always resolves, regardless of whether
+ * the address is registered or already verified.
+ * @param email Email address to resend the verification code to.
+ * @returns void
+ */
+export async function resendVerificationApi(email: string): Promise<void> {
+  await http.post(USERS_VERIFY_EMAIL_RESEND_URL, { email });
 }

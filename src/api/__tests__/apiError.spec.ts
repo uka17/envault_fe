@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { AxiosError } from "axios";
-import { getApiErrorMessage, extractApiFieldErrors } from "../apiError";
+import { getApiErrorCode, getApiErrorMessage, extractApiFieldErrors } from "../apiError";
 import { setLocale } from "@/i18n";
 
 /** Builds a minimal AxiosError carrying the given response data. */
@@ -58,6 +58,21 @@ describe("getApiErrorMessage", () => {
     });
     setLocale("ru");
     expect(getApiErrorMessage(err)).toBe("Some new validation rule");
+  });
+});
+
+describe("getApiErrorCode", () => {
+  it("returns undefined for non-axios errors", () => {
+    expect(getApiErrorCode(new Error("boom"))).toBeUndefined();
+  });
+
+  it("returns undefined when the response has no code", () => {
+    expect(getApiErrorCode(makeAxiosError({}))).toBeUndefined();
+  });
+
+  it("returns the raw backend code, unlocalized", () => {
+    const err = makeAxiosError({ code: "email_not_verified", message: "Please verify your email" });
+    expect(getApiErrorCode(err)).toBe("email_not_verified");
   });
 });
 

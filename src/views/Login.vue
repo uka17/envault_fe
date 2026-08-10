@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
-import { useRouter } from "vue-router";
+import { computed, onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import {
   NAlert,
@@ -19,9 +19,10 @@ import {
 } from "naive-ui";
 import { ArrowBackSharp, EyeOffOutline, EyeOutline, KeyOutline, LockClosedOutline, MailOutline } from "@vicons/ionicons5";
 import { useAuthStore } from "@/stores/auth";
-import { getApiErrorMessage } from "@/api/apiError";
+import { getApiErrorCode, getApiErrorMessage } from "@/api/apiError";
 import { emailRules, requiredPasswordRules } from "@/utils/formRules";
 
+const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
 const { t } = useI18n();
@@ -58,11 +59,22 @@ const submit = async () => {
     await auth.login(formValue.email, formValue.password);
     router.push({ name: "dashboard" });
   } catch (err) {
+    if (getApiErrorCode(err) === "email_not_verified") {
+      router.push({ name: "verify-email", query: { email: formValue.email } });
+      return;
+    }
     submitError.value = getApiErrorMessage(err) ?? t("auth.login.error");
   } finally {
     isSubmitting.value = false;
   }
 };
+
+onMounted(() => {
+  const email = route.query.email;
+  if (typeof email === "string") {
+    formValue.email = email;
+  }
+});
 </script>
 
 <template>

@@ -13,6 +13,8 @@ vi.mock("@/api/authApi", () => ({
   checkAuthApi: vi.fn(),
   updateProfileApi: vi.fn(),
   updatePasswordApi: vi.fn(),
+  verifyEmailApi: vi.fn(),
+  resendVerificationApi: vi.fn(),
 }));
 
 /** Builds a minimal AxiosError with the given field errors as its response body. */
@@ -40,8 +42,15 @@ describe("RegisterView.vue", () => {
     expect(wrapper.findAll("input")).toHaveLength(4);
   });
 
-  it("registers and redirects to login on success", async () => {
-    vi.mocked(registerApi).mockResolvedValue({ id: 1, email: "a", name: "A", createdOn: "", modifiedOn: "" });
+  it("registers and redirects to the verify-email page on success", async () => {
+    vi.mocked(registerApi).mockResolvedValue({
+      id: 1,
+      email: "a",
+      name: "A",
+      emailVerifiedAt: null,
+      createdOn: "",
+      modifiedOn: "",
+    });
     const { wrapper, router } = await mountWithProviders(RegisterView);
     const pushSpy = vi.spyOn(router, "push");
 
@@ -55,7 +64,10 @@ describe("RegisterView.vue", () => {
       email: "alice@example.com",
       password: "Passw0rd",
     });
-    expect(pushSpy).toHaveBeenCalledWith("/login");
+    expect(pushSpy).toHaveBeenCalledWith({
+      name: "verify-email",
+      query: { email: "alice@example.com" },
+    });
   });
 
   it("maps known field errors from the server onto the form", async () => {

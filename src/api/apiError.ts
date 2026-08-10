@@ -27,6 +27,17 @@ function localize(code: string | undefined, fallback: string | undefined): strin
 }
 
 /**
+ * Extract the raw, un-localized backend error code from an API error response,
+ * so callers can branch on specific errors instead of just displaying text.
+ * @param err Error thrown by an API call.
+ * @returns Backend error code, or undefined if the error isn't in the expected format.
+ */
+export function getApiErrorCode(err: unknown): string | undefined {
+  if (!axios.isAxiosError<ApiErrorResponse>(err)) return undefined;
+  return err.response?.data?.code;
+}
+
+/**
  * Extract the first user-facing error message from an API error response,
  * localized via the backend error code when it's recognized.
  * @param err Error thrown by an API call.

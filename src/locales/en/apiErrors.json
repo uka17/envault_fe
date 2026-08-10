@@ -23,5 +23,8 @@
   "nameAlphanumeric": "Name should contain only letters, with single spaces, hyphens or apostrophes between words (e.g. \"John Doe\")",
   "currentPasswordRequired": "Current password is required",
   "newPasswordRequired": "New password is required",
-  "idRequired": "ID is required"
+  "idRequired": "ID is required",
+  "emailNotVerified": "Please verify your email before signing in",
+  "verificationCodeInvalid": "This verification code is invalid or has expired",
+  "verificationCodeRequired": "Verification code is required"
 }

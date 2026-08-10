@@ -14,7 +14,7 @@ vi.mock("@/api/authApi", () => ({
   registerApi: vi.fn(),
 }));
 
-const user = { id: 1, email: "a@b.com", name: "A", createdOn: "", modifiedOn: "" };
+const user = { id: 1, email: "a@b.com", name: "A", emailVerifiedAt: "2025-01-01", createdOn: "", modifiedOn: "" };
 
 beforeEach(() => {
   setActivePinia(createPinia());

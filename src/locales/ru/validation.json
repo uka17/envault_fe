@@ -15,6 +15,9 @@
     "required": "Подтвердите пароль",
     "mismatch": "Пароли не совпадают"
   },
+  "verificationCode": {
+    "required": "Введите код подтверждения"
+  },
   "stash": {
     "recipientRequired": "Введите email получателя",
     "emailInvalid": "Неверный формат email",

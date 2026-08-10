@@ -79,7 +79,7 @@ const submit = async () => {
       email: formValue.email,
       password: formValue.password,
     });
-    router.push("/login");
+    router.push({ name: "verify-email", query: { email: formValue.email } });
   } catch (err) {
     handleRegisterError(err);
   } finally {

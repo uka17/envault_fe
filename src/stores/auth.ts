@@ -7,6 +7,8 @@ import {
   updateProfileApi,
   updatePasswordApi,
   registerApi,
+  verifyEmailApi,
+  resendVerificationApi,
   type UserResponse,
   type UpdateProfilePayload,
   type UpdatePasswordPayload,
@@ -49,6 +51,23 @@ export const useAuthStore = defineStore("auth", {
      */
     async register(payload: RegisterPayload) {
       await registerApi(payload);
+    },
+
+    /**
+     * Verify a user's email using the code received by email at registration time.
+     * Does not authenticate the user; a separate login is required afterwards.
+     * @param code Verification code.
+     */
+    async verifyEmail(code: string) {
+      await verifyEmailApi(code);
+    },
+
+    /**
+     * Resend the email verification code for the given address.
+     * @param email Email address to resend the verification code to.
+     */
+    async resendVerification(email: string) {
+      await resendVerificationApi(email);
     },
 
     /**

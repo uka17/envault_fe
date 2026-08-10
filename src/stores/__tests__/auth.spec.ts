@@ -9,6 +9,8 @@ import {
   updateProfileApi,
   updatePasswordApi,
   registerApi,
+  verifyEmailApi,
+  resendVerificationApi,
 } from "@/api/authApi";
 
 vi.mock("@/api/authApi", () => ({
@@ -19,9 +21,11 @@ vi.mock("@/api/authApi", () => ({
   updateProfileApi: vi.fn(),
   updatePasswordApi: vi.fn(),
   registerApi: vi.fn(),
+  verifyEmailApi: vi.fn(),
+  resendVerificationApi: vi.fn(),
 }));
 
-const user = { id: 1, email: "a@b.com", name: "A", createdOn: "", modifiedOn: "" };
+const user = { id: 1, email: "a@b.com", name: "A", emailVerifiedAt: "2025-01-01", createdOn: "", modifiedOn: "" };
 
 beforeEach(() => {
   setActivePinia(createPinia());
@@ -65,6 +69,28 @@ describe("register", () => {
 
     expect(registerApi).toHaveBeenCalledWith({ email: "a@b.com", password: "pw", name: "A" });
     expect(auth.accessToken).toBeNull();
+  });
+});
+
+describe("verifyEmail", () => {
+  it("delegates to verifyEmailApi", async () => {
+    vi.mocked(verifyEmailApi).mockResolvedValue(undefined);
+    const auth = useAuthStore();
+
+    await auth.verifyEmail("abc123");
+
+    expect(verifyEmailApi).toHaveBeenCalledWith("abc123");
+  });
+});
+
+describe("resendVerification", () => {
+  it("delegates to resendVerificationApi", async () => {
+    vi.mocked(resendVerificationApi).mockResolvedValue(undefined);
+    const auth = useAuthStore();
+
+    await auth.resendVerification("a@b.com");
+
+    expect(resendVerificationApi).toHaveBeenCalledWith("a@b.com");
   });
 });
 

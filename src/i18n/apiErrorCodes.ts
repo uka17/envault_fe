@@ -29,6 +29,9 @@ export const API_ERROR_I18N_KEYS: Record<string, string> = {
   name_alphanumeric: "apiErrors.nameAlphanumeric",
   current_password_required: "apiErrors.currentPasswordRequired",
   new_password_required: "apiErrors.newPasswordRequired",
+  email_not_verified: "apiErrors.emailNotVerified",
+  verification_code_invalid: "apiErrors.verificationCodeInvalid",
+  verification_code_required: "apiErrors.verificationCodeRequired",
   // Used by StashValidator ("delete" rule) but currently missing from the
   // backend's own seed list (api/scripts/data/texts.ts) - kept here so it
   // resolves once the backend adds it during the translations removal.

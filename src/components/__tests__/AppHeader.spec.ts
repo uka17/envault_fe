@@ -73,7 +73,14 @@ describe("AppHeader.vue", () => {
     const { wrapper } = await mountHeader();
     const auth = useAuthStore();
     auth.accessToken = "tok";
-    auth.user = { id: 1, email: "alice@example.com", name: "Alice", createdOn: "", modifiedOn: "" };
+    auth.user = {
+      id: 1,
+      email: "alice@example.com",
+      name: "Alice",
+      emailVerifiedAt: "2025-01-01",
+      createdOn: "",
+      modifiedOn: "",
+    };
     await wrapper.vm.$nextTick();
 
     expect(wrapper.find(".avatar-badge").exists()).toBe(true);
@@ -84,7 +91,14 @@ describe("AppHeader.vue", () => {
     const { wrapper } = await mountHeader();
     const auth = useAuthStore();
     auth.accessToken = "tok";
-    auth.user = { id: 1, email: "alice@example.com", name: "Alice", createdOn: "", modifiedOn: "" };
+    auth.user = {
+      id: 1,
+      email: "alice@example.com",
+      name: "Alice",
+      emailVerifiedAt: "2025-01-01",
+      createdOn: "",
+      modifiedOn: "",
+    };
     await wrapper.vm.$nextTick();
 
     await wrapper.find(".avatar-badge").trigger("click");
@@ -99,7 +113,14 @@ describe("AppHeader.vue", () => {
     const pushSpy = vi.spyOn(router, "push");
     const auth = useAuthStore();
     auth.accessToken = "tok";
-    auth.user = { id: 1, email: "alice@example.com", name: "Alice", createdOn: "", modifiedOn: "" };
+    auth.user = {
+      id: 1,
+      email: "alice@example.com",
+      name: "Alice",
+      emailVerifiedAt: "2025-01-01",
+      createdOn: "",
+      modifiedOn: "",
+    };
     await wrapper.vm.$nextTick();
 
     await wrapper.find(".avatar-badge").trigger("click");
@@ -127,7 +148,14 @@ describe("AppHeader.vue", () => {
     const pushSpy = vi.spyOn(router, "push");
     const auth = useAuthStore();
     auth.accessToken = "tok";
-    auth.user = { id: 1, email: "alice@example.com", name: "Alice", createdOn: "", modifiedOn: "" };
+    auth.user = {
+      id: 1,
+      email: "alice@example.com",
+      name: "Alice",
+      emailVerifiedAt: "2025-01-01",
+      createdOn: "",
+      modifiedOn: "",
+    };
     await wrapper.vm.$nextTick();
 
     await wrapper.find(".avatar-badge").trigger("click");

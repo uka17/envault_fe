@@ -46,6 +46,7 @@ const baseUser = {
   id: 1,
   email: "alice@example.com",
   name: "Alice",
+  emailVerifiedAt: "2025-01-01T00:00:00.000Z",
   createdOn: "2025-01-01T00:00:00.000Z",
   modifiedOn: "2025-01-01T00:00:00.000Z",
 };

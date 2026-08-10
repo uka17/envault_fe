@@ -23,5 +23,8 @@
   "nameAlphanumeric": "Имя должно содержать только буквы, с одиночными пробелами, дефисами или апострофами между словами (например, «Иван Иванов»)",
   "currentPasswordRequired": "Текущий пароль обязателен",
   "newPasswordRequired": "Новый пароль обязателен",
-  "idRequired": "ID обязателен"
+  "idRequired": "ID обязателен",
+  "emailNotVerified": "Подтвердите имейл, чтобы войти",
+  "verificationCodeInvalid": "Код подтверждения неверен или устарел",
+  "verificationCodeRequired": "Код подтверждения обязателен"
 }
