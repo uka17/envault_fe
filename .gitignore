@@ -32,5 +32,6 @@ coverage
 logs/
 playwright-report/
 test-results/
+.agents/skills/impeccable
 .claude/skills/impeccable
 .impeccable/
