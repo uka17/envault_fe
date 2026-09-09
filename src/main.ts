@@ -5,6 +5,7 @@ import { createPinia } from "pinia";
 
 import App from "./App.vue";
 import router from "./router";
+import { setSessionExpiredHandler } from "@/api/http";
 import { useAuthStore } from "@/stores/auth";
 import i18n from "@/i18n";
 
@@ -12,13 +13,15 @@ const app = createApp(App);
 const pinia = createPinia();
 
 app.use(pinia);
-app.use(router);
 app.use(i18n);
 
 (async () => {
   const auth = useAuthStore();
   await auth.init();
 
+  setSessionExpiredHandler(() => router.replace({ name: "login" }));
+  app.use(router);
+  await router.isReady();
   app.mount("#app");
 
   const loader = document.getElementById("app-loader");

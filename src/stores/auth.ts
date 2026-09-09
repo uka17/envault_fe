@@ -83,11 +83,13 @@ export const useAuthStore = defineStore("auth", {
 
     /**
      * Clear in-memory auth state without calling the server.
-     * Used by the axios interceptor when a refresh attempt fails.
+     * Used when the server rejects the refresh token.
+     * @returns Nothing.
      */
     clearAuth() {
       this.accessToken = null;
       this.user = null;
+      localStorage.removeItem("hasSession");
     },
 
     /**

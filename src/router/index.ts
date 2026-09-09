@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHistory, type NavigationGuard } from "vue-router";
 import HomeView from "../views/HomeView.vue";
 import Login from "@/views/Login.vue";
 import RegisterView from "@/views/RegisterView.vue";
@@ -33,18 +33,14 @@ export const routes = [
   {
     path: "/dashboard",
     name: "dashboard",
+    meta: { requiresAuth: true },
     component: DashboardView,
   },
   {
     path: "/profile",
     name: "profile",
+    meta: { requiresAuth: true },
     component: ProfileView,
-    /**
-     * Refetch the current user profile every time this route is entered,
-     * so the profile page always reflects the latest server state
-     * instead of a possibly stale cached value in the auth store.
-     * @returns Nothing; navigation proceeds unconditionally after the fetch attempt.
-     */
     beforeEnter: async () => {
       const auth = useAuthStore();
       await auth.fetchUser();
@@ -53,6 +49,7 @@ export const routes = [
   {
     path: "/stash/new",
     name: "create-stash",
+    meta: { requiresAuth: true },
     component: CreateStashView,
   },
   {
@@ -66,5 +63,14 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
 });
+
+export const requireAuth: NavigationGuard = (to) => {
+  if (to.meta.requiresAuth && !useAuthStore().isAuthenticated) {
+    return { name: "login", replace: true };
+  }
+  return true;
+};
+
+router.beforeEach(requireAuth);
 
 export default router;

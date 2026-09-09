@@ -25,7 +25,14 @@ vi.mock("@/api/authApi", () => ({
   resendVerificationApi: vi.fn(),
 }));
 
-const user = { id: 1, email: "a@b.com", name: "A", emailVerifiedAt: "2025-01-01", createdOn: "", modifiedOn: "" };
+const user = {
+  id: 1,
+  email: "a@b.com",
+  name: "A",
+  emailVerifiedAt: "2025-01-01",
+  createdOn: "",
+  modifiedOn: "",
+};
 
 beforeEach(() => {
   setActivePinia(createPinia());
@@ -107,12 +114,14 @@ describe("refresh", () => {
 });
 
 describe("clearAuth", () => {
-  it("clears the token and user in memory", () => {
+  it("clears the token, user and persisted session flag", () => {
     const auth = useAuthStore();
     auth.accessToken = "tok";
     auth.user = user;
 
+    localStorage.setItem("hasSession", "1");
     auth.clearAuth();
+    expect(localStorage.getItem("hasSession")).toBeNull();
 
     expect(auth.accessToken).toBeNull();
     expect(auth.user).toBeNull();
@@ -194,7 +203,10 @@ describe("updatePassword", () => {
 
     await auth.updatePassword({ currentPassword: "old", newPassword: "New1word" });
 
-    expect(updatePasswordApi).toHaveBeenCalledWith({ currentPassword: "old", newPassword: "New1word" });
+    expect(updatePasswordApi).toHaveBeenCalledWith({
+      currentPassword: "old",
+      newPassword: "New1word",
+    });
   });
 });
 

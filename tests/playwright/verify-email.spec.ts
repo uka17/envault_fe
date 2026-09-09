@@ -4,7 +4,11 @@ import { t, unescape } from "./i18n";
 test.describe("Verify email form", () => {
   test("verifies the code and redirects to login", async ({ page }) => {
     await page.route("**/api/v1/users/verify-email", async (route) => {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({}) });
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({}),
+      });
     });
 
     await page.goto("/verify-email?email=john%40example.com");
@@ -16,6 +20,11 @@ test.describe("Verify email form", () => {
   });
 
   test("shows an error message for an invalid code", async ({ page }) => {
+    let refreshRequests = 0;
+    await page.route("**/api/v1/token/refresh", async (route) => {
+      refreshRequests += 1;
+      await route.fulfill({ status: 401, body: "{}" });
+    });
     const serverMessage = "This verification code is invalid or has expired";
     await page.route("**/api/v1/users/verify-email", async (route) => {
       await route.fulfill({
@@ -32,11 +41,16 @@ test.describe("Verify email form", () => {
 
     await expect(page.getByText(serverMessage)).toBeVisible();
     await expect(page).toHaveURL(/\/verify-email/);
+    expect(refreshRequests).toBe(0);
   });
 
   test("auto-submits the code from the email link", async ({ page }) => {
     await page.route("**/api/v1/users/verify-email", async (route) => {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({}) });
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({}),
+      });
     });
 
     await page.goto("/verify-email?email=john%40example.com&code=fromlink123");
@@ -48,7 +62,11 @@ test.describe("Verify email form", () => {
     let resendCalled = false;
     await page.route("**/api/v1/users/verify-email/resend", async (route) => {
       resendCalled = true;
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({}) });
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({}),
+      });
     });
 
     await page.goto("/verify-email?email=john%40example.com");

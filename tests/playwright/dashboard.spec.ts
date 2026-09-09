@@ -1,12 +1,6 @@
 import { expect, test, type Page } from "playwright/test";
 import { t, unescape } from "./i18n";
 
-/**
- * Format an ISO date string the same way `DashboardView`'s `formatDate` helper
- * does, so tests can assert on the exact text rendered for a stash's schedule.
- * @param isoDate ISO 8601 date string.
- * @returns Formatted date string, e.g. "June 15, 2025, 12:00".
- */
 function formatDate(isoDate: string): string {
   return new Intl.DateTimeFormat("en", {
     day: "numeric",
@@ -17,13 +11,6 @@ function formatDate(isoDate: string): string {
   }).format(new Date(isoDate));
 }
 
-/**
- * Log the page into a mocked session and land on the dashboard with a fixed
- * set of stashes served from the mocked `/stashes` endpoint.
- * @param page Playwright page to authenticate.
- * @returns The ISO send date used for the mocked planned stash, so tests can
- * assert on its interpolated, human-readable form.
- */
 async function loginWithMockedStashes(page: Page): Promise<{ plannedScheduledAt: string }> {
   const plannedScheduledAt = new Date(Date.now() + 86400000).toISOString();
   await page.route("**/api/v1/users/login", async (route) => {
@@ -179,12 +166,54 @@ test.describe("Dashboard", () => {
       .replace("{date}", formatDate(plannedScheduledAt));
     await expect(page.getByRole("dialog").getByText(expectedDeleteText)).toBeVisible();
 
-    await page
-      .getByRole("dialog")
-      .getByRole("button", { name: t.common.actions.cancel })
-      .click();
+    await page.getByRole("dialog").getByRole("button", { name: t.common.actions.cancel }).click();
 
     await expect(page.getByText(expectedDeleteText)).toHaveCount(0);
     await expect(page.getByText("planned@example.com")).toBeVisible();
   });
+});
+
+test("redirects an expired session on startup to login", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("hasSession", "1"));
+  await page.route("**/api/v1/token/refresh", (route) =>
+    route.fulfill({ status: 401, body: "{}" }),
+  );
+  await page.goto("/dashboard");
+  await expect(page).toHaveURL(/\/login$/);
+  expect(await page.evaluate(() => localStorage.getItem("hasSession"))).toBeNull();
+});
+
+test("redirects to login when stashes and refresh return 401", async ({ page }) => {
+  await loginWithMockedStashes(page);
+  await expect(page.getByText("planned@example.com")).toBeVisible();
+  await page.route("**/api/v1/stashes", (route) => route.fulfill({ status: 401, body: "{}" }));
+  await page.route("**/api/v1/token/refresh", (route) =>
+    route.fulfill({ status: 401, body: "{}" }),
+  );
+  await page.getByRole("button", { name: t.stash.dashboard.newStash }).click();
+  await expect(page).toHaveURL(/\/stash\/new$/);
+  await page.locator('a[href="/dashboard"]').first().click();
+  await expect(page).toHaveURL(/\/login$/);
+});
+
+test("keeps the dashboard after successfully refreshing an expired access token", async ({
+  page,
+}) => {
+  await loginWithMockedStashes(page);
+  await expect(page.getByText("planned@example.com")).toBeVisible();
+  let requests = 0;
+  await page.route("**/api/v1/stashes", async (route) => {
+    requests += 1;
+    await route.fulfill({
+      status: requests === 1 ? 401 : 200,
+      body: requests === 1 ? "{}" : "[]",
+      contentType: "application/json",
+    });
+  });
+  await page.getByRole("button", { name: t.stash.dashboard.newStash }).click();
+  await expect(page).toHaveURL(/\/stash\/new$/);
+  await page.locator('a[href="/dashboard"]').first().click();
+  await expect(page.getByText(t.stash.dashboard.emptyTitle)).toBeVisible();
+  await expect(page).toHaveURL(/\/dashboard$/);
+  expect(requests).toBe(2);
 });

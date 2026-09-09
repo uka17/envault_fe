@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { useAuthStore } from "@/stores/auth";
-import { http } from "../http";
+import { http, setSessionExpiredHandler } from "../http";
 
 vi.mock("../authApi", () => ({
   refreshTokenApi: vi.fn(),
@@ -15,7 +15,6 @@ vi.mock("../authApi", () => ({
 
 import { refreshTokenApi } from "../authApi";
 
-/** Grabs the fulfilled/rejected handlers registered on an axios interceptor manager. */
 function interceptorHandlers<T>(manager: unknown) {
   return (manager as { handlers: Array<{ fulfilled: T; rejected: T }> }).handlers[0];
 }
@@ -33,7 +32,9 @@ describe("request interceptor", () => {
 
     const config = await fulfilled({ headers: {} } as never);
 
-    expect((config as { headers: Record<string, string> }).headers.Authorization).toBe("Bearer abc123");
+    expect((config as { headers: Record<string, string> }).headers.Authorization).toBe(
+      "Bearer abc123",
+    );
   });
 
   it("leaves the headers untouched when there is no access token", async () => {
@@ -97,7 +98,7 @@ describe("response interceptor", () => {
   });
 
   it("clears auth and rejects when the refresh call itself fails", async () => {
-    vi.mocked(refreshTokenApi).mockRejectedValue(new Error("refresh failed"));
+    vi.mocked(refreshTokenApi).mockRejectedValue({ isAxiosError: true, response: { status: 401 } });
     const auth = useAuthStore();
     auth.accessToken = "old-token";
 
@@ -108,3 +109,84 @@ describe("response interceptor", () => {
     expect(auth.accessToken).toBeNull();
   });
 });
+
+it("rejects concurrent requests and expires the session once", async () => {
+  const navigate = vi.fn().mockResolvedValue(undefined);
+  setSessionExpiredHandler(navigate);
+  const auth = useAuthStore();
+  auth.accessToken = "old";
+  localStorage.setItem("hasSession", "1");
+  vi.mocked(refreshTokenApi).mockRejectedValue({ isAxiosError: true, response: { status: 401 } });
+  const { rejected } = interceptorHandlers<(error: never) => Promise<unknown>>(
+    http.interceptors.response,
+  );
+  const error = { response: { status: 401 }, config: { url: "/stashes" } };
+  const results = await Promise.allSettled([
+    rejected(error as never),
+    rejected({ ...error, config: { url: "/users/whoami" } } as never),
+  ]);
+  expect(results.map((result) => result.status)).toEqual(["rejected", "rejected"]);
+  expect(refreshTokenApi).toHaveBeenCalledTimes(1);
+  expect(navigate).toHaveBeenCalledTimes(1);
+  expect(auth.accessToken).toBeNull();
+  expect(localStorage.getItem("hasSession")).toBeNull();
+});
+
+it.each([new Error("offline"), { isAxiosError: true, response: { status: 500 } }])(
+  "preserves authentication on transient refresh failure: %s",
+  async (failure) => {
+    const navigate = vi.fn().mockResolvedValue(undefined);
+    setSessionExpiredHandler(navigate);
+    const auth = useAuthStore();
+    auth.accessToken = "old";
+    vi.mocked(refreshTokenApi).mockRejectedValue(failure);
+    const { rejected } = interceptorHandlers<(error: never) => Promise<unknown>>(
+      http.interceptors.response,
+    );
+    const error = { response: { status: 401 }, config: { url: "/stashes" } };
+    await expect(rejected(error as never)).rejects.toBe(error);
+    expect(auth.accessToken).toBe("old");
+    expect(navigate).not.toHaveBeenCalled();
+  },
+);
+
+it("retries concurrent requests with a single refreshed token", async () => {
+  vi.mocked(refreshTokenApi).mockResolvedValue("shared-token");
+  const originalAdapter = http.defaults.adapter;
+  const adapter = vi
+    .fn()
+    .mockResolvedValue({ data: "ok", status: 200, statusText: "OK", headers: {}, config: {} });
+  http.defaults.adapter = adapter;
+  try {
+    const { rejected } = interceptorHandlers<(error: never) => Promise<unknown>>(
+      http.interceptors.response,
+    );
+    await Promise.all([
+      rejected({ response: { status: 401 }, config: { url: "/stashes" } } as never),
+      rejected({ response: { status: 401 }, config: { url: "/users/whoami" } } as never),
+    ]);
+    expect(refreshTokenApi).toHaveBeenCalledTimes(1);
+    expect(adapter).toHaveBeenCalledTimes(2);
+    for (const [config] of adapter.mock.calls) {
+      expect(config.headers.Authorization).toBe("Bearer shared-token");
+      expect(config._retry).toBe(true);
+    }
+  } finally {
+    http.defaults.adapter = originalAdapter;
+  }
+});
+
+it.each(["/users/verify-email", "/users/verify-email/resend"])(
+  "does not refresh on public verification errors from %s",
+  async (url) => {
+    const navigate = vi.fn().mockResolvedValue(undefined);
+    setSessionExpiredHandler(navigate);
+    const { rejected } = interceptorHandlers<(error: never) => Promise<unknown>>(
+      http.interceptors.response,
+    );
+    const error = { response: { status: 401 }, config: { url } };
+    await expect(rejected(error as never)).rejects.toBe(error);
+    expect(refreshTokenApi).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
+  },
+);

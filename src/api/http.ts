@@ -6,6 +6,18 @@ export const http = axios.create({
   withCredentials: true,
 });
 
+let refreshPromise: Promise<string> | null = null;
+let onSessionExpired: (() => Promise<unknown>) | undefined;
+
+/**
+ * Register navigation after a session expires without importing the router.
+ * @param handler Application navigation callback.
+ * @returns Nothing.
+ */
+export function setSessionExpiredHandler(handler: () => Promise<unknown>): void {
+  onSessionExpired = handler;
+}
+
 http.interceptors.request.use((config) => {
   const auth = useAuthStore();
   if (auth.accessToken) {
@@ -14,58 +26,48 @@ http.interceptors.request.use((config) => {
   return config;
 });
 
-let isRefreshing = false;
-let refreshQueue: Array<(token: string) => void> = [];
-
 /**
- * Drain the queue of requests that were waiting for a token refresh.
- * @param token New access token to replay requests with.
+ * Refresh the shared session and handle a rejected refresh token once.
+ * @returns The new access token.
  */
-function resolveQueue(token: string) {
-  refreshQueue.forEach((cb) => cb(token));
-  refreshQueue = [];
+async function refreshSession(): Promise<string> {
+  const auth = useAuthStore();
+  try {
+    return await auth.refresh();
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      auth.clearAuth();
+      await onSessionExpired?.();
+    }
+    throw error;
+  } finally {
+    refreshPromise = null;
+  }
 }
 
 http.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const original: AxiosRequestConfig & { _retry?: boolean } = error.config;
-
-    const skipRefreshUrls = ["/token/refresh", "/users/login"];
+    const original: (AxiosRequestConfig & { _retry?: boolean }) | undefined = error.config;
+    const skipRefreshUrls = ["/token/refresh", "/users/login", "/users/verify-email"];
     if (
       error.response?.status !== 401 ||
+      !original ||
       original._retry ||
       skipRefreshUrls.some((url) => original.url?.includes(url))
     ) {
       return Promise.reject(error);
     }
 
-    if (isRefreshing) {
-      return new Promise((resolve) => {
-        refreshQueue.push((token) => {
-          original.headers = { ...original.headers, Authorization: `Bearer ${token}` };
-          original._retry = true;
-          resolve(http(original));
-        });
-      });
-    }
-
     original._retry = true;
-    isRefreshing = true;
-
+    refreshPromise ??= refreshSession();
+    let token: string;
     try {
-      const auth = useAuthStore();
-      const newToken = await auth.refresh();
-      resolveQueue(newToken);
-      original.headers = { ...original.headers, Authorization: `Bearer ${newToken}` };
-      return http(original);
+      token = await refreshPromise;
     } catch {
-      refreshQueue = [];
-      const auth = useAuthStore();
-      auth.clearAuth();
       return Promise.reject(error);
-    } finally {
-      isRefreshing = false;
     }
+    original.headers = { ...original.headers, Authorization: `Bearer ${token}` };
+    return http(original);
   },
 );

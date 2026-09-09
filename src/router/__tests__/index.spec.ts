@@ -1,6 +1,7 @@
+import { createRouter, createMemoryHistory } from "vue-router";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
-import { routes } from "../index";
+import { routes, requireAuth } from "../index";
 import { useAuthStore } from "@/stores/auth";
 import { checkAuthApi } from "@/api/authApi";
 
@@ -14,7 +15,14 @@ vi.mock("@/api/authApi", () => ({
   registerApi: vi.fn(),
 }));
 
-const user = { id: 1, email: "a@b.com", name: "A", emailVerifiedAt: "2025-01-01", createdOn: "", modifiedOn: "" };
+const user = {
+  id: 1,
+  email: "a@b.com",
+  name: "A",
+  emailVerifiedAt: "2025-01-01",
+  createdOn: "",
+  modifiedOn: "",
+};
 
 beforeEach(() => {
   setActivePinia(createPinia());
@@ -37,3 +45,23 @@ describe("profile route guard", () => {
     expect(auth.user).toEqual(user);
   });
 });
+
+it.each(["/dashboard", "/profile", "/stash/new"])("protects %s", async (path) => {
+  const router = createRouter({ history: createMemoryHistory(), routes });
+  router.beforeEach(requireAuth);
+  await router.push(path);
+  expect(router.currentRoute.value.name).toBe("login");
+  useAuthStore().accessToken = "valid";
+  await router.push("/dashboard");
+  expect(router.currentRoute.value.name).toBe("dashboard");
+});
+
+it.each(["/", "/login", "/register", "/verify-email", "/unlock/example"])(
+  "keeps %s public",
+  async (path) => {
+    const router = createRouter({ history: createMemoryHistory(), routes });
+    router.beforeEach(requireAuth);
+    await router.push(path);
+    expect(router.currentRoute.value.path).toBe(path);
+  },
+);
