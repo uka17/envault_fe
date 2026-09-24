@@ -5,7 +5,7 @@
   },
   "name": {
     "required": "Enter your name",
-    "invalid": "Name can only contain letters"
+    "invalid": "Name can contain letters, with spaces, hyphens or apostrophes between words"
   },
   "password": {
     "required": "Enter your password",

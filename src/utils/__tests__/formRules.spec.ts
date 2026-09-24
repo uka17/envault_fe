@@ -31,6 +31,12 @@ describe("NAME_REGEXP", () => {
     expect(NAME_REGEXP.test("Alice123")).toBe(false);
     expect(NAME_REGEXP.test("")).toBe(false);
   });
+
+  // A name must never start or end with a space, even while the user is still typing.
+  it("rejects names with a leading or trailing space", () => {
+    expect(NAME_REGEXP.test(" Nick")).toBe(false);
+    expect(NAME_REGEXP.test("Nick ")).toBe(false);
+  });
 });
 
 describe("PASSWORD_REGEXP", () => {

@@ -132,3 +132,52 @@ test.describe("Confirm email change page", () => {
     await expect(page.getByText(t.auth.confirmEmailChange.invalidLink)).toBeVisible();
   });
 });
+
+test.describe("Profile name change", () => {
+  test("saves a valid name", async ({ page }) => {
+    const user = { ...baseUser };
+    await loginToProfile(page, user);
+
+    let submittedName: string | undefined;
+    await page.route("**/api/v1/users/me", async (route) => {
+      submittedName = JSON.parse(route.request().postData() ?? "{}").name;
+      user.name = submittedName ?? user.name;
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(user) });
+    });
+
+    await page.getByRole("button", { name: t.profile.edit }).first().click();
+    await page.locator(".n-modal input").first().fill("Nick Smith");
+    await page.locator(".n-modal .modal-footer button").last().click();
+
+    await expect(page.getByText(t.profile.messages.nameUpdated)).toBeVisible();
+    expect(submittedName).toBe("Nick Smith");
+  });
+
+  for (const name of ["Nick ", " Nick"]) {
+    test(`rejects "${name}" because of the leading or trailing space`, async ({ page }) => {
+      await loginToProfile(page, { ...baseUser });
+
+      let requested = false;
+      await page.route("**/api/v1/users/me", async (route) => {
+        requested = true;
+        await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(baseUser) });
+      });
+
+      await page.getByRole("button", { name: t.profile.edit }).first().click();
+      await page.locator(".n-modal input").first().fill(name);
+      await expect(page.getByText(t.validation.name.invalid)).toBeVisible();
+
+      await page.locator(".n-modal .modal-footer button").last().click();
+      expect(requested).toBe(false);
+    });
+  }
+
+  test("shows the invalid name error for digits", async ({ page }) => {
+    await loginToProfile(page, { ...baseUser });
+
+    await page.getByRole("button", { name: t.profile.edit }).first().click();
+    await page.locator(".n-modal input").first().fill("Nick1");
+
+    await expect(page.getByText(t.validation.name.invalid)).toBeVisible();
+  });
+});
