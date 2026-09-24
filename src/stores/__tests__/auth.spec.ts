@@ -14,6 +14,8 @@ import {
   registerApi,
   verifyEmailApi,
   resendVerificationApi,
+  requestPasswordResetApi,
+  confirmPasswordResetApi,
 } from "@/api/authApi";
 
 vi.mock("@/api/authApi", () => ({
@@ -29,6 +31,8 @@ vi.mock("@/api/authApi", () => ({
   registerApi: vi.fn(),
   verifyEmailApi: vi.fn(),
   resendVerificationApi: vi.fn(),
+  requestPasswordResetApi: vi.fn(),
+  confirmPasswordResetApi: vi.fn(),
 }));
 
 const user = {
@@ -301,5 +305,46 @@ describe("init", () => {
     expect(auth.accessToken).toBeNull();
     expect(auth.user).toBeNull();
     expect(localStorage.getItem("hasSession")).toBeNull();
+  });
+});
+
+describe("requestPasswordReset", () => {
+  it("delegates to requestPasswordResetApi without touching auth state", async () => {
+    vi.mocked(requestPasswordResetApi).mockResolvedValue(undefined);
+    const auth = useAuthStore();
+    auth.accessToken = "tok";
+
+    await auth.requestPasswordReset("a@b.com");
+
+    expect(requestPasswordResetApi).toHaveBeenCalledWith("a@b.com");
+    expect(auth.accessToken).toBe("tok");
+  });
+});
+
+describe("confirmPasswordReset", () => {
+  it("clears local auth state on success because the server revoked every session", async () => {
+    vi.mocked(confirmPasswordResetApi).mockResolvedValue(undefined);
+    const auth = useAuthStore();
+    auth.accessToken = "tok";
+    auth.user = user;
+    localStorage.setItem("hasSession", "1");
+
+    await auth.confirmPasswordReset("reset-token", "New1word");
+
+    expect(confirmPasswordResetApi).toHaveBeenCalledWith({ token: "reset-token", newPassword: "New1word" });
+    expect(auth.accessToken).toBeNull();
+    expect(auth.user).toBeNull();
+    expect(localStorage.getItem("hasSession")).toBeNull();
+  });
+
+  it("leaves auth state untouched and propagates the error when the token is rejected", async () => {
+    vi.mocked(confirmPasswordResetApi).mockRejectedValue(new Error("invalid token"));
+    const auth = useAuthStore();
+    auth.accessToken = "tok";
+    auth.user = user;
+
+    await expect(auth.confirmPasswordReset("bad", "New1word")).rejects.toThrow("invalid token");
+    expect(auth.accessToken).toBe("tok");
+    expect(auth.user).toEqual(user);
   });
 });

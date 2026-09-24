@@ -12,6 +12,8 @@ const USERS_VERIFY_EMAIL_RESEND_URL = "/users/verify-email/resend";
 const USERS_EMAIL_CHANGE_REQUEST_URL = "/users/email-change/request";
 const USERS_EMAIL_CHANGE_CONFIRM_URL = "/users/email-change/confirm";
 const USERS_EMAIL_CHANGE_RESEND_URL = "/users/email-change/resend";
+const USERS_PASSWORD_RESET_REQUEST_URL = "/users/password-reset/request";
+const USERS_PASSWORD_RESET_CONFIRM_URL = "/users/password-reset/confirm";
 
 export interface LoginPayload {
   email: string;
@@ -36,6 +38,11 @@ export interface UserResponse {
 
 export interface UpdatePasswordPayload {
   currentPassword: string;
+  newPassword: string;
+}
+
+export interface ConfirmPasswordResetPayload {
+  token: string;
   newPassword: string;
 }
 
@@ -149,4 +156,24 @@ export async function verifyEmailApi(code: string): Promise<void> {
  */
 export async function resendVerificationApi(email: string): Promise<void> {
   await http.post(USERS_VERIFY_EMAIL_RESEND_URL, { email });
+}
+
+/**
+ * Request a password reset link for the given address. The server responds the same way
+ * whether or not the address belongs to a verified account.
+ * @param email Email address to send the reset link to.
+ * @returns void
+ */
+export async function requestPasswordResetApi(email: string): Promise<void> {
+  await http.post(USERS_PASSWORD_RESET_REQUEST_URL, { email });
+}
+
+/**
+ * Set a new password using the one-time token from the reset link.
+ * The server revokes every session on success and does not log the user in.
+ * @param payload Reset token and new password.
+ * @returns void
+ */
+export async function confirmPasswordResetApi(payload: ConfirmPasswordResetPayload): Promise<void> {
+  await http.post(USERS_PASSWORD_RESET_CONFIRM_URL, payload);
 }

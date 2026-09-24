@@ -30,5 +30,7 @@
   "emailChangeTokenInvalid": "Эта ссылка подтверждения недействительна или устарела",
   "emailChangeRateLimited": "Слишком много запросов на смену email. Попробуйте позже.",
   "emailChangeNotPending": "Нет отложенной смены email",
-  "emailChangeDeliveryFailed": "Не удалось отправить письмо с подтверждением. Попробуйте позже."
+  "emailChangeDeliveryFailed": "Не удалось отправить письмо с подтверждением. Попробуйте позже.",
+  "passwordResetInvalid": "Эта ссылка для сброса пароля недействительна или устарела",
+  "passwordResetRateLimited": "Слишком много попыток сброса пароля. Попробуйте позже."
 }

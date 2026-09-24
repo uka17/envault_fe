@@ -12,6 +12,8 @@ import {
   registerApi,
   verifyEmailApi,
   resendVerificationApi,
+  requestPasswordResetApi,
+  confirmPasswordResetApi,
   type UserResponse,
   type UpdatePasswordPayload,
   type RegisterPayload,
@@ -167,6 +169,27 @@ export const useAuthStore = defineStore("auth", {
      */
     async updatePassword(data: UpdatePasswordPayload) {
       await updatePasswordApi(data);
+    },
+
+    /**
+     * Request a password reset link for the given address.
+     * @param email Email address to send the reset link to.
+     * @returns Resolves once the server accepts the request.
+     */
+    async requestPasswordReset(email: string) {
+      await requestPasswordResetApi(email);
+    },
+
+    /**
+     * Set a new password using the token from the reset link.
+     * The server revokes every session on success, so local auth state is cleared too.
+     * @param token Reset token from the email link.
+     * @param newPassword New account password.
+     * @returns Resolves once the password is changed and local auth state is cleared.
+     */
+    async confirmPasswordReset(token: string, newPassword: string) {
+      await confirmPasswordResetApi({ token, newPassword });
+      this.clearAuth();
     },
 
     /**

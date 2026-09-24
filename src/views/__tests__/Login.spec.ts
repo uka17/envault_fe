@@ -48,6 +48,12 @@ describe("Login.vue", () => {
     expect(wrapper.text()).toContain("Sign in");
   });
 
+  it("links to the password recovery page", async () => {
+    const { wrapper } = await mountWithProviders(Login);
+
+    expect(wrapper.find("a.forgot-link").attributes("href")).toBe("/forgot-password");
+  });
+
   it("shows a validation error and does not call the API when fields are empty", async () => {
     const { wrapper } = await mountWithProviders(Login);
 

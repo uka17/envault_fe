@@ -4,6 +4,8 @@ import Login from "@/views/Login.vue";
 import RegisterView from "@/views/RegisterView.vue";
 import VerifyEmailView from "@/views/VerifyEmailView.vue";
 import ConfirmEmailChangeView from "@/views/ConfirmEmailChangeView.vue";
+import ForgotPasswordView from "@/views/ForgotPasswordView.vue";
+import ResetPasswordView from "@/views/ResetPasswordView.vue";
 import DashboardView from "@/views/DashboardView.vue";
 import ProfileView from "@/views/ProfileView.vue";
 import CreateStashView from "@/views/CreateStashView.vue";
@@ -35,6 +37,16 @@ export const routes = [
     path: "/confirm-email-change",
     name: "confirm-email-change",
     component: ConfirmEmailChangeView,
+  },
+  {
+    path: "/forgot-password",
+    name: "forgot-password",
+    component: ForgotPasswordView,
+  },
+  {
+    path: "/reset-password",
+    name: "reset-password",
+    component: ResetPasswordView,
   },
   {
     path: "/dashboard",

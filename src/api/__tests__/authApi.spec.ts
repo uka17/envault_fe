@@ -13,6 +13,8 @@ import {
   updatePasswordApi,
   verifyEmailApi,
   resendVerificationApi,
+  requestPasswordResetApi,
+  confirmPasswordResetApi,
 } from "../authApi";
 
 vi.mock("../http", () => ({
@@ -163,5 +165,28 @@ describe("resendVerificationApi", () => {
     await resendVerificationApi("a@b.com");
 
     expect(mockedHttp.post).toHaveBeenCalledWith("/users/verify-email/resend", { email: "a@b.com" });
+  });
+});
+
+describe("requestPasswordResetApi", () => {
+  it("posts the email to the password reset request endpoint", async () => {
+    mockedHttp.post.mockResolvedValue({ data: {} });
+
+    await requestPasswordResetApi("a@b.com");
+
+    expect(mockedHttp.post).toHaveBeenCalledWith("/users/password-reset/request", { email: "a@b.com" });
+  });
+});
+
+describe("confirmPasswordResetApi", () => {
+  it("posts the token and new password to the password reset confirm endpoint", async () => {
+    mockedHttp.post.mockResolvedValue({ data: {} });
+
+    await confirmPasswordResetApi({ token: "a".repeat(64), newPassword: "New1word" });
+
+    expect(mockedHttp.post).toHaveBeenCalledWith("/users/password-reset/confirm", {
+      token: "a".repeat(64),
+      newPassword: "New1word",
+    });
   });
 });

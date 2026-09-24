@@ -153,6 +153,10 @@ onMounted(() => {
             </n-form>
 
             <footer class="card-footer">
+              <RouterLink to="/forgot-password" class="text-link forgot-link">{{ t("auth.login.forgotPassword") }}</RouterLink>
+            </footer>
+
+            <footer class="card-footer">
               <n-text depth="3">{{ t("auth.login.noAccount") }}</n-text>
               <RouterLink to="/register" class="text-link switch-link">{{ t("auth.login.createLink") }}</RouterLink>
             </footer>
