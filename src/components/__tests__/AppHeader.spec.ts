@@ -13,7 +13,10 @@ vi.mock("@/api/authApi", () => ({
   loginApi: vi.fn(),
   refreshTokenApi: vi.fn(),
   checkAuthApi: vi.fn(),
-  updateProfileApi: vi.fn(),
+  updateNameApi: vi.fn(),
+  requestEmailChangeApi: vi.fn(),
+  confirmEmailChangeApi: vi.fn(),
+  resendEmailChangeApi: vi.fn(),
   updatePasswordApi: vi.fn(),
   registerApi: vi.fn(),
 }));
@@ -76,6 +79,7 @@ describe("AppHeader.vue", () => {
     auth.user = {
       id: 1,
       email: "alice@example.com",
+      pendingEmail: null,
       name: "Alice",
       emailVerifiedAt: "2025-01-01",
       createdOn: "",
@@ -94,6 +98,7 @@ describe("AppHeader.vue", () => {
     auth.user = {
       id: 1,
       email: "alice@example.com",
+      pendingEmail: null,
       name: "Alice",
       emailVerifiedAt: "2025-01-01",
       createdOn: "",
@@ -116,6 +121,7 @@ describe("AppHeader.vue", () => {
     auth.user = {
       id: 1,
       email: "alice@example.com",
+      pendingEmail: null,
       name: "Alice",
       emailVerifiedAt: "2025-01-01",
       createdOn: "",
@@ -151,6 +157,7 @@ describe("AppHeader.vue", () => {
     auth.user = {
       id: 1,
       email: "alice@example.com",
+      pendingEmail: null,
       name: "Alice",
       emailVerifiedAt: "2025-01-01",
       createdOn: "",
