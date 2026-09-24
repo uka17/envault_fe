@@ -10,7 +10,9 @@
     "registeredAt": "Дата регистрации",
     "status": "Статус аккаунта",
     "active": "Активен",
-    "changePassword": "Сменить пароль"
+    "changePassword": "Сменить пароль",
+    "pendingEmail": "Письмо с подтверждением отправлено на {email}. Проверьте почту, чтобы завершить смену.",
+    "resendEmailChange": "Отправить письмо повторно"
   },
   "security": {
     "title": "Безопасность",
@@ -48,6 +50,7 @@
     "editEmail": "Изменить email",
     "newEmailLabel": "Новый email",
     "newEmailPlaceholder": "Введите новый email",
+    "newEmailPendingHint": "На этот адрес уже отправлено подтверждение. Перейдите по ссылке из письма, чтобы подтвердить новый email.",
     "changePasswordTitle": "Сменить пароль",
     "currentPassword": "Текущий пароль",
     "newPassword": "Новый пароль",
@@ -55,11 +58,15 @@
     "submitChange": "Сменить"
   },
   "messages": {
-    "emailUpdated": "Email обновлён",
-    "emailUpdateFailed": "Не удалось обновить email",
+    "emailUpdated": "Письмо с подтверждением отправлено. Адрес изменится после подтверждения.",
+    "emailChangeCancelled": "Смена email отменена. Адрес остался прежним.",
+    "emailUpdateFailed": "Не удалось запросить смену email",
     "nameUpdated": "Имя обновлено",
     "nameUpdateFailed": "Не удалось обновить имя. Попробуйте ещё раз.",
     "passwordUpdated": "Пароль изменён",
-    "passwordUpdateFailed": "Не удалось изменить пароль. Проверьте текущий пароль."
+    "passwordUpdateFailed": "Не удалось изменить пароль. Проверьте текущий пароль.",
+    "resendEmailChangeSuccess": "Письмо с подтверждением отправлено повторно.",
+    "resendEmailChangeFailed": "Не удалось отправить письмо повторно.",
+    "emailChangeRateLimited": "Слишком много запросов. Попробуйте через {n} секунду. | Слишком много запросов. Попробуйте через {n} секунды. | Слишком много запросов. Попробуйте через {n} секунд."
   }
 }

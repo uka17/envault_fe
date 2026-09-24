@@ -3,6 +3,7 @@ import HomeView from "../views/HomeView.vue";
 import Login from "@/views/Login.vue";
 import RegisterView from "@/views/RegisterView.vue";
 import VerifyEmailView from "@/views/VerifyEmailView.vue";
+import ConfirmEmailChangeView from "@/views/ConfirmEmailChangeView.vue";
 import DashboardView from "@/views/DashboardView.vue";
 import ProfileView from "@/views/ProfileView.vue";
 import CreateStashView from "@/views/CreateStashView.vue";
@@ -29,6 +30,11 @@ export const routes = [
     path: "/verify-email",
     name: "verify-email",
     component: VerifyEmailView,
+  },
+  {
+    path: "/confirm-email-change",
+    name: "confirm-email-change",
+    component: ConfirmEmailChangeView,
   },
   {
     path: "/dashboard",

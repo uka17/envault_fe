@@ -6,7 +6,10 @@ import {
   logoutApi,
   refreshTokenApi,
   checkAuthApi,
-  updateProfileApi,
+  updateNameApi,
+  requestEmailChangeApi,
+  confirmEmailChangeApi,
+  resendEmailChangeApi,
   updatePasswordApi,
   registerApi,
   verifyEmailApi,
@@ -18,7 +21,10 @@ vi.mock("@/api/authApi", () => ({
   logoutApi: vi.fn(),
   refreshTokenApi: vi.fn(),
   checkAuthApi: vi.fn(),
-  updateProfileApi: vi.fn(),
+  updateNameApi: vi.fn(),
+  requestEmailChangeApi: vi.fn(),
+  confirmEmailChangeApi: vi.fn(),
+  resendEmailChangeApi: vi.fn(),
   updatePasswordApi: vi.fn(),
   registerApi: vi.fn(),
   verifyEmailApi: vi.fn(),
@@ -28,6 +34,7 @@ vi.mock("@/api/authApi", () => ({
 const user = {
   id: 1,
   email: "a@b.com",
+  pendingEmail: null,
   name: "A",
   emailVerifiedAt: "2025-01-01",
   createdOn: "",
@@ -184,15 +191,68 @@ describe("fetchUser", () => {
   });
 });
 
-describe("updateProfile", () => {
+describe("updateName", () => {
   it("updates the user with the API response", async () => {
     const updated = { ...user, name: "New Name" };
-    vi.mocked(updateProfileApi).mockResolvedValue(updated);
+    vi.mocked(updateNameApi).mockResolvedValue(updated);
     const auth = useAuthStore();
 
-    await auth.updateProfile({ name: "New Name" });
+    await auth.updateName("New Name");
 
+    expect(updateNameApi).toHaveBeenCalledWith("New Name");
     expect(auth.user).toEqual(updated);
+  });
+});
+
+describe("requestEmailChange", () => {
+  it("updates the user with the API response", async () => {
+    const updated = { ...user, pendingEmail: "new@b.com" };
+    vi.mocked(requestEmailChangeApi).mockResolvedValue(updated);
+    const auth = useAuthStore();
+
+    await auth.requestEmailChange("new@b.com");
+
+    expect(requestEmailChangeApi).toHaveBeenCalledWith("new@b.com");
+    expect(auth.user).toEqual(updated);
+  });
+});
+
+describe("confirmEmailChange", () => {
+  it("clears local auth state on success", async () => {
+    vi.mocked(confirmEmailChangeApi).mockResolvedValue(undefined);
+    const auth = useAuthStore();
+    auth.accessToken = "tok";
+    auth.user = user;
+    localStorage.setItem("hasSession", "1");
+
+    await auth.confirmEmailChange("tok123");
+
+    expect(confirmEmailChangeApi).toHaveBeenCalledWith("tok123");
+    expect(auth.accessToken).toBeNull();
+    expect(auth.user).toBeNull();
+    expect(localStorage.getItem("hasSession")).toBeNull();
+  });
+
+  it("leaves auth state untouched and propagates the error when the token is invalid", async () => {
+    vi.mocked(confirmEmailChangeApi).mockRejectedValue(new Error("invalid token"));
+    const auth = useAuthStore();
+    auth.accessToken = "tok";
+    auth.user = user;
+
+    await expect(auth.confirmEmailChange("bad")).rejects.toThrow("invalid token");
+    expect(auth.accessToken).toBe("tok");
+    expect(auth.user).toEqual(user);
+  });
+});
+
+describe("resendEmailChange", () => {
+  it("delegates to resendEmailChangeApi", async () => {
+    vi.mocked(resendEmailChangeApi).mockResolvedValue(undefined);
+    const auth = useAuthStore();
+
+    await auth.resendEmailChange();
+
+    expect(resendEmailChangeApi).toHaveBeenCalled();
   });
 });
 

@@ -10,7 +10,10 @@ vi.mock("@/api/authApi", () => ({
   checkAuthApi: vi.fn(),
   logoutApi: vi.fn(),
   refreshTokenApi: vi.fn(),
-  updateProfileApi: vi.fn(),
+  updateNameApi: vi.fn(),
+  requestEmailChangeApi: vi.fn(),
+  confirmEmailChangeApi: vi.fn(),
+  resendEmailChangeApi: vi.fn(),
   updatePasswordApi: vi.fn(),
   registerApi: vi.fn(),
   verifyEmailApi: vi.fn(),
@@ -24,7 +27,15 @@ function makeApiError(code: string, message: string): AxiosError {
   return err;
 }
 
-const user = { id: 1, email: "a@b.com", name: "A", emailVerifiedAt: "2025-01-01", createdOn: "", modifiedOn: "" };
+const user = {
+  id: 1,
+  email: "a@b.com",
+  pendingEmail: null,
+  name: "A",
+  emailVerifiedAt: "2025-01-01",
+  createdOn: "",
+  modifiedOn: "",
+};
 
 beforeEach(() => {
   vi.clearAllMocks();

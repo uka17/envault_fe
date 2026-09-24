@@ -9,6 +9,9 @@ const USERS_ME_URL = "/users/me";
 const USERS_ME_PASSWORD_URL = "/users/me/password";
 const USERS_VERIFY_EMAIL_URL = "/users/verify-email";
 const USERS_VERIFY_EMAIL_RESEND_URL = "/users/verify-email/resend";
+const USERS_EMAIL_CHANGE_REQUEST_URL = "/users/email-change/request";
+const USERS_EMAIL_CHANGE_CONFIRM_URL = "/users/email-change/confirm";
+const USERS_EMAIL_CHANGE_RESEND_URL = "/users/email-change/resend";
 
 export interface LoginPayload {
   email: string;
@@ -24,15 +27,11 @@ export interface RegisterPayload {
 export interface UserResponse {
   id: number;
   email: string;
+  pendingEmail: string | null;
   name: string;
   emailVerifiedAt: string | null;
   createdOn: string;
   modifiedOn: string;
-}
-
-export interface UpdateProfilePayload {
-  name?: string;
-  email?: string;
 }
 
 export interface UpdatePasswordPayload {
@@ -87,13 +86,41 @@ export async function checkAuthApi(): Promise<UserResponse> {
 }
 
 /**
- * Update the current user's profile (name and/or email).
- * @param payload Fields to update.
+ * Update the current user's display name. Applies immediately, no confirmation required.
+ * @param name New display name.
  * @returns Updated user profile object.
  */
-export async function updateProfileApi(payload: UpdateProfilePayload): Promise<UserResponse> {
-  const { data } = await http.patch<UserResponse>(USERS_ME_URL, payload);
+export async function updateNameApi(name: string): Promise<UserResponse> {
+  const { data } = await http.patch<UserResponse>(USERS_ME_URL, { name });
   return data;
+}
+
+/**
+ * Requests an email change for the current user. The current address stays active
+ * and logged in until the confirmation link is used.
+ * @param email New email address to request.
+ * @returns Updated user profile object (email unchanged until confirmed).
+ */
+export async function requestEmailChangeApi(email: string): Promise<UserResponse> {
+  const { data } = await http.post<UserResponse>(USERS_EMAIL_CHANGE_REQUEST_URL, { email });
+  return data;
+}
+
+/**
+ * Confirms a pending email change using the token received by email.
+ * @param token Confirmation token from the email link.
+ * @returns void
+ */
+export async function confirmEmailChangeApi(token: string): Promise<void> {
+  await http.post(USERS_EMAIL_CHANGE_CONFIRM_URL, { token });
+}
+
+/**
+ * Resends the authenticated user's pending email change confirmation.
+ * @returns void
+ */
+export async function resendEmailChangeApi(): Promise<void> {
+  await http.post(USERS_EMAIL_CHANGE_RESEND_URL);
 }
 
 /**

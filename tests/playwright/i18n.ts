@@ -2,12 +2,13 @@ import common from "../../src/locales/en/common.json" with { type: "json" };
 import auth from "../../src/locales/en/auth.json" with { type: "json" };
 import validation from "../../src/locales/en/validation.json" with { type: "json" };
 import stash from "../../src/locales/en/stash.json" with { type: "json" };
+import profile from "../../src/locales/en/profile.json" with { type: "json" };
 
 /**
  * English locale strings used by the e2e tests, read directly from the app's
  * locale files so the tests stay in sync with any copy changes.
  */
-export const t = { common, auth, validation, stash };
+export const t = { common, auth, validation, stash, profile };
 
 /**
  * Strip vue-i18n's backslash escaping (e.g. "your\\@email.com" -> "your@email.com")

@@ -26,5 +26,9 @@
   "idRequired": "ID is required",
   "emailNotVerified": "Please verify your email before signing in",
   "verificationCodeInvalid": "This verification code is invalid or has expired",
-  "verificationCodeRequired": "Verification code is required"
+  "verificationCodeRequired": "Verification code is required",
+  "emailChangeTokenInvalid": "This confirmation link is invalid or has expired",
+  "emailChangeRateLimited": "Too many email change requests. Please try again later.",
+  "emailChangeNotPending": "No email change is pending",
+  "emailChangeDeliveryFailed": "Confirmation email could not be sent. Please try again later."
 }

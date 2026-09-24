@@ -26,5 +26,9 @@
   "idRequired": "ID обязателен",
   "emailNotVerified": "Подтвердите имейл, чтобы войти",
   "verificationCodeInvalid": "Код подтверждения неверен или устарел",
-  "verificationCodeRequired": "Код подтверждения обязателен"
+  "verificationCodeRequired": "Код подтверждения обязателен",
+  "emailChangeTokenInvalid": "Эта ссылка подтверждения недействительна или устарела",
+  "emailChangeRateLimited": "Слишком много запросов на смену email. Попробуйте позже.",
+  "emailChangeNotPending": "Нет отложенной смены email",
+  "emailChangeDeliveryFailed": "Не удалось отправить письмо с подтверждением. Попробуйте позже."
 }

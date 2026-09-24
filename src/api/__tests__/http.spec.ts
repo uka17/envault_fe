@@ -8,7 +8,10 @@ vi.mock("../authApi", () => ({
   loginApi: vi.fn(),
   logoutApi: vi.fn(),
   checkAuthApi: vi.fn(),
-  updateProfileApi: vi.fn(),
+  updateNameApi: vi.fn(),
+  requestEmailChangeApi: vi.fn(),
+  confirmEmailChangeApi: vi.fn(),
+  resendEmailChangeApi: vi.fn(),
   updatePasswordApi: vi.fn(),
   registerApi: vi.fn(),
 }));
@@ -176,7 +179,7 @@ it("retries concurrent requests with a single refreshed token", async () => {
   }
 });
 
-it.each(["/users/verify-email", "/users/verify-email/resend"])(
+it.each(["/users/verify-email", "/users/verify-email/resend", "/users/email-change/confirm"])(
   "does not refresh on public verification errors from %s",
   async (url) => {
     const navigate = vi.fn().mockResolvedValue(undefined);
@@ -190,3 +193,24 @@ it.each(["/users/verify-email", "/users/verify-email/resend"])(
     expect(navigate).not.toHaveBeenCalled();
   },
 );
+
+it("still refreshes on a 401 from the authenticated email-change resend endpoint", async () => {
+  vi.mocked(refreshTokenApi).mockResolvedValue("new-token");
+  const originalAdapter = http.defaults.adapter;
+  const adapter = vi
+    .fn()
+    .mockResolvedValue({ data: "ok", status: 200, statusText: "OK", headers: {}, config: {} });
+  http.defaults.adapter = adapter;
+  try {
+    const { rejected } = interceptorHandlers<(error: never) => Promise<unknown>>(
+      http.interceptors.response,
+    );
+    const error = { response: { status: 401 }, config: { url: "/users/email-change/resend", headers: {} } };
+
+    await rejected(error as never);
+
+    expect(refreshTokenApi).toHaveBeenCalled();
+  } finally {
+    http.defaults.adapter = originalAdapter;
+  }
+});

@@ -38,6 +38,17 @@ export function getApiErrorCode(err: unknown): string | undefined {
 }
 
 /**
+ * Extract the `Retry-After` header (in seconds) from a rate-limited API error response.
+ * @param err Error thrown by an API call.
+ * @returns Seconds to wait before retrying, or undefined if the header is absent or invalid.
+ */
+export function getApiErrorRetryAfter(err: unknown): number | undefined {
+  if (!axios.isAxiosError<ApiErrorResponse>(err)) return undefined;
+  const seconds = Number(err.response?.headers?.["retry-after"]);
+  return Number.isFinite(seconds) && seconds > 0 ? seconds : undefined;
+}
+
+/**
  * Extract the first user-facing error message from an API error response,
  * localized via the backend error code when it's recognized.
  * @param err Error thrown by an API call.

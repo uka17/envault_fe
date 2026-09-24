@@ -32,8 +32,14 @@ import {
 } from "@vicons/ionicons5";
 import { useAuthStore } from "@/stores/auth";
 import { useSessionsStore } from "@/stores/sessions";
-import { getApiErrorMessage, extractApiFieldErrors } from "@/api/apiError";
-import { nameRules, requiredPasswordRules, newPasswordRules, confirmPasswordRules } from "@/utils/formRules";
+import { getApiErrorMessage, getApiErrorCode, getApiErrorRetryAfter, extractApiFieldErrors } from "@/api/apiError";
+import {
+  emailRules,
+  nameRules,
+  requiredPasswordRules,
+  newPasswordRules,
+  confirmPasswordRules,
+} from "@/utils/formRules";
 import { parseUserAgent } from "@/utils/userAgent";
 
 const auth = useAuthStore();
@@ -54,31 +60,84 @@ const registeredAt = computed(() => {
 
 // Email form
 const showEmailForm = ref(false);
-const newEmail = ref("");
+const emailFormRef = ref<FormInst | null>(null);
+const emailFormValue = reactive({ email: "" });
 const emailLoading = ref(false);
+const emailRulesConfig = computed<FormRules>(() => ({ email: emailRules() }));
+
+// Resending a confirmation to the address that's already pending would be a no-op (the
+// existing token is still valid), so Save is blocked and a hint explains why.
+const emailMatchesPending = computed(() =>
+  !!emailFormValue.email && !!user.value?.pendingEmail && emailFormValue.email === user.value.pendingEmail,
+);
 
 /**
- * Open the email change form, pre-filling the current email.
+ * Open the email change form. The field always starts empty, whether or not a change
+ * is already pending.
  */
 function openEmailForm() {
-  newEmail.value = user.value?.email ?? "";
+  emailFormValue.email = "";
   showEmailForm.value = true;
 }
 
 /**
- * Submit the email change form.
+ * Builds a user-facing message for a failed email-change related request. Uses the exact
+ * retry countdown when the server rate-limited the request, otherwise falls back to the
+ * server's localized reason, and finally to a generic message.
+ * @param err Error thrown by the API call.
+ * @param fallbackKey i18n key for the generic fallback message.
+ * @returns Localized error message to show the user.
+ */
+function emailChangeErrorMessage(err: unknown, fallbackKey: string): string {
+  const retryAfter = getApiErrorRetryAfter(err);
+  if (getApiErrorCode(err) === "email_change_rate_limited" && retryAfter !== undefined) {
+    return t("profile.messages.emailChangeRateLimited", { n: retryAfter }, retryAfter);
+  }
+  return getApiErrorMessage(err) ?? t(fallbackKey);
+}
+
+/**
+ * Submit the email change form. The address stays pending until the confirmation
+ * link sent to it is used. Resubmitting the current confirmed address instead cancels
+ * any pending change, so no confirmation email is sent in that case.
  */
 async function submitEmailForm() {
-  if (!newEmail.value) return;
+  try {
+    await emailFormRef.value?.validate();
+  } catch {
+    return;
+  }
+  if (emailMatchesPending.value) return;
   emailLoading.value = true;
   try {
-    await auth.updateProfile({ email: newEmail.value });
-    message.success(t("profile.messages.emailUpdated"));
+    await auth.requestEmailChange(emailFormValue.email);
+    message.success(
+      auth.user?.pendingEmail === null
+        ? t("profile.messages.emailChangeCancelled")
+        : t("profile.messages.emailUpdated"),
+    );
     showEmailForm.value = false;
-  } catch {
-    message.error(t("profile.messages.emailUpdateFailed"));
+  } catch (err: unknown) {
+    message.error(emailChangeErrorMessage(err, "profile.messages.emailUpdateFailed"));
   } finally {
     emailLoading.value = false;
+  }
+}
+
+const resendEmailChangeLoading = ref(false);
+
+/**
+ * Resend the confirmation email for the pending email change.
+ */
+async function resendEmailChange() {
+  resendEmailChangeLoading.value = true;
+  try {
+    await auth.resendEmailChange();
+    message.success(t("profile.messages.resendEmailChangeSuccess"));
+  } catch (err: unknown) {
+    message.error(emailChangeErrorMessage(err, "profile.messages.resendEmailChangeFailed"));
+  } finally {
+    resendEmailChangeLoading.value = false;
   }
 }
 
@@ -111,7 +170,7 @@ async function submitNameForm() {
   nameError.value = "";
   nameLoading.value = true;
   try {
-    await auth.updateProfile({ name: nameFormValue.name });
+    await auth.updateName(nameFormValue.name);
     message.success(t("profile.messages.nameUpdated"));
     showNameForm.value = false;
   } catch (err: unknown) {
@@ -313,6 +372,17 @@ async function terminateOtherSessions() {
               <dd class="info-value info-value--editable">
                 {{ user?.email ?? "-" }}
                 <button type="button" class="edit-link" @click="openEmailForm">{{ t("profile.edit") }}</button>
+                <p v-if="user?.pendingEmail" class="pending-email-hint">
+                  {{ t("profile.account.pendingEmail", { email: user.pendingEmail }) }}
+                  <button
+                    type="button"
+                    class="edit-link"
+                    :disabled="resendEmailChangeLoading"
+                    @click="resendEmailChange"
+                  >
+                    {{ t("profile.account.resendEmailChange") }}
+                  </button>
+                </p>
               </dd>
             </div>
 
@@ -496,17 +566,30 @@ async function terminateOtherSessions() {
       class="edit-modal"
       :style="{ maxWidth: '420px' }"
     >
-      <n-form-item :label="t('profile.modals.newEmailLabel')" class="form-item">
-        <n-input
-          v-model:value="newEmail"
-          :placeholder="t('profile.modals.newEmailPlaceholder')"
-          @keyup.enter="submitEmailForm"
-        />
-      </n-form-item>
+      <n-form ref="emailFormRef" :model="emailFormValue" :rules="emailRulesConfig">
+        <n-form-item
+          path="email"
+          :label="t('profile.modals.newEmailLabel')"
+          class="form-item"
+          :class="{ 'form-item--hint': emailMatchesPending }"
+          :feedback="emailMatchesPending ? t('profile.modals.newEmailPendingHint') : ''"
+        >
+          <n-input
+            v-model:value="emailFormValue.email"
+            :placeholder="t('profile.modals.newEmailPlaceholder')"
+            @keyup.enter="submitEmailForm"
+          />
+        </n-form-item>
+      </n-form>
       <template #footer>
         <div class="modal-footer">
           <n-button ghost @click="showEmailForm = false">{{ t("common.actions.cancel") }}</n-button>
-          <n-button type="primary" :loading="emailLoading" @click="submitEmailForm">
+          <n-button
+            type="primary"
+            :loading="emailLoading"
+            :disabled="!emailFormValue.email || emailMatchesPending"
+            @click="submitEmailForm"
+          >
             {{ t("common.actions.save") }}
           </n-button>
         </div>
@@ -824,6 +907,21 @@ async function terminateOtherSessions() {
   text-decoration: underline;
 }
 
+.edit-link:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.pending-email-hint {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.2rem 0 0;
+  font-size: 0.83rem;
+  color: #c47a45;
+}
+
 .form-item {
   margin-bottom: 0;
 }
@@ -842,6 +940,11 @@ async function terminateOtherSessions() {
   margin: 0.75rem 0 0;
   font-size: 0.88rem;
   color: #e05c5c;
+}
+
+:deep(.form-item--hint .n-form-item-feedback-wrapper),
+:deep(.form-item--hint .n-form-item-feedback) {
+  color: #c47a45 !important;
 }
 
 .tfa-row {

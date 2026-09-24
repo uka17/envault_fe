@@ -1,14 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { AxiosError } from "axios";
 import { flushPromises, DOMWrapper } from "@vue/test-utils";
 import ProfileView from "../ProfileView.vue";
 import { mountWithProviders } from "@/test/mountWithProviders";
 import { useAuthStore } from "@/stores/auth";
 import { useSessionsStore } from "@/stores/sessions";
-import { updateProfileApi, updatePasswordApi } from "@/api/authApi";
+import {
+  updateNameApi,
+  requestEmailChangeApi,
+  resendEmailChangeApi,
+  updatePasswordApi,
+} from "@/api/authApi";
 import { getSessionsApi, terminateSessionApi, terminateOtherSessionsApi } from "@/api/sessionApi";
 
 vi.mock("@/api/authApi", () => ({
-  updateProfileApi: vi.fn(),
+  updateNameApi: vi.fn(),
+  requestEmailChangeApi: vi.fn(),
+  resendEmailChangeApi: vi.fn(),
   updatePasswordApi: vi.fn(),
   loginApi: vi.fn(),
   logoutApi: vi.fn(),
@@ -45,11 +53,25 @@ const otherSession = {
 const baseUser = {
   id: 1,
   email: "alice@example.com",
+  pendingEmail: null,
   name: "Alice",
   emailVerifiedAt: "2025-01-01T00:00:00.000Z",
   createdOn: "2025-01-01T00:00:00.000Z",
   modifiedOn: "2025-01-01T00:00:00.000Z",
 };
+
+/** Builds a minimal AxiosError carrying the given response data and headers. */
+function makeApiError(code: string, message: string, headers: Record<string, string> = {}): AxiosError {
+  const err = new AxiosError("Request failed");
+  err.response = {
+    data: { code, message, errors: [] },
+    status: 400,
+    statusText: "Bad Request",
+    headers,
+    config: {} as never,
+  };
+  return err;
+}
 
 /** naive-ui's NModal teleports its content to document.body, so modal content must be queried there. */
 function modalInputs(): DOMWrapper<HTMLInputElement>[] {
@@ -88,7 +110,7 @@ describe("ProfileView.vue", () => {
 
   describe("name form", () => {
     it("opens pre-filled with the current name and submits successfully", async () => {
-      vi.mocked(updateProfileApi).mockResolvedValue({ ...baseUser, name: "Alicia" });
+      vi.mocked(updateNameApi).mockResolvedValue({ ...baseUser, name: "Alicia" });
       const { wrapper } = await mountProfile();
 
       await wrapper.findAll(".edit-link")[0].trigger("click");
@@ -100,11 +122,11 @@ describe("ProfileView.vue", () => {
       await modalSaveButton().trigger("click");
       await flushPromises();
 
-      expect(updateProfileApi).toHaveBeenCalledWith({ name: "Alicia" });
+      expect(updateNameApi).toHaveBeenCalledWith("Alicia");
     });
 
     it("shows an error message when the update fails", async () => {
-      vi.mocked(updateProfileApi).mockRejectedValue(new Error("network error"));
+      vi.mocked(updateNameApi).mockRejectedValue(new Error("network error"));
       const { wrapper } = await mountProfile();
 
       await wrapper.findAll(".edit-link")[0].trigger("click");
@@ -120,20 +142,102 @@ describe("ProfileView.vue", () => {
   });
 
   describe("email form", () => {
-    it("opens pre-filled with the current email and submits successfully", async () => {
-      vi.mocked(updateProfileApi).mockResolvedValue({ ...baseUser, email: "new@example.com" });
+    it("opens with an empty field and submits successfully", async () => {
+      vi.mocked(requestEmailChangeApi).mockResolvedValue({ ...baseUser, pendingEmail: "new@example.com" });
       const { wrapper } = await mountProfile();
 
       await wrapper.findAll(".edit-link")[1].trigger("click");
       await flushPromises();
       const [emailInput] = modalInputs();
-      expect(emailInput.element.value).toBe("alice@example.com");
+      expect(emailInput.element.value).toBe("");
 
       await emailInput.setValue("new@example.com");
       await modalSaveButton().trigger("click");
       await flushPromises();
 
-      expect(updateProfileApi).toHaveBeenCalledWith({ email: "new@example.com" });
+      expect(requestEmailChangeApi).toHaveBeenCalledWith("new@example.com");
+    });
+
+    it("opens with an empty field even when a change is already pending", async () => {
+      const result = await mountWithProviders(ProfileView);
+      const auth = useAuthStore();
+      auth.accessToken = "tok";
+      auth.user = { ...baseUser, pendingEmail: "pending@example.com" };
+      await flushPromises();
+      await result.wrapper.vm.$nextTick();
+
+      await result.wrapper.findAll(".edit-link")[1].trigger("click");
+      await flushPromises();
+      const [emailInput] = modalInputs();
+
+      expect(emailInput.element.value).toBe("");
+    });
+
+    it("blocks Save and shows a hint when typing the already-pending address", async () => {
+      const result = await mountWithProviders(ProfileView);
+      const auth = useAuthStore();
+      auth.accessToken = "tok";
+      auth.user = { ...baseUser, pendingEmail: "pending@example.com" };
+      await flushPromises();
+      await result.wrapper.vm.$nextTick();
+
+      await result.wrapper.findAll(".edit-link")[1].trigger("click");
+      await flushPromises();
+      const [emailInput] = modalInputs();
+      await emailInput.setValue("pending@example.com");
+
+      expect(modalSaveButton().attributes("disabled")).toBeDefined();
+      expect(document.body.textContent).toContain("A confirmation was already sent to this address");
+
+      await modalSaveButton().trigger("click");
+      await flushPromises();
+      expect(requestEmailChangeApi).not.toHaveBeenCalled();
+    });
+
+    it("allows Save once changed to a different address than the pending one", async () => {
+      vi.mocked(requestEmailChangeApi).mockResolvedValue({ ...baseUser, pendingEmail: "third@example.com" });
+      const result = await mountWithProviders(ProfileView);
+      const auth = useAuthStore();
+      auth.accessToken = "tok";
+      auth.user = { ...baseUser, pendingEmail: "pending@example.com" };
+      await flushPromises();
+      await result.wrapper.vm.$nextTick();
+
+      await result.wrapper.findAll(".edit-link")[1].trigger("click");
+      await flushPromises();
+      const [emailInput] = modalInputs();
+      await emailInput.setValue("pending@example.com");
+      expect(modalSaveButton().attributes("disabled")).toBeDefined();
+
+      await emailInput.setValue("third@example.com");
+      expect(modalSaveButton().attributes("disabled")).toBeUndefined();
+      expect(document.body.textContent).not.toContain("A confirmation was already sent to this address");
+
+      await modalSaveButton().trigger("click");
+      await flushPromises();
+
+      expect(requestEmailChangeApi).toHaveBeenCalledWith("third@example.com");
+    });
+
+    it("shows a cancellation message, not a success one, when resubmitting the current confirmed address", async () => {
+      vi.mocked(requestEmailChangeApi).mockResolvedValue({ ...baseUser, pendingEmail: null });
+      const result = await mountWithProviders(ProfileView);
+      const auth = useAuthStore();
+      auth.accessToken = "tok";
+      auth.user = { ...baseUser, pendingEmail: "pending@example.com" };
+      await flushPromises();
+      await result.wrapper.vm.$nextTick();
+
+      await result.wrapper.findAll(".edit-link")[1].trigger("click");
+      await flushPromises();
+      const [emailInput] = modalInputs();
+      await emailInput.setValue(baseUser.email);
+      await modalSaveButton().trigger("click");
+      await flushPromises();
+
+      expect(requestEmailChangeApi).toHaveBeenCalledWith(baseUser.email);
+      expect(document.body.textContent).toContain("Email change cancelled");
+      expect(document.body.textContent).not.toContain("Confirmation email sent");
     });
 
     it("does not submit when the email field is empty", async () => {
@@ -146,7 +250,131 @@ describe("ProfileView.vue", () => {
       await modalSaveButton().trigger("click");
       await flushPromises();
 
-      expect(updateProfileApi).not.toHaveBeenCalled();
+      expect(requestEmailChangeApi).not.toHaveBeenCalled();
+    });
+
+    it("shows inline feedback and does not submit for an invalid email format", async () => {
+      const { wrapper } = await mountProfile();
+
+      await wrapper.findAll(".edit-link")[1].trigger("click");
+      await flushPromises();
+      const [emailInput] = modalInputs();
+      await emailInput.setValue("not-an-email");
+      await modalSaveButton().trigger("click");
+      await flushPromises();
+
+      expect(document.body.textContent).toContain("Invalid email format");
+      expect(requestEmailChangeApi).not.toHaveBeenCalled();
+    });
+
+    it("shows the exact retry countdown when rate-limited", async () => {
+      vi.mocked(requestEmailChangeApi).mockRejectedValue(
+        makeApiError("email_change_rate_limited", "Too many email change requests", { "retry-after": "60" }),
+      );
+      const { wrapper } = await mountProfile();
+
+      await wrapper.findAll(".edit-link")[1].trigger("click");
+      await flushPromises();
+      const [emailInput] = modalInputs();
+      await emailInput.setValue("new@example.com");
+      await modalSaveButton().trigger("click");
+      await flushPromises();
+      await flushPromises();
+
+      expect(document.body.textContent).toContain("Try again in 60 seconds");
+    });
+
+    it("shows the server's reason when the address is already taken", async () => {
+      vi.mocked(requestEmailChangeApi).mockRejectedValue(
+        makeApiError("user_already_exists", "Email is invalid or already taken"),
+      );
+      const { wrapper } = await mountProfile();
+
+      await wrapper.findAll(".edit-link")[1].trigger("click");
+      await flushPromises();
+      const [emailInput] = modalInputs();
+      await emailInput.setValue("new@example.com");
+      await modalSaveButton().trigger("click");
+      await flushPromises();
+      await flushPromises();
+
+      expect(document.body.textContent).toContain("Email is invalid or already taken");
+    });
+  });
+
+  describe("pending email banner", () => {
+    it("shows a hint with a resend button when an email change is pending", async () => {
+      const result = await mountWithProviders(ProfileView);
+      const auth = useAuthStore();
+      auth.accessToken = "tok";
+      auth.user = { ...baseUser, pendingEmail: "new@example.com" };
+      await flushPromises();
+      await result.wrapper.vm.$nextTick();
+
+      expect(result.wrapper.text()).toContain("new@example.com");
+
+      const resendBtn = result.wrapper.findAll(".edit-link").find((b) => b.text().includes("Resend confirmation"));
+      expect(resendBtn).toBeDefined();
+    });
+
+    it("resends the confirmation email when the resend button is clicked", async () => {
+      vi.mocked(resendEmailChangeApi).mockResolvedValue(undefined);
+      const result = await mountWithProviders(ProfileView);
+      const auth = useAuthStore();
+      auth.accessToken = "tok";
+      auth.user = { ...baseUser, pendingEmail: "new@example.com" };
+      await flushPromises();
+      await result.wrapper.vm.$nextTick();
+
+      const resendBtn = result.wrapper.findAll(".edit-link").find((b) => b.text().includes("Resend confirmation"));
+      await resendBtn?.trigger("click");
+      await flushPromises();
+
+      expect(resendEmailChangeApi).toHaveBeenCalled();
+    });
+
+    it("shows the exact retry countdown when resend is rate-limited", async () => {
+      vi.mocked(resendEmailChangeApi).mockRejectedValue(
+        makeApiError("email_change_rate_limited", "Too many email change requests", { "retry-after": "5" }),
+      );
+      const result = await mountWithProviders(ProfileView);
+      const auth = useAuthStore();
+      auth.accessToken = "tok";
+      auth.user = { ...baseUser, pendingEmail: "new@example.com" };
+      await flushPromises();
+      await result.wrapper.vm.$nextTick();
+
+      const resendBtn = result.wrapper.findAll(".edit-link").find((b) => b.text().includes("Resend confirmation"));
+      await resendBtn?.trigger("click");
+      await flushPromises();
+      await flushPromises();
+
+      expect(document.body.textContent).toContain("Try again in 5 second");
+    });
+
+    it("shows the server's reason when there is nothing pending to resend", async () => {
+      vi.mocked(resendEmailChangeApi).mockRejectedValue(
+        makeApiError("email_change_not_pending", "No email change is pending"),
+      );
+      const result = await mountWithProviders(ProfileView);
+      const auth = useAuthStore();
+      auth.accessToken = "tok";
+      auth.user = { ...baseUser, pendingEmail: "new@example.com" };
+      await flushPromises();
+      await result.wrapper.vm.$nextTick();
+
+      const resendBtn = result.wrapper.findAll(".edit-link").find((b) => b.text().includes("Resend confirmation"));
+      await resendBtn?.trigger("click");
+      await flushPromises();
+      await flushPromises();
+
+      expect(document.body.textContent).toContain("No email change is pending");
+    });
+
+    it("does not show the hint when there is no pending email change", async () => {
+      const { wrapper } = await mountProfile();
+
+      expect(wrapper.text()).not.toContain("Resend confirmation");
     });
   });
 

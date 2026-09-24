@@ -49,7 +49,12 @@ http.interceptors.response.use(
   (response) => response,
   async (error) => {
     const original: (AxiosRequestConfig & { _retry?: boolean }) | undefined = error.config;
-    const skipRefreshUrls = ["/token/refresh", "/users/login", "/users/verify-email"];
+    const skipRefreshUrls = [
+      "/token/refresh",
+      "/users/login",
+      "/users/verify-email",
+      "/users/email-change/confirm",
+    ];
     if (
       error.response?.status !== 401 ||
       !original ||

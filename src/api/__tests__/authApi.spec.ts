@@ -6,7 +6,10 @@ import {
   refreshTokenApi,
   logoutApi,
   checkAuthApi,
-  updateProfileApi,
+  updateNameApi,
+  requestEmailChangeApi,
+  confirmEmailChangeApi,
+  resendEmailChangeApi,
   updatePasswordApi,
   verifyEmailApi,
   resendVerificationApi,
@@ -86,15 +89,47 @@ describe("checkAuthApi", () => {
   });
 });
 
-describe("updateProfileApi", () => {
-  it("patches profile fields and returns the updated user", async () => {
-    const user = { id: 1, email: "new@b.com", name: "A", createdOn: "", modifiedOn: "" };
+describe("updateNameApi", () => {
+  it("patches the name and returns the updated user", async () => {
+    const user = { id: 1, email: "a@b.com", name: "New Name", createdOn: "", modifiedOn: "" };
     mockedHttp.patch.mockResolvedValue({ data: user });
 
-    const result = await updateProfileApi({ email: "new@b.com" });
+    const result = await updateNameApi("New Name");
 
-    expect(mockedHttp.patch).toHaveBeenCalledWith("/users/me", { email: "new@b.com" });
+    expect(mockedHttp.patch).toHaveBeenCalledWith("/users/me", { name: "New Name" });
     expect(result).toEqual(user);
+  });
+});
+
+describe("requestEmailChangeApi", () => {
+  it("posts the new email and returns the updated user", async () => {
+    const user = { id: 1, email: "a@b.com", pendingEmail: "new@b.com", name: "A", createdOn: "", modifiedOn: "" };
+    mockedHttp.post.mockResolvedValue({ data: user });
+
+    const result = await requestEmailChangeApi("new@b.com");
+
+    expect(mockedHttp.post).toHaveBeenCalledWith("/users/email-change/request", { email: "new@b.com" });
+    expect(result).toEqual(user);
+  });
+});
+
+describe("confirmEmailChangeApi", () => {
+  it("posts the token to the confirm endpoint", async () => {
+    mockedHttp.post.mockResolvedValue({ data: undefined });
+
+    await confirmEmailChangeApi("tok123");
+
+    expect(mockedHttp.post).toHaveBeenCalledWith("/users/email-change/confirm", { token: "tok123" });
+  });
+});
+
+describe("resendEmailChangeApi", () => {
+  it("posts to the resend endpoint", async () => {
+    mockedHttp.post.mockResolvedValue({ data: undefined });
+
+    await resendEmailChangeApi();
+
+    expect(mockedHttp.post).toHaveBeenCalledWith("/users/email-change/resend");
   });
 });
 

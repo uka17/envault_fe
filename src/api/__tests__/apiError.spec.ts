@@ -1,16 +1,16 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { AxiosError } from "axios";
-import { getApiErrorCode, getApiErrorMessage, extractApiFieldErrors } from "../apiError";
+import { getApiErrorCode, getApiErrorMessage, getApiErrorRetryAfter, extractApiFieldErrors } from "../apiError";
 import { setLocale } from "@/i18n";
 
-/** Builds a minimal AxiosError carrying the given response data. */
-function makeAxiosError(data: unknown): AxiosError {
+/** Builds a minimal AxiosError carrying the given response data and headers. */
+function makeAxiosError(data: unknown, headers: Record<string, string> = {}): AxiosError {
   const error = new AxiosError("Request failed");
   error.response = {
     data,
     status: 400,
     statusText: "Bad Request",
-    headers: {},
+    headers,
     config: {} as never,
   };
   return error;
@@ -37,6 +37,13 @@ describe("getApiErrorMessage", () => {
     expect(getApiErrorMessage(err)).toBe("User not found");
     setLocale("ru");
     expect(getApiErrorMessage(err)).toBe("Пользователь не найден");
+  });
+
+  it("translates email-change related codes via the active locale", () => {
+    const err = makeAxiosError({ code: "email_change_rate_limited", message: "Too many email change requests" });
+    expect(getApiErrorMessage(err)).toBe("Too many email change requests. Please try again later.");
+    setLocale("ru");
+    expect(getApiErrorMessage(err)).toBe("Слишком много запросов на смену email. Попробуйте позже.");
   });
 
   it("falls back to the backend's own message for an unmapped top-level code", () => {
@@ -73,6 +80,26 @@ describe("getApiErrorCode", () => {
   it("returns the raw backend code, unlocalized", () => {
     const err = makeAxiosError({ code: "email_not_verified", message: "Please verify your email" });
     expect(getApiErrorCode(err)).toBe("email_not_verified");
+  });
+});
+
+describe("getApiErrorRetryAfter", () => {
+  it("returns undefined for non-axios errors", () => {
+    expect(getApiErrorRetryAfter(new Error("boom"))).toBeUndefined();
+  });
+
+  it("returns undefined when the response has no Retry-After header", () => {
+    expect(getApiErrorRetryAfter(makeAxiosError({}))).toBeUndefined();
+  });
+
+  it("returns undefined for a non-numeric or non-positive header value", () => {
+    expect(getApiErrorRetryAfter(makeAxiosError({}, { "retry-after": "not-a-number" }))).toBeUndefined();
+    expect(getApiErrorRetryAfter(makeAxiosError({}, { "retry-after": "0" }))).toBeUndefined();
+    expect(getApiErrorRetryAfter(makeAxiosError({}, { "retry-after": "-5" }))).toBeUndefined();
+  });
+
+  it("returns the parsed number of seconds", () => {
+    expect(getApiErrorRetryAfter(makeAxiosError({}, { "retry-after": "60" }))).toBe(60);
   });
 });
 

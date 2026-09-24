@@ -4,13 +4,15 @@ import {
   logoutApi,
   refreshTokenApi,
   checkAuthApi,
-  updateProfileApi,
+  updateNameApi,
+  requestEmailChangeApi,
+  confirmEmailChangeApi,
+  resendEmailChangeApi,
   updatePasswordApi,
   registerApi,
   verifyEmailApi,
   resendVerificationApi,
   type UserResponse,
-  type UpdateProfilePayload,
   type UpdatePasswordPayload,
   type RegisterPayload,
 } from "@/api/authApi";
@@ -120,11 +122,43 @@ export const useAuthStore = defineStore("auth", {
     },
 
     /**
-     * Update the current user's profile fields (name and/or email) and sync local state.
-     * @param data Fields to update.
+     * Update the current user's display name and sync local state.
+     * @param name New display name.
+     * @returns Resolves once the updated profile is stored.
      */
-    async updateProfile(data: UpdateProfilePayload) {
-      this.user = await updateProfileApi(data);
+    async updateName(name: string) {
+      this.user = await updateNameApi(name);
+    },
+
+    /**
+     * Request an email change for the current user and sync local state
+     * (the address stays pending until confirmed).
+     * @param email New email address to request.
+     * @returns Resolves once the profile with the pending address is stored.
+     */
+    async requestEmailChange(email: string) {
+      this.user = await requestEmailChangeApi(email);
+    },
+
+    /**
+     * Confirm a pending email change using the token from the email link.
+     * The server revokes every session on success, so local auth state is cleared too.
+     * @param token Confirmation token from the email link.
+     * @returns Resolves once the change is confirmed and local auth state is cleared.
+     */
+    async confirmEmailChange(token: string) {
+      await confirmEmailChangeApi(token);
+      this.accessToken = null;
+      this.user = null;
+      localStorage.removeItem("hasSession");
+    },
+
+    /**
+     * Resend the current user's pending email change confirmation.
+     * @returns Resolves once the server accepts the resend request.
+     */
+    async resendEmailChange() {
+      await resendEmailChangeApi();
     },
 
     /**

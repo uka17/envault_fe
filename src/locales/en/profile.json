@@ -10,7 +10,9 @@
     "registeredAt": "Registration date",
     "status": "Account status",
     "active": "Active",
-    "changePassword": "Change password"
+    "changePassword": "Change password",
+    "pendingEmail": "Confirmation sent to {email}. Check your inbox to finish the change.",
+    "resendEmailChange": "Resend confirmation"
   },
   "security": {
     "title": "Security",
@@ -48,6 +50,7 @@
     "editEmail": "Edit email",
     "newEmailLabel": "New email",
     "newEmailPlaceholder": "Enter new email",
+    "newEmailPendingHint": "A confirmation was already sent to this address. Follow the link in it to confirm your new email.",
     "changePasswordTitle": "Change password",
     "currentPassword": "Current password",
     "newPassword": "New password",
@@ -55,11 +58,15 @@
     "submitChange": "Change"
   },
   "messages": {
-    "emailUpdated": "Email updated",
-    "emailUpdateFailed": "Failed to update email",
+    "emailUpdated": "Confirmation email sent. Your address changes once you confirm it.",
+    "emailChangeCancelled": "Email change cancelled. Your address stays unchanged.",
+    "emailUpdateFailed": "Failed to request email change",
     "nameUpdated": "Name updated",
     "nameUpdateFailed": "Failed to update name. Please try again.",
     "passwordUpdated": "Password changed",
-    "passwordUpdateFailed": "Failed to change password. Check your current password."
+    "passwordUpdateFailed": "Failed to change password. Check your current password.",
+    "resendEmailChangeSuccess": "Confirmation email resent.",
+    "resendEmailChangeFailed": "Failed to resend the confirmation email.",
+    "emailChangeRateLimited": "Too many requests. Try again in {n} second. | Too many requests. Try again in {n} seconds."
   }
 }
