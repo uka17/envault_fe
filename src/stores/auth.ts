@@ -124,6 +124,7 @@ export const useAuthStore = defineStore("auth", {
     /**
      * Update the current user's display name and sync local state.
      * @param name New display name.
+     * @returns Resolves once the updated profile is stored.
      */
     async updateName(name: string) {
       this.user = await updateNameApi(name);
@@ -133,6 +134,7 @@ export const useAuthStore = defineStore("auth", {
      * Request an email change for the current user and sync local state
      * (the address stays pending until confirmed).
      * @param email New email address to request.
+     * @returns Resolves once the profile with the pending address is stored.
      */
     async requestEmailChange(email: string) {
       this.user = await requestEmailChangeApi(email);
@@ -142,6 +144,7 @@ export const useAuthStore = defineStore("auth", {
      * Confirm a pending email change using the token from the email link.
      * The server revokes every session on success, so local auth state is cleared too.
      * @param token Confirmation token from the email link.
+     * @returns Resolves once the change is confirmed and local auth state is cleared.
      */
     async confirmEmailChange(token: string) {
       await confirmEmailChangeApi(token);
@@ -152,6 +155,7 @@ export const useAuthStore = defineStore("auth", {
 
     /**
      * Resend the current user's pending email change confirmation.
+     * @returns Resolves once the server accepts the resend request.
      */
     async resendEmailChange() {
       await resendEmailChangeApi();
